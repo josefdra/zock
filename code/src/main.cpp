@@ -2,7 +2,7 @@
 
 int main(){
     Map map;
-    map.readmap();
+    map.readmap("../../maps/simple2Pl.map");
     map.printmap();
     return 1;
 }

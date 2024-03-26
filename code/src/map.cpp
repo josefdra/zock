@@ -3,9 +3,9 @@
 Map::Map(){};
 Map::~Map(){};
 
-void Map::readmap()
+void Map::readmap(const std::string inputfile)
 {
-    std::ifstream inputFile("C:\\Users\\Dell\\Desktop\\Dateien\\Studium\\ZOCK\\g01\\maps\\simple2PL.map");
+    std::ifstream inputFile(inputfile);
     std::stringstream mapfile;
     mapfile << inputFile.rdbuf();
     mapfile >> spielerzahl >> ueberschreibsteine >> bomben >> staerke >> bretthoehe >> brettbreite;
@@ -22,12 +22,12 @@ void Map::readmap()
     }
     while (mapfile)
     {
-        std::array<unsigned short, 6> transition;
-        unsigned char throwaway;
-        mapfile >> transition[0] >> transition[1] >> transition[2] >> throwaway >> throwaway >> throwaway >> transition[3] >> transition[4] >> transition[5];
-        transitions.push_back(transition);
+        uint16_t x1, y1, r1, x2, y2, r2 = 0;
+        unsigned char muelleimer;
+        mapfile >> x1 >> y1 >> r1 >> muelleimer >> muelleimer >> muelleimer >> x2 >> y2 >> r2;
+        transitionen.emplace_back(x1, y1, r1, x2, y2, r2);
     }
-    transitions.pop_back();
+    transitionen.pop_back();
 }
 
 void Map::printmap()
@@ -44,8 +44,11 @@ void Map::printmap()
         }
         std::cout << std::endl;
     }
-    for (auto transition : transitions)
+    for (auto transition : transitionen)
     {
-        std::cout << transition[0] << " " << transition[1] << " " << transition[2] << " <-> " << transition[3] << " " << transition[4] << " " << transition[5] << std::endl;
+        uint16_t x1, y1, r1, x2, y2, r2;
+        std::tie(x1, y1, r1, x2, y2, r2) = transition;
+
+        std::cout << x1 << " " << y1 << " " << r1 << " <-> " << x2 << " " << y2 << " " << r2 << std::endl;
     }
 }
