@@ -21,6 +21,7 @@ void Map::read_hash_map(const std::string inputfile)
     std::ifstream inputFile(inputfile);
     std::stringstream mapfile;
     mapfile << inputFile.rdbuf();
+    inputFile.close();
     mapfile >> spielerzahl >> ueberschreibsteine >> bomben >> staerke >> height >> width;
     hash_map_element elem;
     for (int i = 1; i < (width * height + 1); i++)

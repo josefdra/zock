@@ -32,12 +32,12 @@ public:
     std::unordered_map<uint16_t, hash_map_element> all_map_moves;
     uint16_t height;
     uint16_t width;
-
-private:
     uint8_t spielerzahl;
     uint16_t ueberschreibsteine;
     uint16_t bomben;
     uint8_t staerke;
+
+private:    
 };
 
 #endif // MAP_H

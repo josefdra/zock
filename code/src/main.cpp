@@ -4,7 +4,7 @@
 int main()
 {
     Map map;
-    map.read_hash_map("../../maps/evenMoreTransitions.map");
+    map.read_hash_map("../../maps/lotOfTransitions.map");
     map.print_map();
     tranition_generate(map);
     return 1;
