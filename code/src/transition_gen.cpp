@@ -50,3 +50,23 @@ void tranition_generate(Map &m)
     std::chrono::duration<double, std::micro> elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     std::cout << "Elapsed time (generate_transitions): " << elapsed_time.count() << " microseconds" << std::endl;
 }
+
+void export_hash_map(Map &m)
+{
+    std::ofstream outfile("../../output/hash.csv");
+    outfile << m.spielerzahl << "," << std::endl;
+    outfile << m.ueberschreibsteine << "," << std::endl;
+    outfile << m.bomben << "," << m.staerke << std::endl;
+    outfile << m.width << "," << m.height << std::endl;
+    for (int i = 1; i < (m.width * m.height + 1); i++)
+    {
+        uint16_t temp = m.all_map_moves[i].symbol;
+        outfile << temp << ",";
+        for (int j = 0; j < 8; j++)
+        {
+            outfile << m.all_map_moves[i].transitions[j] << ",";
+        }
+        outfile << std::endl;
+    }
+    outfile.close();
+}
