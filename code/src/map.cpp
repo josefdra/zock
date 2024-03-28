@@ -36,9 +36,9 @@ void Map::read_hash_map(const std::string inputfile)
             check_neighbours(i);
         }
     }
-    uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2 = 0;
     while (mapfile)
     {
+        uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2 = 0;
         unsigned char trash;
         mapfile >> x1 >> y1 >> r1 >> trash >> trash >> trash >> x2 >> y2 >> r2;
         x1++;
@@ -104,11 +104,4 @@ void Map::print_map()
         }
     }
     print_transitions();
-}
-
-uint16_t Map::get_height() {
-    return height;
-}
-uint16_t Map::get_width() {
-    return width;
 }

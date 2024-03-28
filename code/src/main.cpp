@@ -1,10 +1,11 @@
 #include "map.hpp"
 #include "transition_gen.hpp"
 
-int main(){
+int main()
+{
     Map map;
-    map.read_hash_map("../../maps/simple2Pl.map");
+    map.read_hash_map("../../maps/evenMoreTransitions.map");
     map.print_map();
-    generate(std::ref(map));
+    tranition_generate(map);
     return 1;
 }
