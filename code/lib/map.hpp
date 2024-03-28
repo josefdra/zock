@@ -24,21 +24,20 @@ public:
     void read_hash_map(const std::string inputfile);
     void print_transitions();
     void print_map();
-    uint16_t get_height();
-    uint16_t get_width();
-    struct hash_map_element{
+    struct hash_map_element
+    {
         unsigned char symbol;
         std::array<uint16_t, 8> transitions;
     };
     std::unordered_map<uint16_t, hash_map_element> all_map_moves;
     uint16_t height;
-    uint16_t width;   
+    uint16_t width;
 
-private:    
+private:
     uint8_t spielerzahl;
     uint16_t ueberschreibsteine;
     uint16_t bomben;
-    uint8_t staerke; 
+    uint8_t staerke;
 };
 
 #endif // MAP_H

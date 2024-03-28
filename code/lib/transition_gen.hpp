@@ -6,6 +6,6 @@
 
 #include "map.hpp"
 
-void generate(Map& map);
+void tranition_generate(Map& map);
 
 #endif // TRANSITION_GEN_H
