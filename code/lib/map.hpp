@@ -8,24 +8,37 @@
 #include <vector>
 #include <array>
 #include <tuple>
+#include <cstdint>
+#include <unordered_map>
+#include <chrono>
+#include <iomanip>
+
+typedef std::chrono::high_resolution_clock h_res_clock;
 
 class Map
 {
 public:
     Map();
     ~Map();
-    void readmap(const std::string inputfile);
-    void printmap();
+    void check_neighbours(uint16_t n);
+    void read_hash_map(const std::string inputfile);
+    void print_transitions();
+    void print_map();
+    uint16_t get_height();
+    uint16_t get_width();
+    struct hash_map_element{
+        unsigned char symbol;
+        std::array<uint16_t, 8> transitions;
+    };
+    std::unordered_map<uint16_t, hash_map_element> all_map_moves;
+    uint16_t height;
+    uint16_t width;   
 
-private:
+private:    
     uint8_t spielerzahl;
     uint16_t ueberschreibsteine;
     uint16_t bomben;
-    uint8_t staerke;
-    uint16_t bretthoehe;
-    uint16_t brettbreite;
-    std::vector<std::vector<unsigned char>> map;
-    std::vector<std::tuple<uint16_t, uint16_t, uint16_t, uint16_t, uint16_t, uint16_t>> transitionen;
+    uint8_t staerke; 
 };
 
 #endif // MAP_H
