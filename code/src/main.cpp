@@ -6,6 +6,6 @@ int main()
     Map map;
     map.read_hash_map("../../maps/lotOfTransitions.map");
     map.print_map();
-    tranition_generate(map);
+    transition_generate(map);
     return 1;
 }
