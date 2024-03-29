@@ -1,6 +1,6 @@
 #include "transition_gen.hpp"
 
-void tranition_generate(Map &m)
+void transition_generate(Map &m)
 {
     h_res_clock::time_point start_time = h_res_clock::now();
     std::vector<std::array<uint16_t, 2>> tr;
