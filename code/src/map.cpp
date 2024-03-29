@@ -5,7 +5,7 @@ Map::~Map(){};
 
 void Map::check_neighbours(uint16_t n)
 {
-    n > width &&all_map_moves[n - width].symbol != '-' ? all_map_moves[n].transitions[0] = n - width : all_map_moves[n].transitions[0] = 0;
+    n > width && all_map_moves[n - width].symbol != '-' ? all_map_moves[n].transitions[0] = n - width : all_map_moves[n].transitions[0] = 0;
     n % width != 0 && n > width &&all_map_moves[n - width + 1].symbol != '-' ? all_map_moves[n].transitions[1] = n - width + 1 : all_map_moves[n].transitions[1] = 0;
     n % width != 0 && all_map_moves[n + 1].symbol != '-' ? all_map_moves[n].transitions[2] = n + 1 : all_map_moves[n].transitions[2] = 0;
     n % width != 0 && n <= width *(height - 1) && all_map_moves[n + width + 1].symbol != '-' ? all_map_moves[n].transitions[3] = n + width + 1 : all_map_moves[n].transitions[3] = 0;
