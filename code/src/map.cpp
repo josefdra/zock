@@ -39,22 +39,24 @@ void Map::read_hash_map(const std::string inputfile)
     }
     while (mapfile)
     {
-        uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2 = 0;
+        uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2, pos1r, pos2r = 0;
         unsigned char trash;
         mapfile >> x1 >> y1 >> r1 >> trash >> trash >> trash >> x2 >> y2 >> r2;
         x1++;
         x2++;
         pos1 = (x1) + (y1)*width;
         pos2 = (x2) + (y2)*width;
-        all_map_moves[pos1].transitions[r1] = pos2;
-        all_map_moves[pos2].transitions[r2] = pos1;
+        pos1r = pos1 * 10 + r1;
+        pos2r = pos2 * 10 + r2;
+        all_map_moves[pos1].transitions[r1] = pos2r;
+        all_map_moves[pos2].transitions[r2] = pos1r;
     }
     h_res_clock::time_point end_time = h_res_clock::now();
     std::chrono::duration<double, std::micro> elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     std::cout << "Elapsed time (read_hash_map): " << elapsed_time.count() << " microseconds" << std::endl;
 }
 
-void Map::print_transitions()
+void Map::print_map_with_transitions()
 {
     std::cout << std::endl;
     for (int y = 0; y < height; y++)
@@ -104,5 +106,4 @@ void Map::print_map()
             std::cout << std::endl;
         }
     }
-    print_transitions();
 }

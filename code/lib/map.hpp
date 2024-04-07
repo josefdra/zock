@@ -22,7 +22,7 @@ public:
     ~Map();
     void check_neighbours(uint16_t n);
     void read_hash_map(const std::string inputfile);
-    void print_transitions();
+    void print_map_with_transitions();
     void print_map();
     struct hash_map_element
     {
