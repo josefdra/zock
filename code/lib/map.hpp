@@ -27,7 +27,7 @@ public:
     void print_transitions();
     void print_map();
     void process_moves();
-    void paint_cells(std::vector<uint16_t>&);
+    void paint_cells(std::vector<std::vector<uint16_t>>&);
     struct hash_map_element
     {
         unsigned char symbol;

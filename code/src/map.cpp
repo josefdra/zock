@@ -5,14 +5,14 @@ Map::~Map(){};
 
 void Map::check_neighbours(uint16_t n)
 {
-    n > width && all_map_moves[n - width].symbol != '-' ? all_map_moves[n].transitions[0] = n - width : all_map_moves[n].transitions[0] = 0;
-    n % width != 0 && n > width &&all_map_moves[n - width + 1].symbol != '-' ? all_map_moves[n].transitions[1] = n - width + 1 : all_map_moves[n].transitions[1] = 0;
-    n % width != 0 && all_map_moves[n + 1].symbol != '-' ? all_map_moves[n].transitions[2] = n + 1 : all_map_moves[n].transitions[2] = 0;
-    n % width != 0 && n <= width *(height - 1) && all_map_moves[n + width + 1].symbol != '-' ? all_map_moves[n].transitions[3] = n + width + 1 : all_map_moves[n].transitions[3] = 0;
-    n <= width *(height - 1) && all_map_moves[n + width].symbol != '-' ? all_map_moves[n].transitions[4] = n + width : all_map_moves[n].transitions[4] = 0;
-    n % width != 1 && n <= width *(height - 1) && all_map_moves[n + width - 1].symbol != '-' ? all_map_moves[n].transitions[5] = n + width - 1 : all_map_moves[n].transitions[5] = 0;
-    n % width != 1 && all_map_moves[n - 1].symbol != '-' ? all_map_moves[n].transitions[6] = n - 1 : all_map_moves[n].transitions[6] = 0;
-    n % width != 1 && n > width &&all_map_moves[n - width - 1].symbol != '-' ? all_map_moves[n].transitions[7] = n - width - 1 : all_map_moves[n].transitions[7] = 0;
+    n > width && all_map_moves[n - width].symbol != '-' ? all_map_moves[n].transitions[0] = (n - width)*10+4 : all_map_moves[n].transitions[0] = 0;
+    n % width != 0 && n > width &&all_map_moves[n - width + 1].symbol != '-' ? all_map_moves[n].transitions[1] = (n - width + 1) * 10 + 5 : all_map_moves[n].transitions[1] = 0;
+    n % width != 0 && all_map_moves[n + 1].symbol != '-' ? all_map_moves[n].transitions[2] = (n + 1) * 10 + 6 : all_map_moves[n].transitions[2] = 0;
+    n % width != 0 && n <= width *(height - 1) && all_map_moves[n + width + 1].symbol != '-' ? all_map_moves[n].transitions[3] = (n + width + 1) * 10 + 7 : all_map_moves[n].transitions[3] = 0;
+    n <= width *(height - 1) && all_map_moves[n + width].symbol != '-' ? all_map_moves[n].transitions[4] = (n + width) * 10 + 0 : all_map_moves[n].transitions[4] = 0;
+    n % width != 1 && n <= width *(height - 1) && all_map_moves[n + width - 1].symbol != '-' ? all_map_moves[n].transitions[5] = (n + width - 1) * 10 + 1 : all_map_moves[n].transitions[5] = 0;
+    n % width != 1 && all_map_moves[n - 1].symbol != '-' ? all_map_moves[n].transitions[6] = (n - 1) * 10 + 2 : all_map_moves[n].transitions[6] = 0;
+    n % width != 1 && n > width &&all_map_moves[n - width - 1].symbol != '-' ? all_map_moves[n].transitions[7] = (n - width - 1) * 10 + 3 : all_map_moves[n].transitions[7] = 0;
 }
 
 void Map::read_hash_map(const std::string inputfile)
@@ -52,8 +52,6 @@ void Map::read_hash_map(const std::string inputfile)
             pos2r = pos2 * 10 + r2;
             all_map_moves[pos1].transitions[r1] = pos2r;
             all_map_moves[pos2].transitions[r2] = pos1r;
-            all_map_moves[pos1].hasTransitions = true;
-            all_map_moves[pos2].hasTransitions = true;
         }
     }
     h_res_clock::time_point end_time = h_res_clock::now();
@@ -130,13 +128,15 @@ void Map::process_moves(){
     uint16_t newCoord;
     bool changedSmth = false;
     bool skipNext = false;
-    std::vector<uint16_t> cellsToChange;
+    std::vector<std::vector<uint16_t>> cellsToChange;
     //ueberpruefe ob betretbares Feld (0) gewählt wurde
     if (all_map_moves.at(coord).symbol == '0'){
         //suche nach umliegenden Gegnerischen Steinen
         for (int i = 0; i < NUM_OF_DIRECTIONS; i++){
             uint8_t currentDirection = i;
             newCoord = coord;
+            std::vector<uint16_t> tempCellVector;
+            tempCellVector.push_back(newCoord);
             //check if current Coordinate has transitions
             
             do {
@@ -148,7 +148,7 @@ void Map::process_moves(){
                 break;
             }
 
-            if (all_map_moves.at(newCoord).hasTransitions & !skipNext){
+            if (all_map_moves.at(newCoord).hasTransitions /*&& !skipNext*/){
                 currentDirection = currTransitionCoord % 10;
                 currTransitionCoord /= 10;
                 currentDirection +=4;
@@ -163,12 +163,13 @@ void Map::process_moves(){
             }
 
             if (all_map_moves.at(currTransitionCoord).symbol != '0' && all_map_moves.at(currTransitionCoord).symbol != currPlayer){
+                tempCellVector.push_back(currTransitionCoord);
                 playerFound = true;
                 newCoord = currTransitionCoord;
             }
             else if (playerFound && all_map_moves.at(currTransitionCoord).symbol == currPlayer){
                 moveDirectionValid.at(currentDirection) = true; //maybe useless
-                cellsToChange.push_back(newCoord);
+                cellsToChange.push_back(tempCellVector);
                 changedSmth = true;
                 playerFound = false;
                 break;
@@ -187,9 +188,10 @@ void Map::process_moves(){
     
 }
 
-void Map::paint_cells(std::vector<uint16_t>& vec){
-    for (auto elem : vec){
-        all_map_moves.at(elem).symbol = '1';
-        std::cout << elem << std::endl;
+void Map::paint_cells(std::vector<std::vector<uint16_t>>& vec){
+    for (auto index : vec){
+        for (auto elem : index){
+            all_map_moves.at(elem).symbol = '1';
+        }
     }
 }
