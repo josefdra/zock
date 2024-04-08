@@ -52,10 +52,8 @@ void process_moves(Map &map)
 
     // CHANGE
     char currPlayer = '1';
-
     bool changedSmth = false;
     bool inversion = false;
-
     uint16_t position;
     uint16_t currTransitionCoord;
     std::unordered_set<uint16_t> cellsToChange;

@@ -79,6 +79,9 @@ void Map::read_hash_map(const std::string inputfile)
     std::cout << "Elapsed time (read_hash_map): " << elapsed_time.count() << " microseconds" << std::endl;
 }
 
+/**
+ * @brief prints every transition and the character of each coordinate
+ */
 void Map::print_transitions()
 {
     std::cout << std::endl;
@@ -115,7 +118,10 @@ void Map::print_transitions()
     }
 }
 
-void Map::print_map()
+/**
+ * @brief prints the map with transitions
+ */
+void Map::print_map_with_transitions()
 {
     std::cout << spielerzahl << std::endl;
     std::cout << ueberschreibsteine << std::endl;
@@ -130,4 +136,23 @@ void Map::print_map()
         }
     }
     print_transitions();
+}
+
+/**
+ * @brief prints the map without transitions
+ */
+void Map::print_map()
+{
+    std::cout << spielerzahl << std::endl;
+    std::cout << ueberschreibsteine << std::endl;
+    std::cout << bomben << " " << staerke << std::endl;
+    std::cout << height << " " << width << std::endl;
+    for (int i = 1; i < (width * height + 1); i++)
+    {
+        std::cout << all_map_moves[i].symbol << " ";
+        if (i % width == 0)
+        {
+            std::cout << std::endl;
+        }
+    }
 }

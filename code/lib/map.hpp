@@ -26,6 +26,7 @@ public:
     void check_neighbours(uint16_t);
     void read_hash_map(const std::string);
     void print_transitions();
+    void print_map_with_transitions();
     void print_map();
     struct hash_map_element
     {
@@ -41,7 +42,7 @@ public:
     uint16_t bomben;
     uint8_t staerke;
 
-private:    
+private:
 };
 
 #endif // MAP_H

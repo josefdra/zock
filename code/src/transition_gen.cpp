@@ -1,11 +1,10 @@
 #include "transition_gen.hpp"
 
 /**
- * @brief tbd
+ * @brief checks if there are any free transitions, matches them with a second one and prints all of them
  *
  * @param m
  */
-
 void transition_generate(Map &m)
 {
     h_res_clock::time_point start_time = h_res_clock::now();
@@ -55,24 +54,4 @@ void transition_generate(Map &m)
     h_res_clock::time_point end_time = h_res_clock::now();
     std::chrono::duration<double, std::micro> elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     std::cout << "Elapsed time (generate_transitions): " << elapsed_time.count() << " microseconds" << std::endl;
-}
-
-void export_hash_map(Map &m)
-{
-    std::ofstream outfile("../../output/hash.csv");
-    outfile << m.spielerzahl << "," << std::endl;
-    outfile << m.ueberschreibsteine << "," << std::endl;
-    outfile << m.bomben << "," << m.staerke << std::endl;
-    outfile << m.width << "," << m.height << std::endl;
-    for (int i = 1; i < (m.width * m.height + 1); i++)
-    {
-        uint16_t temp = m.all_map_moves[i].symbol;
-        outfile << temp << ",";
-        for (int j = 0; j < 8; j++)
-        {
-            outfile << m.all_map_moves[i].transitions[j] << ",";
-        }
-        outfile << std::endl;
-    }
-    outfile.close();
 }
