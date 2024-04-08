@@ -1,5 +1,11 @@
 #include "transition_gen.hpp"
 
+/**
+ * @brief tbd
+ *
+ * @param m
+ */
+
 void transition_generate(Map &m)
 {
     h_res_clock::time_point start_time = h_res_clock::now();
