@@ -5,7 +5,7 @@ Map::~Map(){};
 
 void Map::check_neighbours(uint16_t n)
 {
-    n > width && all_map_moves[n - width].symbol != '-' ? all_map_moves[n].transitions[0] = (n - width)*10+4 : all_map_moves[n].transitions[0] = 0;
+    n > width &&all_map_moves[n - width].symbol != '-' ? all_map_moves[n].transitions[0] = (n - width) * 10 + 4 : all_map_moves[n].transitions[0] = 0;
     n % width != 0 && n > width &&all_map_moves[n - width + 1].symbol != '-' ? all_map_moves[n].transitions[1] = (n - width + 1) * 10 + 5 : all_map_moves[n].transitions[1] = 0;
     n % width != 0 && all_map_moves[n + 1].symbol != '-' ? all_map_moves[n].transitions[2] = (n + 1) * 10 + 6 : all_map_moves[n].transitions[2] = 0;
     n % width != 0 && n <= width *(height - 1) && all_map_moves[n + width + 1].symbol != '-' ? all_map_moves[n].transitions[3] = (n + width + 1) * 10 + 7 : all_map_moves[n].transitions[3] = 0;
@@ -43,7 +43,8 @@ void Map::read_hash_map(const std::string inputfile)
         uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2, pos1r, pos2r = 0;
         unsigned char trash;
         mapfile >> x1 >> y1 >> r1 >> trash >> trash >> trash >> x2 >> y2 >> r2;
-        if (x1 != 65000){
+        if (x1 != 65000)
+        {
             x1++;
             x2++;
             pos1 = (x1) + (y1)*width;
@@ -112,86 +113,136 @@ void Map::print_map()
     print_transitions();
 }
 
-void Map::process_moves(){
-    //int because cin can't convert to uint8_t 
+bool Map::check_empty_fields(unsigned char c)
+{
+    bool var = false;
+    for (int i = 0; i < empty_fields.size(); i++)
+    {
+        if (c == empty_fields[i])
+        {
+            var = true;
+        }
+    }
+    return var;
+}
+
+bool Map::check_players(unsigned char c)
+{
+    bool var = false;
+    for (int i = 0; i < players.size(); i++)
+    {
+        if (c == players[i])
+        {
+            var = true;
+        }
+    }
+    return var;
+}
+
+void Map::process_moves()
+{
+    // int because cin can't convert to uint8_t
     int row;
     int column;
     char throwaway;
     std::cout << "enter coordinates to check move in this format: column row" << std::endl;
     std::cin >> column >> row;
     uint16_t coord;
-    coord = column + 1 + row *width;
+    coord = column + 1 + row * width;
     char currPlayer = '1';
-    uint16_t currTransitionCoord; 
-    bool playerFound = false;
-    std::array<bool, NUM_OF_DIRECTIONS> moveDirectionValid {false};
-    uint16_t newCoord;
+    uint16_t currTransitionCoord;
     bool changedSmth = false;
-    bool skipNext = false;
-    std::vector<std::vector<uint16_t>> cellsToChange;
-    //ueberpruefe ob betretbares Feld (0) gewählt wurde
-    if (all_map_moves.at(coord).symbol == '0'){
-        //suche nach umliegenden Gegnerischen Steinen
-        for (int i = 0; i < NUM_OF_DIRECTIONS; i++){
+    bool inversion = false;
+    uint16_t position;
+    std::unordered_set<uint16_t> cellsToChange;
+    // ueberpruefe ob betretbares Feld (0) gewählt wurde
+    if (check_empty_fields(all_map_moves.at(coord).symbol) || (ueberschreibsteine > 0))
+    {
+        // suche nach umliegenden Gegnerischen Steinen
+        for (int i = 0; i < NUM_OF_DIRECTIONS; i++)
+        {
+            bool playerFound = false;
+            bool foundSelf = false;            
             uint8_t currentDirection = i;
-            newCoord = coord;
-            std::vector<uint16_t> tempCellVector;
-            tempCellVector.push_back(newCoord);
-            //check if current Coordinate has transitions
-            
-            do {
-                
-            currTransitionCoord = all_map_moves.at(newCoord).transitions.at(currentDirection);
-            
-            if (currTransitionCoord == 0){
-                playerFound = false;
-                break;
+            position = coord;
+            std::unordered_set<uint16_t> tempCellSet;
+            tempCellSet.insert(position);
+            // check if current Coordinate has transitions
+            if(all_map_moves.at(position).symbol == 'i'){
+                inversion = true;
             }
+            do
+            {
 
-            if (all_map_moves.at(newCoord).hasTransitions /*&& !skipNext*/){
+                currTransitionCoord = all_map_moves.at(position).transitions.at(currentDirection);
+
+                if (currTransitionCoord == 0)
+                {
+                    break;
+                }
+
                 currentDirection = currTransitionCoord % 10;
                 currTransitionCoord /= 10;
-                currentDirection +=4;
+                currentDirection += 4;
                 currentDirection = currentDirection % 8;
-            }
 
-            if (currTransitionCoord == newCoord){
-                    skipNext = true;
+                // Vielleicht drehen der Richtungen zum einlesen verschieben
+
+                if(currTransitionCoord == coord){
+                    foundSelf = true;
                 }
-            else{
-                skipNext = false;
-            }
 
-            if (all_map_moves.at(currTransitionCoord).symbol != '0' && all_map_moves.at(currTransitionCoord).symbol != currPlayer){
-                tempCellVector.push_back(currTransitionCoord);
-                playerFound = true;
-                newCoord = currTransitionCoord;
-            }
-            else if (playerFound && all_map_moves.at(currTransitionCoord).symbol == currPlayer){
-                moveDirectionValid.at(currentDirection) = true; //maybe useless
-                cellsToChange.push_back(tempCellVector);
-                changedSmth = true;
-                playerFound = false;
-                break;
-            }
-            else if (playerFound && all_map_moves.at(currTransitionCoord).symbol == '0'){
-                playerFound = false;
-            }
-            
-            }while(playerFound);
+                if (!check_empty_fields(all_map_moves.at(currTransitionCoord).symbol) && all_map_moves.at(currTransitionCoord).symbol != currPlayer)
+                {
+                    tempCellSet.insert(currTransitionCoord);
+                    playerFound = true;
+                    position = currTransitionCoord;
+                }
+                else if (playerFound && all_map_moves.at(currTransitionCoord).symbol == currPlayer)
+                {
+                    if (!foundSelf)
+                    {
+                        for (auto elem : tempCellSet)
+                        {
+                            cellsToChange.insert(elem);
+                        }
+                        changedSmth = true;
+                    }                    
+                    playerFound = false;
+                    break;
+                }
+                else if (playerFound && check_empty_fields(all_map_moves.at(currTransitionCoord).symbol))
+                {
+                    playerFound = false;
+                }
+
+            } while (playerFound);
         }
     }
-    paint_cells(cellsToChange);
-    if(changedSmth){
+    paint_cells(cellsToChange, currPlayer);
+    if (changedSmth)
+    {
+        if (!check_empty_fields(all_map_moves.at(coord).symbol))
+        {
+            // ueberschreibstein abziehen
+        }
+        if(inversion){
+            for (int i = 1; i < (width * height + 1); i++){
+                if(check_players(all_map_moves[i].symbol)){
+                    uint16_t number = (int)all_map_moves[i].symbol;
+                    number = (number + 1) % spielerzahl;
+                    all_map_moves[i].symbol = (char)number;
+                }
+            }
+        }
         print_map();
     }
-    
 }
 
-void Map::paint_cells(std::vector<std::vector<uint16_t>>& vec){
-    for (auto index : vec){
-        for (auto elem : index){
-            all_map_moves.at(elem).symbol = '1';
-        }
+void Map::paint_cells(std::unordered_set<uint16_t> &set, unsigned char player_number)
+{
+    for (auto elem : set)
+    {
+        all_map_moves.at(elem).symbol = player_number;
     }
 }
