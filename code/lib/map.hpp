@@ -27,10 +27,6 @@ public:
     void read_hash_map(const std::string);
     void print_transitions();
     void print_map();
-    bool check_empty_fields(unsigned char);
-    bool check_players(unsigned char);
-    void process_moves();
-    void paint_cells(std::unordered_set<uint16_t>&, unsigned char);
     struct hash_map_element
     {
         unsigned char symbol;
@@ -44,8 +40,6 @@ public:
     uint16_t ueberschreibsteine;
     uint16_t bomben;
     uint8_t staerke;
-    std::array<unsigned char, 4> empty_fields {'0', 'i', 'c', 'b'};
-    std::array<unsigned char, 8> players {'1', '2', '3', '4', '5', '6', '7', '8'};
 
 private:    
 };

@@ -32,9 +32,9 @@ int main()
     // map.print_map_with_transitions();
     while (1)
     {
-        map.read_hash_map("../../maps/boeseMap10.map");
+        map.read_hash_map("../../maps/boeseMap03.map");
         map.print_map();
-        map.process_moves();
+        process_moves(map);
     }
     // transition_generate(map);
     return 1;
