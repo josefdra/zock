@@ -5,14 +5,14 @@
 int main()
 {
     Map map;
-    map.read_hash_map("../../maps/simple2Pl.map");
-    transition_generate(map);
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(1, (map.spielerzahl + 1));
-    uint16_t players_turn = dis(gen);
-    std::string input;
-    uint16_t x, y, xy;
+    // map.read_hash_map("../../maps/simple2Pl.map");
+    // transition_generate(map);
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+    // std::uniform_int_distribution<> dis(1, (map.spielerzahl + 1));
+    // uint16_t players_turn = dis(gen);
+    // std::string input;
+    // uint16_t x, y, xy;
     // while (1)
     // {
     //     map.print_map();
@@ -28,7 +28,14 @@ int main()
     //     check_valid_moves(map, xy);
     //     players_turn = (players_turn + 1) % map.spielerzahl;
     // }
-    map.print_map();
-    map.print_map_with_transitions();
+    // map.print_map();
+    // map.print_map_with_transitions();
+    while (1)
+    {
+        map.read_hash_map("../../maps/boeseMap10.map");
+        map.print_map();
+        map.process_moves();
+    }
+    // transition_generate(map);
     return 1;
 }

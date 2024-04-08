@@ -1,6 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#define NUM_OF_DIRECTIONS 8
+
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -12,6 +14,7 @@
 #include <unordered_map>
 #include <chrono>
 #include <iomanip>
+#include <unordered_set>
 
 typedef std::chrono::high_resolution_clock h_res_clock;
 
@@ -20,14 +23,19 @@ class Map
 public:
     Map();
     ~Map();
-    void check_neighbours(uint16_t n);
-    void read_hash_map(const std::string inputfile);
-    void print_map_with_transitions();
+    void check_neighbours(uint16_t);
+    void read_hash_map(const std::string);
+    void print_transitions();
     void print_map();
+    bool check_empty_fields(unsigned char);
+    bool check_players(unsigned char);
+    void process_moves();
+    void paint_cells(std::unordered_set<uint16_t>&, unsigned char);
     struct hash_map_element
     {
         unsigned char symbol;
         std::array<uint16_t, 8> transitions;
+        bool hasTransitions = false;
     };
     std::unordered_map<uint16_t, hash_map_element> all_map_moves;
     uint16_t height;
@@ -36,6 +44,8 @@ public:
     uint16_t ueberschreibsteine;
     uint16_t bomben;
     uint8_t staerke;
+    std::array<unsigned char, 4> empty_fields {'0', 'i', 'c', 'b'};
+    std::array<unsigned char, 8> players {'1', '2', '3', '4', '5', '6', '7', '8'};
 
 private:    
 };
