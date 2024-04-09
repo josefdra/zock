@@ -16,8 +16,6 @@
 #include <iomanip>
 #include <unordered_set>
 
-typedef std::chrono::high_resolution_clock h_res_clock;
-
 class Map
 {
 public:

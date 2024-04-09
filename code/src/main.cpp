@@ -1,6 +1,6 @@
 #include "map.hpp"
-#include "transition_gen.hpp"
 #include "check_valid_moves.hpp"
+#include "helper.hpp"
 
 int main()
 {
@@ -32,9 +32,14 @@ int main()
     // map.print_map_with_transitions();
     while (1)
     {
-        map.read_hash_map("../../maps/boeseMap10.map");
+        map.read_hash_map("../../maps/boeseMap09.map");
         map.print_map();
-        process_moves(map);
+        auto func = [&map]()
+        { process_moves(map); };
+        timer_function(func, "process_moves");
+        std::cout << std::endl
+                  << "------------------------ Reset ------------------------" << std::endl
+                  << std::endl;
     }
     // transition_generate(map);
     return 1;

@@ -38,25 +38,29 @@ bool check_players(unsigned char c)
     return var;
 }
 
-/// @brief This function asks for a coordinate and checks if it's a valid move
-/// @param map current map layout
-void process_moves(Map &map)
+void print_tuple_vector(std::vector<std::tuple<uint16_t, uint16_t>> &vec)
 {
-    int row;
-    int column;
-    char throwaway;
-    std::cout << "enter coordinates to check move in this format: column row" << std::endl;
-    std::cin >> column >> row;
-    uint16_t coord;
-    coord = column + 1 + row * map.width;
+    for (std::tuple<uint16_t, uint16_t> &element : vec)
+    {
+        uint16_t x;
+        uint16_t y;
+        std::tie(x, y) = element;
+        std::cout << "(" << x << ", " << y << ")" << std::endl;
+    }
+}
 
+void check_coordinate(uint16_t coord, std::vector<std::tuple<uint16_t, uint16_t>> &valid_moves, Map &map, bool paint)
+{
     // CHANGE
     char currPlayer = '1';
     bool changedSmth = false;
     bool inversion = false;
+    bool c = false;
     uint16_t position;
     uint16_t currTransitionCoord;
     std::unordered_set<uint16_t> cellsToChange;
+
+    map.all_map_moves[coord].symbol == 'c' ? c = true : c = false;
 
     // check whether the cell can be entered without certain stones or whether the required stones are available
     if (check_empty_fields(map.all_map_moves.at(coord).symbol) || (map.ueberschreibsteine > 0))
@@ -127,14 +131,23 @@ void process_moves(Map &map)
         }
     }
 
-    paint_cells(cellsToChange, currPlayer, map);
+    if (paint)
+    {
+        paint_cells(cellsToChange, currPlayer, map);
+    }
+
     if (changedSmth)
     {
+        uint16_t x, y;
+        coord % map.width == 0 ? x = map.width - 1 : x = coord % map.width - 1;
+        y = (coord - (x + 1)) / map.width;
+        std::tuple<uint16_t, uint16_t> tuple(x, y);
+        valid_moves.push_back(tuple);
         if (!check_empty_fields(map.all_map_moves.at(coord).symbol))
         {
             // ueberschreibstein abziehen
         }
-        if (inversion)
+        if (inversion && paint)
         {
             for (int i = 1; i < (map.width * map.height + 1); i++)
             {
@@ -146,8 +159,49 @@ void process_moves(Map &map)
                 }
             }
         }
-        map.print_map();
+        if (c && paint)
+        {
+            std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
+            char player;
+            std::cin >> player;
+            for (int i = 1; i < (map.width * map.height + 1); i++)
+            {
+                if (map.all_map_moves[i].symbol == currPlayer)
+                {
+                    map.all_map_moves[i].symbol = player;
+                }
+                else if (map.all_map_moves[i].symbol == player)
+                {
+                    map.all_map_moves[i].symbol = currPlayer;
+                }
+            }
+            currPlayer = player;
+        }
     }
+}
+
+/// @brief This function asks for a coordinate and checks if it's a valid move
+/// @param map current map layout
+void process_moves(Map &map)
+{
+    std::vector<std::tuple<uint16_t, uint16_t>> valid_moves;
+    uint16_t coord;
+    for (int i = 1; i < (map.width * map.height) + 1; i++)
+    {
+        if (map.all_map_moves[coord].symbol != '-')
+        {
+            check_coordinate(i, valid_moves, map, false);
+        }
+    }
+    std::cout << "Das sind alle möglichen Züge: " << std::endl;
+    print_tuple_vector(valid_moves);
+    std::cout << "Wo wollen Sie setzen? Format (x y): " << std::endl;
+    int row;
+    int column;
+    std::cin >> column >> row;
+    coord = column + 1 + row * map.width;
+    check_coordinate(coord, valid_moves, map, true);
+    map.print_map();
 }
 
 void paint_cells(std::unordered_set<uint16_t> &set, unsigned char player_number, Map &map)

@@ -32,7 +32,6 @@ void Map::check_neighbours(uint16_t n)
  */
 void Map::read_hash_map(const std::string inputfile)
 {
-    h_res_clock::time_point start_time = h_res_clock::now();
     std::ifstream inputFile(inputfile);
     std::stringstream mapfile;
     mapfile << inputFile.rdbuf();
@@ -74,9 +73,6 @@ void Map::read_hash_map(const std::string inputfile)
             all_map_moves[pos2].transitions[r2] = pos1r;
         }
     }
-    h_res_clock::time_point end_time = h_res_clock::now();
-    std::chrono::duration<double, std::micro> elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-    std::cout << "Elapsed time (read_hash_map): " << elapsed_time.count() << " microseconds" << std::endl;
 }
 
 /**

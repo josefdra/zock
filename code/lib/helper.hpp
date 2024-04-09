@@ -1,4 +1,54 @@
-#include "transition_gen.hpp"
+#ifndef HELPER_H
+#define HELPER_H
+
+#include <functional>
+#include <iostream>
+#include <chrono>
+#include <random>
+#include <algorithm>
+#include <tuple>
+#include <vector>
+
+#include "map.hpp"
+
+typedef std::chrono::high_resolution_clock h_res_clock;
+
+/**
+ * @brief Measures how long it takes, to execute a function.
+ * @brief Example Usage: 
+ * @brief auto func = [&map]() { map.read_hash_map("../../maps/boeseMap09.map"); };
+ * @brief timer_function(func, "read_hash_map");
+ * @brief for member functions the object must be referenzed in []
+ * @param func
+ * @param func_name
+ */
+template <typename F>
+void timer_function(F func, std::string func_name)
+{
+    h_res_clock::time_point start_time = h_res_clock::now();
+    func();
+    h_res_clock::time_point end_time = h_res_clock::now();
+
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    std::cout << "Function: " << func_name << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+}
+
+template <typename F, typename... Args>
+void function_duration(void (*func)(Args...), const char *func_name, Args &&...args)
+{
+    h_res_clock::time_point start_time = h_res_clock::now();
+    std::invoke(func, std::forward<Args>(args)...);
+    h_res_clock::time_point end_time = h_res_clock::now();
+
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    std::cout << "Function: " << func_name << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+}
 
 /**
  * @brief checks if there are any free transitions, matches them with a second one and prints all of them
@@ -7,7 +57,6 @@
  */
 void transition_generate(Map &m)
 {
-    h_res_clock::time_point start_time = h_res_clock::now();
     std::vector<std::array<uint16_t, 2>> tr;
     std::vector<std::array<uint16_t, 6>> output;
     std::array<uint16_t, 2> temp = {0, 0};
@@ -51,7 +100,6 @@ void transition_generate(Map &m)
     {
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
-    h_res_clock::time_point end_time = h_res_clock::now();
-    std::chrono::duration<double, std::micro> elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-    std::cout << "Elapsed time (generate_transitions): " << elapsed_time.count() << " microseconds" << std::endl;
 }
+
+#endif // HELPER_H
