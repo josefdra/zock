@@ -55,9 +55,12 @@ void check_coordinate(uint16_t coord, std::vector<std::tuple<uint16_t, uint16_t>
     char currPlayer = '1';
     bool changedSmth = false;
     bool inversion = false;
+    bool c = false;
     uint16_t position;
     uint16_t currTransitionCoord;
     std::unordered_set<uint16_t> cellsToChange;
+
+    map.all_map_moves[coord].symbol == 'c' ? c = true : c = false;
 
     // check whether the cell can be entered without certain stones or whether the required stones are available
     if (check_empty_fields(map.all_map_moves.at(coord).symbol) || (map.ueberschreibsteine > 0))
@@ -155,6 +158,24 @@ void check_coordinate(uint16_t coord, std::vector<std::tuple<uint16_t, uint16_t>
                     map.all_map_moves[i].symbol = (char)number;
                 }
             }
+        }
+        if (c && paint)
+        {
+            std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
+            char player;
+            std::cin >> player;
+            for (int i = 1; i < (map.width * map.height + 1); i++)
+            {
+                if (map.all_map_moves[i].symbol == currPlayer)
+                {
+                    map.all_map_moves[i].symbol = player;
+                }
+                else if (map.all_map_moves[i].symbol == player)
+                {
+                    map.all_map_moves[i].symbol = currPlayer;
+                }
+            }
+            currPlayer = player;
         }
     }
 }
