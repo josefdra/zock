@@ -1,5 +1,6 @@
 #include "map.hpp"
 #include "check_valid_moves.hpp"
+#include "helper.hpp"
 
 int main()
 {
@@ -33,7 +34,9 @@ int main()
     {
         map.read_hash_map("../../maps/boeseMap09.map");
         map.print_map();
-        process_moves(map);
+        auto func = [&map]()
+        { process_moves(map); };
+        timer_function(func, "process_moves");
         std::cout << std::endl
                   << "------------------------ Reset ------------------------" << std::endl
                   << std::endl;

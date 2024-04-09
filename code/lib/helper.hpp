@@ -13,11 +13,20 @@
 
 typedef std::chrono::high_resolution_clock h_res_clock;
 
-template <typename ReturnType, typename... Args>
-ReturnType function_duration(ReturnType (*func)(Args...), const char *func_name, Args &&...args)
+/**
+ * @brief Measures how long it takes, to execute a function.
+ * @brief Example Usage: 
+ * @brief auto func = [&map]() { map.read_hash_map("../../maps/boeseMap09.map"); };
+ * @brief timer_function(func, "read_hash_map");
+ * @brief for member functions the object must be referenzed in []
+ * @param func
+ * @param func_name
+ */
+template <typename F>
+void timer_function(F func, std::string func_name)
 {
     h_res_clock::time_point start_time = h_res_clock::now();
-    ReturnType result = func(std::forward<Args>(args)...);
+    func();
     h_res_clock::time_point end_time = h_res_clock::now();
 
     std::chrono::duration<double, std::micro> elapsed_time =
@@ -25,7 +34,6 @@ ReturnType function_duration(ReturnType (*func)(Args...), const char *func_name,
 
     std::cout << "Function: " << func_name << std::endl;
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
-    return result;
 }
 
 template <typename F, typename... Args>
@@ -93,6 +101,5 @@ void transition_generate(Map &m)
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
 }
-
 
 #endif // HELPER_H
