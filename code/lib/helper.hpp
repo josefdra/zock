@@ -1,4 +1,43 @@
-#include "transition_gen.hpp"
+#pragma once
+
+#include <functional>
+#include <iostream>
+#include <chrono>
+#include <random>
+#include <algorithm>
+
+#include "map.hpp"
+
+typedef std::chrono::high_resolution_clock h_res_clock;
+
+template <typename ReturnType, typename... Args>
+ReturnType function_duration(ReturnType (*func)(Args...), const char *func_name, Args &&...args)
+{
+    h_res_clock::time_point start_time = h_res_clock::now();
+    ReturnType result = func(std::forward<Args>(args)...);
+    h_res_clock::time_point end_time = h_res_clock::now();
+
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    std::cout << "Function: " << func_name << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+    return result;
+}
+
+template <typename F, typename... Args>
+void function_duration(void (*func)(Args...), const char *func_name, Args &&...args)
+{
+    h_res_clock::time_point start_time = h_res_clock::now();
+    std::invoke(func, std::forward<Args>(args)...);
+    h_res_clock::time_point end_time = h_res_clock::now();
+
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+
+    std::cout << "Function: " << func_name << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+}
 
 /**
  * @brief checks if there are any free transitions, matches them with a second one and prints all of them
@@ -7,7 +46,6 @@
  */
 void transition_generate(Map &m)
 {
-    h_res_clock::time_point start_time = h_res_clock::now();
     std::vector<std::array<uint16_t, 2>> tr;
     std::vector<std::array<uint16_t, 6>> output;
     std::array<uint16_t, 2> temp = {0, 0};
@@ -51,7 +89,4 @@ void transition_generate(Map &m)
     {
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
-    h_res_clock::time_point end_time = h_res_clock::now();
-    std::chrono::duration<double, std::micro> elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-    std::cout << "Elapsed time (generate_transitions): " << elapsed_time.count() << " microseconds" << std::endl;
 }

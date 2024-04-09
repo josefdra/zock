@@ -1,5 +1,4 @@
 #include "map.hpp"
-#include "transition_gen.hpp"
 #include "check_valid_moves.hpp"
 
 int main()
@@ -35,6 +34,9 @@ int main()
         map.read_hash_map("../../maps/boeseMap10.map");
         map.print_map();
         process_moves(map);
+
+        std::cout << std::endl
+                  << "Reset: " << std::endl;
     }
     // transition_generate(map);
     return 1;
