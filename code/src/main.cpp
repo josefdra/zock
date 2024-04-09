@@ -31,12 +31,11 @@ int main()
     // map.print_map_with_transitions();
     while (1)
     {
-        map.read_hash_map("../../maps/boeseMap10.map");
+        map.read_hash_map("../../maps/boeseMap11.map");
         map.print_map();
         process_moves(map);
-
-        std::cout << std::endl
-                  << "Reset: " << std::endl;
+        std::cout << std::endl << "------------------------ Reset ------------------------" << std::endl
+                  << std::endl;
     }
     // transition_generate(map);
     return 1;

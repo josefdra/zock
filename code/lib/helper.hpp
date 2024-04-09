@@ -1,10 +1,13 @@
-#pragma once
+#ifndef HELPER_H
+#define HELPER_H
 
 #include <functional>
 #include <iostream>
 #include <chrono>
 #include <random>
 #include <algorithm>
+#include <tuple>
+#include <vector>
 
 #include "map.hpp"
 
@@ -90,3 +93,6 @@ void transition_generate(Map &m)
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
 }
+
+
+#endif // HELPER_H
