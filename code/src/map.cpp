@@ -1,4 +1,5 @@
 #include "map.hpp"
+#include "helper.hpp"
 
 /**
  * @brief map.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships
@@ -40,7 +41,7 @@ void Map::read_hash_map(const std::string map_name)
     m_hash_map_element elem;
     mapfile << inputFile.rdbuf();
     // 65000 is set to check for end of file
-    mapfile << 65000;
+    mapfile << '\n' << 65000;
     inputFile.close();
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     // every coordinate gets a symbol and it's neighbours are being set
@@ -79,10 +80,14 @@ void Map::read_hash_map(const std::string map_name)
 }
 
 /**
- * @brief prints every transition and the character of each coordinate
+ * @brief prints the map with transitions
  */
-void Map::print_transitions()
+void Map::print_map_with_transitions()
 {
+    std::cout << m_player_count << std::endl;
+    std::cout << m_initial_overwrite_stones << std::endl;
+    std::cout << m_initial_bombs << " " << m_strength << std::endl;
+    std::cout << m_height << " " << m_width << std::endl;
     std::cout << std::endl;
     for (int y = 0; y < m_height; y++)
     {
@@ -99,7 +104,15 @@ void Map::print_transitions()
         {
             int x = m_width * y + n;
             std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[6] << " ";
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].symbol << " ";
+            if (check_players(m_symbol_and_transitions[x].symbol))
+            {
+                std::cout << getColorString(Colors((m_symbol_and_transitions[x].symbol - '0'))) << std::setw(3) << m_symbol_and_transitions[x].symbol << " "
+                          << "\e[0m";
+            }
+            else
+            {
+                std::cout << std::setw(3) << m_symbol_and_transitions[x].symbol << " ";
+            }
             std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[2] << " ";
             std::cout << "  ";
         }
@@ -118,9 +131,9 @@ void Map::print_transitions()
 }
 
 /**
- * @brief prints the map with transitions
+ * @brief prints the map without transitions but with spectifications
  */
-void Map::print_map_with_transitions()
+void Map::print_map_with_spectifications()
 {
     std::cout << m_player_count << std::endl;
     std::cout << m_initial_overwrite_stones << std::endl;
@@ -128,30 +141,42 @@ void Map::print_map_with_transitions()
     std::cout << m_height << " " << m_width << std::endl;
     for (int i = 1; i < (m_width * m_height + 1); i++)
     {
-        std::cout << m_symbol_and_transitions[i].symbol << " ";
+        if (check_players(m_symbol_and_transitions[i].symbol))
+        {
+            std::cout << getColorString(Colors((m_symbol_and_transitions[i].symbol - '0'))) << std::setw(3) << m_symbol_and_transitions[i].symbol << " "
+                      << "\e[0m";
+        }
+        else
+        {
+            std::cout << std::setw(3) << m_symbol_and_transitions[i].symbol << " ";
+        }
         if (i % m_width == 0)
         {
             std::cout << std::endl;
         }
     }
-    print_transitions();
 }
 
 /**
- * @brief prints the map without transitions
+ * @brief prints the map without transitions and without specifications
  */
 void Map::print_map()
 {
-    std::cout << m_player_count << std::endl;
-    std::cout << m_initial_overwrite_stones << std::endl;
-    std::cout << m_initial_bombs << " " << m_strength << std::endl;
-    std::cout << m_height << " " << m_width << std::endl;
     for (int i = 1; i < (m_width * m_height + 1); i++)
     {
-        std::cout << m_symbol_and_transitions[i].symbol << " ";
+        if (check_players(m_symbol_and_transitions[i].symbol))
+        {
+            std::cout << getColorString(Colors((m_symbol_and_transitions[i].symbol - '0'))) << std::setw(3) << m_symbol_and_transitions[i].symbol << " "
+                      << "\e[0m";
+        }
+        else
+        {
+            std::cout << std::setw(3) << m_symbol_and_transitions[i].symbol << " ";
+        }
         if (i % m_width == 0)
         {
             std::cout << std::endl;
         }
     }
+    std::cout << std::endl;
 }

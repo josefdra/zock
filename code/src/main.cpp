@@ -2,6 +2,6 @@
 
 int main()
 {
-    Game game("../../maps/boeseMap11.map");
+    Game game("../../maps/grimFace.map");
     return 1;
 }
