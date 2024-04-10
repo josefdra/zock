@@ -1,12 +1,20 @@
 #include "player.hpp"
 
-Player::Player(char n) : m_player_symbol(n) {}
-Player::~Player(){};
-
-void Player::set_bombs_and_stones(uint16_t o, uint16_t b)
+Player::Player(char s, uint16_t o, uint16_t b) : m_symbol(s),
+                                                 m_overwrite_stones(o),
+                                                 m_bombs(b)
 {
-    m_overwrite_stones = o;
-    m_bombs = b;
+}
+Player::~Player() {}
+
+bool Player::has_valid_moves()
+{
+    return m_has_valid_moves;
+}
+
+void Player::set_valid_moves(bool b)
+{
+    m_has_valid_moves = b;
 }
 
 bool Player::has_bombs()
@@ -41,4 +49,9 @@ void Player::decrement_overwrite_stone()
 void Player::decrement_bombs()
 {
     m_bombs--;
+}
+
+char Player::get_symbol()
+{
+    return m_symbol;
 }
