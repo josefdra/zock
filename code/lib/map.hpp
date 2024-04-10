@@ -19,26 +19,26 @@
 class Map
 {
 public:
-    Map();
+    Map(std::string);
     ~Map();
     void check_neighbours(uint16_t);
     void read_hash_map(const std::string);
     void print_transitions();
     void print_map_with_transitions();
     void print_map();
-    struct hash_map_element
+    struct m_hash_map_element
     {
         unsigned char symbol;
         std::array<uint16_t, 8> transitions;
         bool hasTransitions = false;
     };
-    std::unordered_map<uint16_t, hash_map_element> all_map_moves;
-    uint16_t height;
-    uint16_t width;
-    uint8_t spielerzahl;
-    uint16_t ueberschreibsteine;
-    uint16_t bomben;
-    uint8_t staerke;
+    std::unordered_map<uint16_t, m_hash_map_element> m_symbol_and_transitions;
+    uint16_t m_height;
+    uint16_t m_width;
+    uint16_t m_player_count;
+    uint16_t m_strength;
+    uint16_t m_initial_overwrite_stones;
+    uint16_t m_initial_bombs;
 
 private:
 };

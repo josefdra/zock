@@ -5,7 +5,10 @@
  *
  */
 
-Map::Map(){};
+Map::Map(std::string map_name)
+{
+    read_hash_map(map_name);
+};
 Map::~Map(){};
 
 /**
@@ -15,14 +18,14 @@ Map::~Map(){};
  */
 void Map::check_neighbours(uint16_t n)
 {
-    n > width &&all_map_moves[n - width].symbol != '-' ? all_map_moves[n].transitions[0] = (n - width) * 10 + 4 : all_map_moves[n].transitions[0] = 0;
-    n % width != 0 && n > width &&all_map_moves[n - width + 1].symbol != '-' ? all_map_moves[n].transitions[1] = (n - width + 1) * 10 + 5 : all_map_moves[n].transitions[1] = 0;
-    n % width != 0 && all_map_moves[n + 1].symbol != '-' ? all_map_moves[n].transitions[2] = (n + 1) * 10 + 6 : all_map_moves[n].transitions[2] = 0;
-    n % width != 0 && n <= width *(height - 1) && all_map_moves[n + width + 1].symbol != '-' ? all_map_moves[n].transitions[3] = (n + width + 1) * 10 + 7 : all_map_moves[n].transitions[3] = 0;
-    n <= width *(height - 1) && all_map_moves[n + width].symbol != '-' ? all_map_moves[n].transitions[4] = (n + width) * 10 + 0 : all_map_moves[n].transitions[4] = 0;
-    n % width != 1 && n <= width *(height - 1) && all_map_moves[n + width - 1].symbol != '-' ? all_map_moves[n].transitions[5] = (n + width - 1) * 10 + 1 : all_map_moves[n].transitions[5] = 0;
-    n % width != 1 && all_map_moves[n - 1].symbol != '-' ? all_map_moves[n].transitions[6] = (n - 1) * 10 + 2 : all_map_moves[n].transitions[6] = 0;
-    n % width != 1 && n > width &&all_map_moves[n - width - 1].symbol != '-' ? all_map_moves[n].transitions[7] = (n - width - 1) * 10 + 3 : all_map_moves[n].transitions[7] = 0;
+    n > m_width &&m_symbol_and_transitions[n - m_width].symbol != '-' ? m_symbol_and_transitions[n].transitions[0] = (n - m_width) * 10 : m_symbol_and_transitions[n].transitions[0] = 0;
+    n % m_width != 0 && n > m_width &&m_symbol_and_transitions[n - m_width + 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[1] = (n - m_width + 1) * 10 + 1 : m_symbol_and_transitions[n].transitions[1] = 0;
+    n % m_width != 0 && m_symbol_and_transitions[n + 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[2] = (n + 1) * 10 + 2 : m_symbol_and_transitions[n].transitions[2] = 0;
+    n % m_width != 0 && n <= m_width *(m_height - 1) && m_symbol_and_transitions[n + m_width + 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[3] = (n + m_width + 1) * 10 + 3 : m_symbol_and_transitions[n].transitions[3] = 0;
+    n <= m_width *(m_height - 1) && m_symbol_and_transitions[n + m_width].symbol != '-' ? m_symbol_and_transitions[n].transitions[4] = (n + m_width) * 10 + 4 : m_symbol_and_transitions[n].transitions[4] = 0;
+    n % m_width != 1 && n <= m_width *(m_height - 1) && m_symbol_and_transitions[n + m_width - 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[5] = (n + m_width - 1) * 10 + 5 : m_symbol_and_transitions[n].transitions[5] = 0;
+    n % m_width != 1 && m_symbol_and_transitions[n - 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[6] = (n - 1) * 10 + 6 : m_symbol_and_transitions[n].transitions[6] = 0;
+    n % m_width != 1 && n > m_width &&m_symbol_and_transitions[n - m_width - 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[7] = (n - m_width - 1) * 10 + 7 : m_symbol_and_transitions[n].transitions[7] = 0;
 }
 
 /**
@@ -30,26 +33,26 @@ void Map::check_neighbours(uint16_t n)
  *
  * @param inputfile mapfile to read
  */
-void Map::read_hash_map(const std::string inputfile)
+void Map::read_hash_map(const std::string map_name)
 {
-    std::ifstream inputFile(inputfile);
+    std::ifstream inputFile(map_name);
     std::stringstream mapfile;
+    m_hash_map_element elem;
     mapfile << inputFile.rdbuf();
     // 65000 is set to check for end of file
     mapfile << 65000;
     inputFile.close();
-    mapfile >> spielerzahl >> ueberschreibsteine >> bomben >> staerke >> height >> width;
-    hash_map_element elem;
+    mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     // every coordinate gets a symbol and it's neighbours are being set
-    for (int i = 1; i < (width * height + 1); i++)
+    for (int i = 1; i < (m_width * m_height + 1); i++)
     {
         mapfile >> elem.symbol;
         elem.transitions = {0, 0, 0, 0, 0, 0, 0, 0};
-        all_map_moves[i] = elem;
+        m_symbol_and_transitions[i] = elem;
     }
-    for (int i = 1; i < (width * height + 1); i++)
+    for (int i = 1; i < (m_width * m_height + 1); i++)
     {
-        if (all_map_moves[i].symbol != '-')
+        if (m_symbol_and_transitions[i].symbol != '-')
         {
             check_neighbours(i);
         }
@@ -65,12 +68,12 @@ void Map::read_hash_map(const std::string inputfile)
         {
             x1++;
             x2++;
-            pos1 = (x1) + (y1)*width;
-            pos2 = (x2) + (y2)*width;
-            pos1r = pos1 * 10 + r1;
-            pos2r = pos2 * 10 + r2;
-            all_map_moves[pos1].transitions[r1] = pos2r;
-            all_map_moves[pos2].transitions[r2] = pos1r;
+            pos1 = (x1) + (y1)*m_width;
+            pos2 = (x2) + (y2)*m_width;
+            pos1r = pos1 * 10 + ((r1 + 4) % 8);
+            pos2r = pos2 * 10 + ((r2 + 4) % 8);
+            m_symbol_and_transitions[pos1].transitions[r1] = pos2r;
+            m_symbol_and_transitions[pos2].transitions[r2] = pos1r;
         }
     }
 }
@@ -81,32 +84,32 @@ void Map::read_hash_map(const std::string inputfile)
 void Map::print_transitions()
 {
     std::cout << std::endl;
-    for (int y = 0; y < height; y++)
+    for (int y = 0; y < m_height; y++)
     {
-        for (int n = 1; n < width + 1; n++)
+        for (int n = 1; n < m_width + 1; n++)
         {
-            int x = width * y + n;
-            std::cout << std::setw(3) << all_map_moves[x].transitions[7] << " ";
-            std::cout << std::setw(3) << all_map_moves[x].transitions[0] << " ";
-            std::cout << std::setw(3) << all_map_moves[x].transitions[1] << " ";
+            int x = m_width * y + n;
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[7] << " ";
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[0] << " ";
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[1] << " ";
             std::cout << "  ";
         }
         std::cout << std::endl;
-        for (int n = 1; n < width + 1; n++)
+        for (int n = 1; n < m_width + 1; n++)
         {
-            int x = width * y + n;
-            std::cout << std::setw(3) << all_map_moves[x].transitions[6] << " ";
-            std::cout << std::setw(3) << all_map_moves[x].symbol << " ";
-            std::cout << std::setw(3) << all_map_moves[x].transitions[2] << " ";
+            int x = m_width * y + n;
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[6] << " ";
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].symbol << " ";
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[2] << " ";
             std::cout << "  ";
         }
         std::cout << std::endl;
-        for (int n = 1; n < width + 1; n++)
+        for (int n = 1; n < m_width + 1; n++)
         {
-            int x = width * y + n;
-            std::cout << std::setw(3) << all_map_moves[x].transitions[5] << " ";
-            std::cout << std::setw(3) << all_map_moves[x].transitions[4] << " ";
-            std::cout << std::setw(3) << all_map_moves[x].transitions[3] << " ";
+            int x = m_width * y + n;
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[5] << " ";
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[4] << " ";
+            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[3] << " ";
             std::cout << "  ";
         }
         std::cout << std::endl;
@@ -119,14 +122,14 @@ void Map::print_transitions()
  */
 void Map::print_map_with_transitions()
 {
-    std::cout << spielerzahl << std::endl;
-    std::cout << ueberschreibsteine << std::endl;
-    std::cout << bomben << " " << staerke << std::endl;
-    std::cout << height << " " << width << std::endl;
-    for (int i = 1; i < (width * height + 1); i++)
+    std::cout << m_player_count << std::endl;
+    std::cout << m_initial_overwrite_stones << std::endl;
+    std::cout << m_initial_bombs << " " << m_strength << std::endl;
+    std::cout << m_height << " " << m_width << std::endl;
+    for (int i = 1; i < (m_width * m_height + 1); i++)
     {
-        std::cout << all_map_moves[i].symbol << " ";
-        if (i % width == 0)
+        std::cout << m_symbol_and_transitions[i].symbol << " ";
+        if (i % m_width == 0)
         {
             std::cout << std::endl;
         }
@@ -139,14 +142,14 @@ void Map::print_map_with_transitions()
  */
 void Map::print_map()
 {
-    std::cout << spielerzahl << std::endl;
-    std::cout << ueberschreibsteine << std::endl;
-    std::cout << bomben << " " << staerke << std::endl;
-    std::cout << height << " " << width << std::endl;
-    for (int i = 1; i < (width * height + 1); i++)
+    std::cout << m_player_count << std::endl;
+    std::cout << m_initial_overwrite_stones << std::endl;
+    std::cout << m_initial_bombs << " " << m_strength << std::endl;
+    std::cout << m_height << " " << m_width << std::endl;
+    for (int i = 1; i < (m_width * m_height + 1); i++)
     {
-        std::cout << all_map_moves[i].symbol << " ";
-        if (i % width == 0)
+        std::cout << m_symbol_and_transitions[i].symbol << " ";
+        if (i % m_width == 0)
         {
             std::cout << std::endl;
         }

@@ -15,7 +15,7 @@ typedef std::chrono::high_resolution_clock h_res_clock;
 
 /**
  * @brief Measures how long it takes, to execute a function.
- * @brief Example Usage: 
+ * @brief Example Usage:
  * @brief auto func = [&map]() { map.read_hash_map("../../maps/boeseMap09.map"); };
  * @brief timer_function(func, "read_hash_map");
  * @brief for member functions the object must be referenzed in []
@@ -51,6 +51,38 @@ void function_duration(void (*func)(Args...), const char *func_name, Args &&...a
 }
 
 /**
+ * @brief prints a vector of tuples
+ *
+ * @param vec vector to print
+ */
+void print_tuple_vector(std::vector<std::tuple<uint16_t, uint16_t>> &vec)
+{
+    for (std::tuple<uint16_t, uint16_t> &element : vec)
+    {
+        uint16_t x;
+        uint16_t y;
+        std::tie(x, y) = element;
+        std::cout << "(" << x << ", " << y << ")" << std::endl;
+    }
+}
+
+/**
+ * @brief prints a vector of tuples
+ *
+ * @param vec vector to print
+ */
+void print_tuple_vector(std::vector<std::tuple<uint16_t, uint16_t>> &vec)
+{
+    for (std::tuple<uint16_t, uint16_t> &element : vec)
+    {
+        uint16_t x;
+        uint16_t y;
+        std::tie(x, y) = element;
+        std::cout << "(" << x << ", " << y << ")" << std::endl;
+    }
+}
+
+/**
  * @brief checks if there are any free transitions, matches them with a second one and prints all of them
  *
  * @param m
@@ -60,13 +92,13 @@ void transition_generate(Map &m)
     std::vector<std::array<uint16_t, 2>> tr;
     std::vector<std::array<uint16_t, 6>> output;
     std::array<uint16_t, 2> temp = {0, 0};
-    for (int i = 1; i < (m.height * m.width + 1); i++)
+    for (int i = 1; i < (m.m_height * m.m_width + 1); i++)
     {
-        if (m.all_map_moves[i].symbol != '-')
+        if (m.m_symbol_and_transitions[i].symbol != '-')
         {
             for (int j = 0; j < 8; j++)
             {
-                if (m.all_map_moves[i].transitions[j] == 0)
+                if (m.m_symbol_and_transitions[i].transitions[j] == 0)
                 {
                     temp[0] = i;
                     temp[1] = j;
@@ -82,12 +114,12 @@ void transition_generate(Map &m)
     uint16_t temp_size = tr.size() / 2;
     for (int i = 0; i < temp_size; i++)
     {
-        tr.back()[0] % m.width == 0 ? temp_bigger[0] = m.width : temp_bigger[0] = tr.back()[0] % m.width;
-        temp_bigger[1] = (tr.back()[0] - 1) / m.width + 1;
+        tr.back()[0] % m.m_width == 0 ? temp_bigger[0] = m.m_width : temp_bigger[0] = tr.back()[0] % m.m_width;
+        temp_bigger[1] = (tr.back()[0] - 1) / m.m_width + 1;
         temp_bigger[2] = tr.back()[1];
         tr.pop_back();
-        tr.back()[0] % m.width == 0 ? temp_bigger[3] = m.width : temp_bigger[3] = tr.back()[0] % m.width;
-        temp_bigger[4] = (tr.back()[0] - 1) / m.width + 1;
+        tr.back()[0] % m.m_width == 0 ? temp_bigger[3] = m.m_width : temp_bigger[3] = tr.back()[0] % m.m_width;
+        temp_bigger[4] = (tr.back()[0] - 1) / m.m_width + 1;
         temp_bigger[5] = tr.back()[1];
         tr.pop_back();
         if (!(temp_bigger[0] == 0 && temp_bigger[1] == 0 && temp_bigger[3] == 0 && temp_bigger[4] == 0))
