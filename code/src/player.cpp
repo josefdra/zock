@@ -7,16 +7,6 @@ Player::Player(char s, uint16_t o, uint16_t b) : m_symbol(s),
 }
 Player::~Player() {}
 
-bool Player::has_valid_moves()
-{
-    return m_has_valid_moves;
-}
-
-void Player::set_valid_moves(bool b)
-{
-    m_has_valid_moves = b;
-}
-
 bool Player::has_bombs()
 {
     if (m_bombs > 0)
@@ -41,17 +31,14 @@ bool Player::has_overwrite_stones()
     }
 }
 
-void Player::decrement_overwrite_stone()
+void Player::print_valid_moves(uint16_t width)
 {
-    m_overwrite_stones--;
-}
-
-void Player::decrement_bombs()
-{
-    m_bombs--;
-}
-
-char Player::get_symbol()
-{
-    return m_symbol;
+    uint16_t x, y, coord;
+    for (auto elem : m_valid_moves)
+    {
+        coord = elem.first;
+        coord % width == 0 ? x = width - 1 : x = coord % width - 1;
+        y = (coord - (x + 1)) / width;
+        std::cout << "(" << x << " , " << y << ")" << std::endl;
+    }
 }

@@ -17,6 +17,7 @@ public:
     std::vector<Player> m_players;
     void run();
     void move(uint16_t);
+    void determine_winner();
 
 private:
 };
