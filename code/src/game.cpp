@@ -123,5 +123,6 @@ void Game::determine_winner()
         }
     }
     std::cout << std::endl
-              << "The winner is: Player " << winner << " with " << winning_points << "/" << possible_points << std::endl << std::endl;
+              << "The winner is: Player " << winner << " with " << winning_points << "/" << possible_points << std::endl
+              << std::endl;
 }
