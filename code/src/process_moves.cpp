@@ -233,3 +233,8 @@ void paint_cells(std::unordered_set<uint16_t> &set, unsigned char player_number,
         map.m_symbol_and_transitions.at(elem).symbol = player_number;
     }
 }
+
+float eveluate(uint16_t coord, Player &p, Map &m){
+    float return_value = -INFINITY;
+    return return_value;
+}

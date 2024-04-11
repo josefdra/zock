@@ -42,3 +42,38 @@ void Player::print_valid_moves(uint16_t width)
         std::cout << "(" << x << " , " << y << ")" << std::endl;
     }
 }
+
+void Player::check_corners(Map &m)
+{
+    m_player_corners.clear();
+    for (uint16_t i = 1; i < (m.m_width * m.m_height + 1); i++)
+    {
+        if (check_empty_fields(m.m_symbol_and_transitions[i].symbol) || m.m_symbol_and_transitions[i].symbol == m_symbol)
+        {
+            bool corner = false;
+            std::vector<uint16_t> transitions;
+            for (uint16_t j = 0; j < 8; j++)
+            {
+                if (m.m_symbol_and_transitions[i].transitions[j] != 0 && m.m_symbol_and_transitions[m.m_symbol_and_transitions[i].transitions[j] / 10].symbol != m_symbol)
+                {
+                    transitions.push_back(j);
+                }
+            }
+            if (transitions.size() < 5)
+            {
+                corner = true;
+                for (auto t : transitions)
+                {
+                    if (m.m_symbol_and_transitions[i].transitions[(t + 4) % 8] != 0 && m.m_symbol_and_transitions[m.m_symbol_and_transitions[i].transitions[(t + 4) % 8] / 10].symbol != m_symbol)
+                    {
+                        corner = false;
+                    }
+                }
+            }
+            if (corner)
+            {
+                m_player_corners.push_back(i);
+            }
+        }
+    }
+}

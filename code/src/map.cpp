@@ -41,7 +41,8 @@ void Map::read_hash_map(const std::string map_name)
     m_hash_map_element elem;
     mapfile << inputFile.rdbuf();
     // 65000 is set to check for end of file
-    mapfile << '\n' << 65000;
+    mapfile << '\n'
+            << 65000;
     inputFile.close();
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     // every coordinate gets a symbol and it's neighbours are being set

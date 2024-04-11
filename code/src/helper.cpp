@@ -60,7 +60,6 @@ bool check_players(unsigned char c)
     return var;
 }
 
-
 /**
  * @brief Measures how long it takes, to execute a function.
  * @brief Example Usage:
