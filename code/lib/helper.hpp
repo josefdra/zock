@@ -9,8 +9,6 @@
 #include <tuple>
 #include <vector>
 
-#include "map.hpp"
-
 enum Colors
 {
     black = 1,

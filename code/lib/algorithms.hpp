@@ -1,3 +1,5 @@
+/*
+
 #ifndef ALGORITHMS_HPP
 #define ALGORITHMS_HPP
 
@@ -9,3 +11,5 @@
 int minimaxWithPruning(uint16_t, uint8_t, uint8_t, uint8_t, bool, Map &, Player &);
 
 #endif // ALGORITHMS_HPP
+
+*/
