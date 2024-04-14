@@ -117,4 +117,47 @@ void print_corners(Map &m)
             std::cout << std::endl;
         }
     }
+    std::random_device rd;
+    std::mt19937 g(rd());
+    shuffle(tr.begin(), tr.end(), g);
+    std::array<uint16_t, 6> temp_bigger = {0, 0, 0, 0, 0, 0};
+    uint16_t temp_size = tr.size() / 2;
+    for (int i = 0; i < temp_size; i++)
+    {
+        tr.back()[0] % m.m_width == 0 ? temp_bigger[0] = m.m_width : temp_bigger[0] = tr.back()[0] % m.m_width;
+        temp_bigger[1] = (tr.back()[0] - 1) / m.m_width + 1;
+        temp_bigger[2] = tr.back()[1];
+        tr.pop_back();
+        tr.back()[0] % m.m_width == 0 ? temp_bigger[3] = m.m_width : temp_bigger[3] = tr.back()[0] % m.m_width;
+        temp_bigger[4] = (tr.back()[0] - 1) / m.m_width + 1;
+        temp_bigger[5] = tr.back()[1];
+        tr.pop_back();
+        if (!(temp_bigger[0] == 0 && temp_bigger[1] == 0 && temp_bigger[3] == 0 && temp_bigger[4] == 0))
+        {
+            output.push_back(temp_bigger);
+        }
+        temp_bigger = {0, 0, 0, 0, 0, 0};
+    }
+    for (auto elem : output)
+    {
+        std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
+    }
+}
+
+uint16_t check_frontier(Map &m, uint16_t i)
+{
+    uint16_t score = 8;
+    for (uint16_t j = 0; j < NUM_OF_DIRECTIONS; j++)
+    {
+        if ((m.m_symbol_and_transitions[i].transitions[j] %10) == 0)
+        {
+            score--;
+        }
+    }
+    if (score == 8)
+    {
+        score += 7;
+    }
+    return score;
+}
 }

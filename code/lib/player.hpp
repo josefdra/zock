@@ -16,6 +16,9 @@ public:
     bool has_overwrite_stones();
     bool has_bombs();
     void print_valid_moves(uint16_t);
+    void check_if_corner_occupied(Map &);
+    void check_corners(Map &);
+    void print_frontiers(Map &);
     std::unordered_map<uint16_t, std::tuple<uint16_t, std::unordered_set<uint16_t>>> m_valid_moves;
     bool m_has_valid_moves = false;
     char m_symbol;
