@@ -1,10 +1,15 @@
+/*
+
 #ifndef ALGORITHMS_HPP
 #define ALGORITHMS_HPP
 
 #include <algorithm>
 #include "map.hpp"
 #include "player.hpp"
+#include "process_moves.hpp"
 
-int minimaxWithPruning(unsigned short &, unsigned char, unsigned char &, unsigned char &, bool, Map &, Player &);
+int minimaxWithPruning(uint16_t, uint8_t, uint8_t, uint8_t, bool, Map &, Player &);
 
 #endif // ALGORITHMS_HPP
+
+*/

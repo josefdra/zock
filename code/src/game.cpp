@@ -1,5 +1,4 @@
 #include "game.hpp"
-#include "helper.hpp"
 
 // initialize Game
 Game::Game(const std::string map_name) : m_map_name(map_name),
@@ -11,6 +10,8 @@ Game::Game(const std::string map_name) : m_map_name(map_name),
         Player player('0' + i, m_map.m_initial_overwrite_stones, m_map.m_initial_bombs);
         m_players.push_back(player);
     }
+    m_map.check_before_before_corners(m_players);
+    print_corners(m_map);
 }
 
 Game::~Game() {}
@@ -36,7 +37,7 @@ void Game::run()
             {
                 move((start_player + i) % m_map.m_player_count);
             }
-            for (auto player : m_players)
+            for (auto &player : m_players)
             {
                 if (player.m_has_valid_moves)
                 {
@@ -106,14 +107,15 @@ void Game::determine_winner()
             possible_points++;
             if (48 < m_map.m_symbol_and_transitions[i].symbol < 57)
             {
-                m_players[m_map.m_symbol_and_transitions[i].symbol - '0'].m_points++;
+                m_players[m_map.m_symbol_and_transitions[i].symbol - '0' - 1].m_points++;
             }
         }
     }
+
     uint16_t winning_points = 0;
     char winner;
     std::cout << "These are the points:" << std::endl;
-    for (auto p : m_players)
+    for (auto &p : m_players)
     {
         std::cout << "Player " << p.m_symbol << ": " << std::setw(4) << p.m_points << "/" << possible_points << std::endl;
         if (p.m_points > winning_points)

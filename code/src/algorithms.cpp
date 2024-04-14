@@ -1,24 +1,24 @@
+/*
+
 #include "algorithms.hpp"
 
-int minimaxWithPruning(unsigned short &position, unsigned char depth, unsigned char &alpha, unsigned char &beta, bool maximizingPlayer, Map &map, Player &p)
+int minimaxWithPruning(uint16_t position, uint8_t depth, uint8_t alpha, uint8_t beta, bool maximizingPlayer, Map &map, Player &p)
 {
-    unsigned char eval;
-    unsigned char maxEval;
-    unsigned char minEval;
-    unsigned char staticEval;
-    unsigned short currChildPos;
+    uint8_t eval;
+    uint8_t maxEval;
+    uint8_t minEval;
+    uint16_t nextChildPos;
     if (depth == 0)
     {
-        return 1 /*staticEval at position*/
-
-            ;
+        return position;
     } // @todo bewertung an position einbauen
 
     if (maximizingPlayer)
     {
-        for (unsigned char child = 0; child < 8; child++)
+        for (auto child : p.m_valid_moves)
         {
-            currChildPos = p.m_valid_moves.eval = minimaxWithPruning(currChildPos, depth - 1, alpha, beta, false, map, p);
+            check_coordinate(child.first, map, p, false);
+            eval = minimaxWithPruning(child.first, depth - 1, alpha, beta, false, map, p);
             maxEval = std::max(maxEval, eval);
             alpha = std::max(alpha, eval);
             if (beta <= alpha)
@@ -30,10 +30,10 @@ int minimaxWithPruning(unsigned short &position, unsigned char depth, unsigned c
     }
     else
     {
-        for (unsigned char child = 0; child < 8; child++)
+        for (auto child : p.m_valid_moves)
         {
-            currChildPos = map.m_symbol_and_transitions.at(position).transitions.at(child);
-            eval = minimaxWithPruning(currChildPos, depth - 1, alpha, beta, true, map);
+            check_coordinate(child.first, map, p, false);
+            eval = minimaxWithPruning(child.first, depth - 1, alpha, beta, true, map, p);
             minEval = std::max(minEval, eval);
             beta = std::max(beta, eval);
             if (beta <= alpha)
@@ -44,3 +44,5 @@ int minimaxWithPruning(unsigned short &position, unsigned char depth, unsigned c
         }
     }
 }
+
+*/
