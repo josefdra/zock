@@ -34,7 +34,7 @@ bool Player::has_overwrite_stones()
 void Player::print_valid_moves(uint16_t width)
 {
     uint16_t x, y, coord;
-    for (auto elem : m_valid_moves)
+    for (auto &elem : m_valid_moves)
     {
         coord = elem.first;
         coord % width == 0 ? x = width - 1 : x = coord % width - 1;
@@ -42,3 +42,4 @@ void Player::print_valid_moves(uint16_t width)
         std::cout << "(" << x << " , " << y << ")" << std::endl;
     }
 }
+

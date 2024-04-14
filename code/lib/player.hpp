@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
+#include <vector>
 
 class Player
 {
@@ -21,6 +22,7 @@ public:
     uint16_t m_overwrite_stones = 0;
     uint16_t m_bombs = 0;
     uint16_t m_points = 0;
+    std::unordered_set<uint16_t> m_player_corners;
 
 private:
 };
