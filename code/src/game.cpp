@@ -1,5 +1,4 @@
 #include "game.hpp"
-#include "helper.hpp"
 
 // initialize Game
 Game::Game(const std::string map_name) : m_map_name(map_name),
@@ -9,9 +8,10 @@ Game::Game(const std::string map_name) : m_map_name(map_name),
     for (int i = 1; i < m_map.m_player_count + 1; i++)
     {
         Player player('0' + i, m_map.m_initial_overwrite_stones, m_map.m_initial_bombs);
-        player.check_corners(m_map);
         m_players.push_back(player);
     }
+    m_map.check_before_before_corners(m_players);
+    print_corners(m_map);
 }
 
 Game::~Game() {}
@@ -37,7 +37,7 @@ void Game::run()
             {
                 move((start_player + i) % m_map.m_player_count);
             }
-            for (auto player : m_players)
+            for (auto &player : m_players)
             {
                 if (player.m_has_valid_moves)
                 {
@@ -60,34 +60,34 @@ void Game::run()
 void Game::move(uint16_t i)
 {
     uint16_t coord;
-    // std::cout
-    //     << "------------------------ Next Move: Player " << i + 1 << "------------------------" << std::endl
-    //     << std::endl;
-    // h_res_clock::time_point start_time = h_res_clock::now();
+    std::cout
+        << "------------------------ Next Move: Player " << i + 1 << "------------------------" << std::endl
+        << std::endl;
+    h_res_clock::time_point start_time = h_res_clock::now();
     check_moves(m_map, m_players[i]);
-    // h_res_clock::time_point end_time = h_res_clock::now();
-    // std::chrono::duration<double, std::micro> elapsed_time =
-    //     std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-    // std::cout << "Function: "
-    //           << "check_moves" << std::endl;
-    // std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+    h_res_clock::time_point end_time = h_res_clock::now();
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    std::cout << "Function: "
+              << "check_moves" << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 
     if (m_players[i].m_valid_moves.size() > 0)
     {
         m_players[i].m_has_valid_moves = true;
         auto elem = m_players[i].m_valid_moves.begin();
         coord = elem->first;
-        // start_time = h_res_clock::now();
+        start_time = h_res_clock::now();
         execute_move(coord, m_players[i], m_map);
-        // h_res_clock::time_point end_time = h_res_clock::now();
-        // std::chrono::duration<double, std::micro> elapsed_time =
-        //     std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-        // std::cout << "Function: "
-        //           << "execute_move" << std::endl;
-        // std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+        h_res_clock::time_point end_time = h_res_clock::now();
+        std::chrono::duration<double, std::micro> elapsed_time =
+            std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+        std::cout << "Function: "
+                  << "execute_move" << std::endl;
+        std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 
         m_players[i].m_valid_moves.clear();
-        // m_map.print_map();
+        m_map.print_map();
     }
     else
     {
@@ -115,7 +115,7 @@ void Game::determine_winner()
     uint16_t winning_points = 0;
     char winner;
     std::cout << "These are the points:" << std::endl;
-    for (auto p : m_players)
+    for (auto &p : m_players)
     {
         std::cout << "Player " << p.m_symbol << ": " << std::setw(4) << p.m_points << "/" << possible_points << std::endl;
         if (p.m_points > winning_points)

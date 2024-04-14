@@ -28,6 +28,6 @@ typedef std::chrono::high_resolution_clock h_res_clock;
 std::string getColorString(Colors);
 bool check_empty_fields(unsigned char);
 bool check_players(unsigned char);
-void transition_generate(Map &);
+void print_corners(Map &);
 
 #endif // HELPER_H

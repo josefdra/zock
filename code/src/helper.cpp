@@ -1,4 +1,5 @@
 #include "helper.hpp"
+#include "map.hpp"
 
 std::array<unsigned char, 4> empty_fields{'0', 'i', 'c', 'b'};
 std::array<unsigned char, 8> players{'1', '2', '3', '4', '5', '6', '7', '8'};
@@ -88,54 +89,32 @@ void timer_function(F func, std::string func_name)
 }
 */
 
-/**
- * @brief checks if there are any free transitions, matches them with a second one and prints all of them
- *
- * @param m
- */
-void transition_generate(Map &m)
+void print_corners(Map &m)
 {
-    std::vector<std::array<uint16_t, 2>> tr;
-    std::vector<std::array<uint16_t, 6>> output;
-    std::array<uint16_t, 2> temp = {0, 0};
     for (int i = 1; i < (m.m_height * m.m_width + 1); i++)
     {
-        if (m.m_symbol_and_transitions[i].symbol != '-')
+        auto corner = std::find(m.m_map_corners.begin(), m.m_map_corners.end(), i);
+        auto before_corner = std::find(m.m_map_before_corners.begin(), m.m_map_before_corners.end(), i);
+        auto before_before_corner = std::find(m.m_map_before_before_corners.begin(), m.m_map_before_before_corners.end(), i);
+        if (corner != m.m_map_corners.end())
         {
-            for (int j = 0; j < 8; j++)
-            {
-                if (m.m_symbol_and_transitions[i].transitions[j] == 0)
-                {
-                    temp[0] = i;
-                    temp[1] = j;
-                    tr.push_back(temp);
-                }
-            }
+            std::cout << 9 << " ";
         }
-    }
-    std::random_device rd;
-    std::mt19937 g(rd());
-    shuffle(tr.begin(), tr.end(), g);
-    std::array<uint16_t, 6> temp_bigger = {0, 0, 0, 0, 0, 0};
-    uint16_t temp_size = tr.size() / 2;
-    for (int i = 0; i < temp_size; i++)
-    {
-        tr.back()[0] % m.m_width == 0 ? temp_bigger[0] = m.m_width : temp_bigger[0] = tr.back()[0] % m.m_width;
-        temp_bigger[1] = (tr.back()[0] - 1) / m.m_width + 1;
-        temp_bigger[2] = tr.back()[1];
-        tr.pop_back();
-        tr.back()[0] % m.m_width == 0 ? temp_bigger[3] = m.m_width : temp_bigger[3] = tr.back()[0] % m.m_width;
-        temp_bigger[4] = (tr.back()[0] - 1) / m.m_width + 1;
-        temp_bigger[5] = tr.back()[1];
-        tr.pop_back();
-        if (!(temp_bigger[0] == 0 && temp_bigger[1] == 0 && temp_bigger[3] == 0 && temp_bigger[4] == 0))
+        else if (before_corner != m.m_map_before_corners.end())
         {
-            output.push_back(temp_bigger);
+            std::cout << 1 << " ";
         }
-        temp_bigger = {0, 0, 0, 0, 0, 0};
-    }
-    for (auto elem : output)
-    {
-        std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
+        else if (before_before_corner != m.m_map_before_before_corners.end())
+        {
+            std::cout << 6 << " ";
+        }
+        else
+        {
+            std::cout << 0 << " ";
+        }
+        if ((i % m.m_width) == 0)
+        {
+            std::cout << std::endl;
+        }
     }
 }

@@ -8,9 +8,6 @@
 #include <iostream>
 #include <vector>
 
-#include "map.hpp"
-#include "helper.hpp"
-
 class Player
 {
 public:
@@ -19,15 +16,13 @@ public:
     bool has_overwrite_stones();
     bool has_bombs();
     void print_valid_moves(uint16_t);
-    void check_if_corner_occupied(Map &);
-    void check_corners(Map &);
     std::unordered_map<uint16_t, std::tuple<uint16_t, std::unordered_set<uint16_t>>> m_valid_moves;
     bool m_has_valid_moves = false;
     char m_symbol;
     uint16_t m_overwrite_stones = 0;
     uint16_t m_bombs = 0;
     uint16_t m_points = 0;
-    std::vector<uint16_t> m_player_corners;
+    std::unordered_set<uint16_t> m_player_corners;
 
 private:
 };
