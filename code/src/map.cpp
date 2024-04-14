@@ -1,5 +1,6 @@
 #include "map.hpp"
 #include "helper.hpp"
+#include "player.hpp"
 
 /**
  * @brief map.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships

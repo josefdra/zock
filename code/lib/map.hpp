@@ -15,8 +15,8 @@
 #include <chrono>
 #include <iomanip>
 #include <unordered_set>
-
-#include "player.hpp"
+// forward definition to prevent include errors
+class Player;
 
 class Map
 {
@@ -30,7 +30,7 @@ public:
     void print_map();
     void check_corners(std::vector<Player> &);
     void check_before_corners(std::vector<Player> &);
-    void check_before_before_corners(std::vector<Player> &p);
+    void check_before_before_corners(std::vector<Player> &);
     struct m_hash_map_element
     {
         unsigned char symbol;

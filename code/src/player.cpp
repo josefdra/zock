@@ -1,4 +1,5 @@
 #include "player.hpp"
+#include "map.hpp"
 
 Player::Player(char s, uint16_t o, uint16_t b) : m_symbol(s),
                                                  m_overwrite_stones(o),

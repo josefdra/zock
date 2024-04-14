@@ -8,8 +8,9 @@
 #include <iostream>
 #include <vector>
 
-#include "map.hpp"
 #include "helper.hpp"
+// forward definition to prevent include errors
+class Map;
 
 class Player
 {

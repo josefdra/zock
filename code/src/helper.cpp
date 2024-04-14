@@ -1,5 +1,4 @@
 #include "helper.hpp"
-#include "map.hpp"
 
 std::array<unsigned char, 4> empty_fields{'0', 'i', 'c', 'b'};
 std::array<unsigned char, 8> players{'1', '2', '3', '4', '5', '6', '7', '8'};
