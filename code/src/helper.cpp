@@ -139,3 +139,20 @@ void transition_generate(Map &m)
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
 }
+
+uint16_t check_frontier(Map &m, uint16_t i)
+{
+    uint16_t score = 8;
+    for (uint16_t j = 0; j < NUM_OF_DIRECTIONS; j++)
+    {
+        if ((m.m_symbol_and_transitions[i].transitions[j] %10) == 0)
+        {
+            score--;
+        }
+    }
+    if (score == 8)
+    {
+        score += 7;
+    }
+    return score;
+}

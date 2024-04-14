@@ -77,3 +77,24 @@ void Player::check_corners(Map &m)
         }
     }
 }
+
+void Player::print_frontiers(Map &m)
+{
+    for (uint16_t i = 1; i < (m.m_width * m.m_height + 1); i++)
+    {
+        if (m.m_symbol_and_transitions[i].symbol == m_symbol)
+        {
+            std::cout << getColorString(Colors((m.m_symbol_and_transitions[i].symbol - '0'))) << std::setw(3) << check_frontier(m, i) << " "
+                      << "\e[0m";
+        }
+        else
+        {
+            std::cout << std::setw(3) << m.m_symbol_and_transitions[i].symbol << " ";
+        }
+        if (i % m.m_width == 0)
+        {
+            std::cout << std::endl;
+        }
+    }
+    std::cout << std::endl;
+}

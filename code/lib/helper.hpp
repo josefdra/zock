@@ -29,5 +29,6 @@ std::string getColorString(Colors);
 bool check_empty_fields(unsigned char);
 bool check_players(unsigned char);
 void transition_generate(Map &);
+uint16_t check_frontier(Map &m, uint16_t i);
 
 #endif // HELPER_H
