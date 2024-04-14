@@ -71,7 +71,7 @@ void check_coordinate(uint16_t coord, Map &map, Player &p, bool paint)
                     if (!foundSelf)
                     {
                         valid = true;
-                        for (auto element : tempCellSet)
+                        for (auto &element : tempCellSet)
                         {
                             addSet.insert(element);
                         }
@@ -130,7 +130,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
         // normal
         if (special == 0)
         {
-            for (uint16_t field : fields)
+            for (auto &field : fields)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
@@ -138,7 +138,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
         // inversion
         else if (special == 1)
         {
-            for (uint16_t field : fields)
+            for (auto &field : fields)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
@@ -161,7 +161,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
                     std::cout << "not a valid player, try again" << std::endl;
                 }
             } while (next_player > m.m_player_count);
-            for (uint16_t field : fields)
+            for (auto &field : fields)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
@@ -188,7 +188,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
                     std::cout << "not a valid input, try again" << std::endl;
                 }
             } while (bonus != 'b' && bonus != 'u');
-            for (uint16_t field : fields)
+            for (auto &field : fields)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
@@ -228,7 +228,7 @@ void check_moves(Map &map, Player &player)
 
 void paint_cells(std::unordered_set<uint16_t> &set, unsigned char player_number, Map &map)
 {
-    for (auto elem : set)
+    for (auto &elem : set)
     {
         map.m_symbol_and_transitions.at(elem).symbol = player_number;
     }

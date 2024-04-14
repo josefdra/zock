@@ -2,10 +2,12 @@
 #define GAME_H
 
 #include <random>
+#include <chrono>
 
-#include "player.hpp"
 #include "map.hpp"
+#include "player.hpp"
 #include "process_moves.hpp"
+#include "helper.hpp"
 
 class Game
 {

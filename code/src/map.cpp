@@ -181,3 +181,75 @@ void Map::print_map()
     }
     std::cout << std::endl;
 }
+
+void Map::check_corners(std::vector<Player> &p)
+{
+    m_map_corners.clear();
+    for (auto &player : p)
+    {
+        player.m_player_corners.clear();
+        for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
+        {
+            if (check_empty_fields(m_symbol_and_transitions[i].symbol) || m_symbol_and_transitions[i].symbol == player.m_symbol)
+            {
+                bool corner = false;
+                std::vector<uint16_t> transitions;
+                for (uint16_t j = 0; j < 8; j++)
+                {
+                    if (m_symbol_and_transitions[i].transitions[j] != 0 && m_symbol_and_transitions[m_symbol_and_transitions[i].transitions[j] / 10].symbol != player.m_symbol)
+                    {
+                        transitions.push_back(j);
+                    }
+                }
+                if (transitions.size() < 5)
+                {
+                    corner = true;
+                    for (auto &t : transitions)
+                    {
+                        if (m_symbol_and_transitions[i].transitions[(t + 4) % 8] != 0 && m_symbol_and_transitions[m_symbol_and_transitions[i].transitions[(t + 4) % 8] / 10].symbol != player.m_symbol)
+                        {
+                            corner = false;
+                        }
+                    }
+                }
+                if (corner)
+                {
+                    player.m_player_corners.insert(i);
+                    m_map_corners.insert(i);
+                }
+            }
+        }
+    }
+}
+
+void Map::check_before_corners(std::vector<Player> &p)
+{
+    check_corners(p);
+    m_map_before_corners.clear();
+    for (auto &coord : m_map_corners)
+    {
+        for (uint16_t i = 0; i < NUM_OF_DIRECTIONS; i++)
+        {
+            if (check_empty_fields(m_symbol_and_transitions[m_symbol_and_transitions[coord].transitions[i] / 10].symbol))
+            {
+                m_map_before_corners.insert(m_symbol_and_transitions[coord].transitions[i] / 10);
+            }
+        }
+    }
+}
+
+void Map::check_before_before_corners(std::vector<Player> &p)
+{
+    check_before_corners(p);
+    m_map_before_before_corners.clear();
+    for (auto &coord : m_map_before_corners)
+    {
+        for (uint16_t i = 0; i < NUM_OF_DIRECTIONS; i++)
+        {
+            if (check_empty_fields(m_symbol_and_transitions[m_symbol_and_transitions[coord].transitions[i] / 10].symbol))
+            {
+                m_map_before_before_corners.insert(m_symbol_and_transitions[coord].transitions[i] / 10);
+            }
+        }
+    }
+}

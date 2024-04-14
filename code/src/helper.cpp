@@ -1,4 +1,5 @@
 #include "helper.hpp"
+#include "map.hpp"
 
 std::array<unsigned char, 4> empty_fields{'0', 'i', 'c', 'b'};
 std::array<unsigned char, 8> players{'1', '2', '3', '4', '5', '6', '7', '8'};
@@ -88,29 +89,32 @@ void timer_function(F func, std::string func_name)
 }
 */
 
-/**
- * @brief checks if there are any free transitions, matches them with a second one and prints all of them
- *
- * @param m
- */
-void transition_generate(Map &m)
+void print_corners(Map &m)
 {
-    std::vector<std::array<uint16_t, 2>> tr;
-    std::vector<std::array<uint16_t, 6>> output;
-    std::array<uint16_t, 2> temp = {0, 0};
     for (int i = 1; i < (m.m_height * m.m_width + 1); i++)
     {
-        if (m.m_symbol_and_transitions[i].symbol != '-')
+        auto corner = std::find(m.m_map_corners.begin(), m.m_map_corners.end(), i);
+        auto before_corner = std::find(m.m_map_before_corners.begin(), m.m_map_before_corners.end(), i);
+        auto before_before_corner = std::find(m.m_map_before_before_corners.begin(), m.m_map_before_before_corners.end(), i);
+        if (corner != m.m_map_corners.end())
         {
-            for (int j = 0; j < 8; j++)
-            {
-                if (m.m_symbol_and_transitions[i].transitions[j] == 0)
-                {
-                    temp[0] = i;
-                    temp[1] = j;
-                    tr.push_back(temp);
-                }
-            }
+            std::cout << 9 << " ";
+        }
+        else if (before_corner != m.m_map_before_corners.end())
+        {
+            std::cout << 1 << " ";
+        }
+        else if (before_before_corner != m.m_map_before_before_corners.end())
+        {
+            std::cout << 6 << " ";
+        }
+        else
+        {
+            std::cout << 0 << " ";
+        }
+        if ((i % m.m_width) == 0)
+        {
+            std::cout << std::endl;
         }
     }
     std::random_device rd;
@@ -155,4 +159,5 @@ uint16_t check_frontier(Map &m, uint16_t i)
         score += 7;
     }
     return score;
+}
 }
