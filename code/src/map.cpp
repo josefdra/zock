@@ -254,3 +254,13 @@ void Map::check_before_before_corners(std::vector<Player> &p)
         }
     }
 }
+
+void Map::print_frontier_scores(std::vector<Player> &p)
+{
+    std::cout << "frontier_scores:" << std::endl;
+    for (auto &player : p)
+    {
+        player.get_frontier_score(*this);
+        std::cout << "Player " << player.m_symbol << ": " << player.frontier_score << std::endl;
+    }
+}

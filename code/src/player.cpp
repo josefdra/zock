@@ -64,3 +64,14 @@ void Player::print_frontiers(Map &m)
     }
     std::cout << std::endl;
 }
+
+void Player::get_frontier_score(Map &m)
+{
+    for (uint16_t i = 1; i < (m.m_width * m.m_height + 1); i++)
+    {
+        if (m.m_symbol_and_transitions[i].symbol == m_symbol)
+        {
+            frontier_score += check_frontier(m, i);
+        }
+    }
+}

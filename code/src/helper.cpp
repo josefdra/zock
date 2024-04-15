@@ -7,8 +7,8 @@ std::string getColorString(Colors color)
 {
     switch (color)
     {
-    case black:
-        return "\e[90m";
+    case orange:
+        return "\e[38;5;208m";
     case red:
         return "\e[91m";
     case green:
@@ -118,19 +118,15 @@ void print_corners(Map &m)
     }
 }
 
-uint16_t check_frontier(Map &m, uint16_t i)
+uint16_t check_frontier(Map &m, uint16_t coord)
 {
     uint16_t score = 8;
-    for (uint16_t j = 0; j < NUM_OF_DIRECTIONS; j++)
+    for (int j = 0; j < NUM_OF_DIRECTIONS; j++)
     {
-        if ((m.m_symbol_and_transitions[i].transitions[j] % 10) == 0)
+        if (check_empty_fields(m.m_symbol_and_transitions[m.m_symbol_and_transitions[coord].transitions[j] / 10].symbol))
         {
             score--;
         }
-    }
-    if (score == 8)
-    {
-        score += 7;
-    }
+        }
     return score;
 }

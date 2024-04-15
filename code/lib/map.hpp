@@ -28,6 +28,7 @@ public:
     void print_map_with_transitions();
     void print_map_with_spectifications();
     void print_map();
+    void print_frontier_scores(std::vector<Player> &);
     void check_corners(std::vector<Player> &);
     void check_before_corners(std::vector<Player> &);
     void check_before_before_corners(std::vector<Player> &);

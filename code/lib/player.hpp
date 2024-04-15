@@ -21,6 +21,7 @@ public:
     bool has_bombs();
     void print_valid_moves(uint16_t);
     void print_frontiers(Map &);
+    void get_frontier_score(Map &);
     std::unordered_map<uint16_t, std::tuple<uint16_t, std::unordered_set<uint16_t>>> m_valid_moves;
     bool m_has_valid_moves = false;
     char m_symbol;
@@ -28,6 +29,7 @@ public:
     uint16_t m_bombs = 0;
     uint16_t m_points = 0;
     std::unordered_set<uint16_t> m_player_corners;
+    uint16_t frontier_score = 0;
 
 private:
 };
