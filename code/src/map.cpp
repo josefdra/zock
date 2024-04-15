@@ -403,7 +403,7 @@ void Map::print_frontier_scores(std::vector<Player> &p)
     for (auto &player : p)
     {
         player.get_frontier_score(*this);
-        std::cout << "Player " << player.m_symbol << ": " << player.frontier_score << std::endl;
+        std::cout << getColorString(Colors(player.m_symbol - '0')) << "Player " << player.m_symbol << ": " << player.frontier_score << "\e[0m" << std::endl;
     }
 }
 
