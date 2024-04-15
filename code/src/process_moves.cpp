@@ -71,7 +71,7 @@ void check_coordinate(uint16_t coord, Map &map, Player &p, bool paint)
                     if (!foundSelf)
                     {
                         valid = true;
-                        for (auto element : tempCellSet)
+                        for (auto &element : tempCellSet)
                         {
                             addSet.insert(element);
                         }
@@ -130,7 +130,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
         // normal
         if (special == 0)
         {
-            for (uint16_t field : fields)
+            for (auto &field : fields)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
@@ -138,7 +138,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
         // inversion
         else if (special == 1)
         {
-            for (uint16_t field : fields)
+            for (auto &field : fields)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
@@ -146,6 +146,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
             helper = helper % m.m_player_count;
             char next_player = helper + 1 + '0';
             change_players(m, p.m_symbol, next_player);
+            m.check_before_before_special_fields();
         }
         // choice
         else if (special == 2)
@@ -161,11 +162,12 @@ void execute_move(uint16_t coord, Player &p, Map &m)
                     std::cout << "not a valid player, try again" << std::endl;
                 }
             } while (next_player > m.m_player_count);
-            for (uint16_t field : fields)
+            for (auto &field : fields)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
             change_players(m, p.m_symbol, ('0' + next_player));
+            m.check_before_before_special_fields();
         }
         // bonus
         else if (special == 3)
@@ -188,10 +190,11 @@ void execute_move(uint16_t coord, Player &p, Map &m)
                     std::cout << "not a valid input, try again" << std::endl;
                 }
             } while (bonus != 'b' && bonus != 'u');
-            for (uint16_t field : fields)
+            for (auto &field : fields)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
+            m.check_before_before_special_fields();
         }
         else
         {
@@ -228,8 +231,14 @@ void check_moves(Map &map, Player &player)
 
 void paint_cells(std::unordered_set<uint16_t> &set, unsigned char player_number, Map &map)
 {
-    for (auto elem : set)
+    for (auto &elem : set)
     {
         map.m_symbol_and_transitions.at(elem).symbol = player_number;
     }
+}
+
+float eveluate(uint16_t coord, Player &p, Map &m)
+{
+    float return_value = -INFINITY;
+    return return_value;
 }

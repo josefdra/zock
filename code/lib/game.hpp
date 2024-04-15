@@ -1,12 +1,14 @@
-#ifndef GAME_H
-#define GAME_H
+#ifndef GAME_HPP
+#define GAME_HPP
 
 #include <random>
+#include <chrono>
 
-#include "player.hpp"
 #include "map.hpp"
+#include "player.hpp"
 #include "process_moves.hpp"
 #include "algorithms.hpp"
+#include "helper.hpp"
 
 class Game
 {
@@ -16,11 +18,11 @@ public:
     std::string m_map_name;
     Map m_map;
     std::vector<Player> m_players;
+    void determine_winner();
+    void calculate_map_value();
+    void eveluate_board();
     void run();
     void move(uint16_t);
-    void determine_winner();
-
-private:
 };
 
-#endif // GAME_H
+#endif // GAME_HPP

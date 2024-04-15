@@ -1,3 +1,5 @@
+/*
+
 #include "algorithms.hpp"
 
 int minimaxWithPruning(uint16_t position, uint8_t depth, uint8_t alpha, uint8_t beta, bool maximizingPlayer, Map &map, Player &p)
@@ -52,3 +54,5 @@ int minimaxWithPruning(uint16_t position, uint8_t depth, uint8_t alpha, uint8_t 
         }
     }
 }
+
+*/
