@@ -32,6 +32,7 @@ public:
     uint16_t m_overwrite_stones = 0;
     uint16_t m_bombs = 0;
     uint16_t m_points = 0;
+    std::vector<int16_t> staticMapEval;
     std::unordered_set<uint16_t> m_protected_fields;
     std::unordered_set<uint16_t> m_before_before_protected_fields;
     std::unordered_set<uint16_t> m_borders;

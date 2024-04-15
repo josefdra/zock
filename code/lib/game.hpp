@@ -7,6 +7,7 @@
 #include "map.hpp"
 #include "player.hpp"
 #include "process_moves.hpp"
+#include "algorithms.hpp"
 #include "helper.hpp"
 
 class Game
