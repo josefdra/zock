@@ -203,7 +203,7 @@ void Game::move(uint16_t i)
     h_res_clock::time_point start_time = h_res_clock::now();
     check_moves(m_map, m_players[i]);
     uint16_t bestpos;
-    m_map.setFieldValue(m_players.at(i));
+    // m_map.setFieldValue(m_players.at(i));
     h_res_clock::time_point end_time = h_res_clock::now();
     std::chrono::duration<double, std::micro> elapsed_time =
         std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
@@ -215,7 +215,7 @@ void Game::move(uint16_t i)
     {
         m_players[i].m_has_valid_moves = true;
         auto elem = m_players[i].m_valid_moves.begin();
-        bestpos = minimaxWithPruning(0, 10, -INFINITY, INFINITY, true, m_map, m_players.at(i));
+        // bestpos = minimaxWithPruning(0, 10, -INFINITY, INFINITY, true, m_map, m_players.at(i));
         coord = elem->first;
         start_time = h_res_clock::now();
         std::cout << "coord: " << coord << std::endl;

@@ -115,7 +115,7 @@ uint16_t check_frontier(Map &m, uint16_t coord)
         {
             score--;
         }
-        }
+    }
     return score;
 }
 
@@ -129,7 +129,13 @@ EvalOfField evalFieldSymbol(char c)
         return EvalOfField::inversion;
     else if (c == 'c')
         return EvalOfField::choice;
+    // @todo implement else case
+    else
+        // This return is wrong and has to be removed. Is just here to get rid of the warning.
+        return EvalOfField::enemy;
     for (int i = 0; i < players.size(); i++)
+    {
         if (c == players.at(i))
             return EvalOfField::enemy;
+    }
 }
