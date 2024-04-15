@@ -146,6 +146,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
             helper = helper % m.m_player_count;
             char next_player = helper + 1 + '0';
             change_players(m, p.m_symbol, next_player);
+            m.check_before_before_special_fields();
         }
         // choice
         else if (special == 2)
@@ -166,6 +167,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
             change_players(m, p.m_symbol, ('0' + next_player));
+            m.check_before_before_special_fields();
         }
         // bonus
         else if (special == 3)
@@ -192,6 +194,7 @@ void execute_move(uint16_t coord, Player &p, Map &m)
             {
                 m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
+            m.check_before_before_special_fields();
         }
         else
         {
@@ -234,7 +237,8 @@ void paint_cells(std::unordered_set<uint16_t> &set, unsigned char player_number,
     }
 }
 
-float eveluate(uint16_t coord, Player &p, Map &m){
+float eveluate(uint16_t coord, Player &p, Map &m)
+{
     float return_value = -INFINITY;
     return return_value;
 }
