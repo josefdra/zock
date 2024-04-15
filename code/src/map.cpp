@@ -387,22 +387,6 @@ void Map::check_before_before_special_fields()
     m_before_before_special_fields.erase(0);
 }
 
-void Map::check_before_before_corners(std::vector<Player> &p)
-{
-    check_before_corners(p);
-    m_map_before_before_corners.clear();
-    for (auto &coord : m_map_before_corners)
-    {
-        for (uint16_t i = 0; i < NUM_OF_DIRECTIONS; i++)
-        {
-            if (check_empty_fields(m_symbol_and_transitions[m_symbol_and_transitions[coord].transitions[i] / 10].symbol))
-            {
-                m_map_before_before_corners.insert(m_symbol_and_transitions[coord].transitions[i] / 10);
-            }
-        }
-    }
-}
-
 void Map::print_frontier_scores(std::vector<Player> &p)
 {
     std::cout << "frontier_scores:" << std::endl;
