@@ -6,6 +6,7 @@
 #include "player.hpp"
 #include "map.hpp"
 #include "process_moves.hpp"
+#include "algorithms.hpp"
 
 class Game
 {

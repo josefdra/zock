@@ -60,7 +60,6 @@ bool check_players(unsigned char c)
     return var;
 }
 
-
 /**
  * @brief Measures how long it takes, to execute a function.
  * @brief Example Usage:
@@ -139,4 +138,19 @@ void transition_generate(Map &m)
     {
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
+}
+
+EvalOfField evalFieldSymbol(char c)
+{
+    if (c == '0')
+        return EvalOfField::empty;
+    else if (c == 'b')
+        return EvalOfField::bomb;
+    else if (c == 'i')
+        return EvalOfField::inversion;
+    else if (c == 'c')
+        return EvalOfField::choice;
+    for (int i = 0; i < players.size(); i++)
+        if (c == players.at(i))
+            return EvalOfField::enemy;
 }

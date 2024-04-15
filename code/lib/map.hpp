@@ -16,6 +16,8 @@
 #include <iomanip>
 #include <unordered_set>
 
+class Player;
+
 class Map
 {
 public:
@@ -26,6 +28,7 @@ public:
     void print_map_with_transitions();
     void print_map_with_spectifications();
     void print_map();
+    void setFieldValue(Player &);
     struct m_hash_map_element
     {
         unsigned char symbol;

@@ -2,7 +2,7 @@
 
 int main()
 {
-    Game game("../../maps/2013_comp_1_2p.map");
+    Game game("../../maps/2019_comp_05_2p.map");
     game.run();
     return 1;
 }
