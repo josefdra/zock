@@ -13,14 +13,14 @@
 
 enum Colors
 {
-    black = 1,
-    red,
-    green,
-    yellow,
+    red = 1,
     blue,
+    green,
+    orange,
     magenta,
-    cyan,
+    yellow,
     dark_black,
+    cyan,
 };
 
 typedef std::chrono::high_resolution_clock h_res_clock;
