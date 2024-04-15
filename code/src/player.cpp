@@ -172,7 +172,7 @@ void Player::get_moves_score(Map &m)
     std::string msg = "";
     for (auto &move : m_valid_moves)
     {
-        u_int16_t special = std::get<0>(move.second);
+        uint16_t special = std::get<0>(move.second);
         if (special == 0) // normal
         {
             if (check_empty_fields(m.m_symbol_and_transitions[move.first].symbol)) // empty field (0)

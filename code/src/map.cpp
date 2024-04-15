@@ -10,9 +10,6 @@
 Map::Map(std::string map_name)
 {
     read_hash_map(map_name);
-    check_corners();
-    check_before_before_borders();
-    check_before_before_special_fields();
 };
 Map::~Map(){};
 
@@ -199,12 +196,19 @@ void Map::setFieldValue(Player &p)
 /**
  * @brief adds the corners of the map to the set m_corners
  */
-void Map::check_corners()
+void Map::check_corners_borders_special_fields()
 {
     m_corners.clear();
+    m_borders.clear();
+    m_special_fields.clear();
+
     for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
     {
-        if (m_symbol_and_transitions[i].symbol != '-')
+        if (check_special(m_symbol_and_transitions[i].symbol))
+        {
+            m_special_fields.insert(i);
+        }
+        else if (m_symbol_and_transitions[i].symbol != '-')
         {
             bool corner = false;
             std::vector<uint16_t> transitions;
@@ -213,6 +217,11 @@ void Map::check_corners()
                 if (m_symbol_and_transitions[i].transitions[j] != 0)
                 {
                     transitions.push_back(j);
+                }
+                else if (m_symbol_and_transitions[i].transitions[j] == 0)
+                {
+                    m_borders.insert(i);
+                    break;
                 }
             }
             if (transitions.size() < 5)
@@ -232,6 +241,8 @@ void Map::check_corners()
             }
         }
     }
+    
+    m_borders.erase(0);
 }
 
 void Map::check_before_protected_fields(std::vector<Player> &players)
@@ -268,29 +279,8 @@ void Map::check_before_protected_fields(std::vector<Player> &players)
     m_before_protected_fields.erase(0);
 }
 
-void Map::check_borders()
-{
-    m_borders.clear();
-
-    for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
-    {
-        if (m_symbol_and_transitions[i].symbol != '-')
-        {
-            for (uint16_t j = 0; j < 8; j++)
-            {
-                if (m_symbol_and_transitions[i].transitions[j] == 0)
-                {
-                    m_borders.insert(i);
-                }
-            }
-        }
-        m_borders.erase(0);
-    }
-}
-
 void Map::check_before_borders()
 {
-    check_borders();
     m_before_borders.clear();
     for (auto &c : m_borders)
     {
@@ -344,21 +334,8 @@ void Map::check_before_before_borders()
     m_before_before_borders.erase(0);
 }
 
-void Map::check_special_fields()
-{
-    m_special_fields.clear();
-    for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
-    {
-        if (check_special(m_symbol_and_transitions[i].symbol))
-        {
-            m_special_fields.insert(i);
-        }
-    }
-}
-
 void Map::check_before_special_fields()
 {
-    check_special_fields();
     m_before_special_fields.clear();
     for (auto &c : m_special_fields)
     {
@@ -406,4 +383,3 @@ void Map::print_frontier_scores(std::vector<Player> &p)
         std::cout << getColorString(Colors(player.m_symbol - '0')) << "Player " << player.m_symbol << ": " << player.frontier_score << "\e[0m" << std::endl;
     }
 }
-

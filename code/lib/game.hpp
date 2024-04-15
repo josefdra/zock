@@ -20,7 +20,7 @@ public:
     std::vector<Player> m_players;
     void determine_winner();
     void calculate_map_value();
-    void eveluate_board();
+    void evaluate_board();
     void run();
     void move(uint16_t);
 };

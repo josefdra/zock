@@ -33,7 +33,8 @@ void Game::determine_winner()
     std::cout << "These are the points:" << std::endl;
     for (auto &p : m_players)
     {
-        std::cout << "Player " << p.m_symbol << ": " << std::setw(4) << p.m_points << "/" << possible_points << std::endl;
+        std::cout << getColorString(Colors(p.m_symbol - '0')) << "Player " << p.m_symbol << ": " << std::setw(4) << p.m_points << "/" << possible_points << std::endl
+                  << "\e[0m";
         if (p.m_points > winning_points)
         {
             winning_points = p.m_points;
@@ -41,8 +42,9 @@ void Game::determine_winner()
         }
     }
     std::cout << std::endl
-              << "The winner is: Player " << winner << " with " << winning_points << "/" << possible_points << std::endl
-              << std::endl;
+              << "The winner is: " << getColorString(Colors(winner - '0')) << "Player " << winner << " with " << winning_points << "/" << possible_points << std::endl
+              << std::endl
+              << "\e[0m";
 }
 
 void Game::calculate_map_value()
@@ -132,9 +134,12 @@ void Game::calculate_map_value()
     }
 }
 
-void Game::eveluate_board()
+void Game::evaluate_board()
 {
     m_map.m_protected_fields.clear();
+    m_map.check_corners_borders_special_fields();
+    m_map.check_before_before_borders();
+    m_map.check_before_before_special_fields();
     for (auto &p : m_players)
     {
         p.check_protected_fields(m_map);
@@ -162,7 +167,6 @@ void Game::run()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, m_map.m_player_count - 1);
     uint16_t start_player = dis(gen);
-
     for (int j = 0; j < 10; j++)
     {
         if (valid_moves)
@@ -191,7 +195,14 @@ void Game::run()
         << std::endl;
     m_map.print_map();
     determine_winner();
-    eveluate_board();
+    h_res_clock::time_point start_time = h_res_clock::now();
+    evaluate_board();
+    h_res_clock::time_point end_time = h_res_clock::now();
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    std::cout << "Function: "
+              << "evaluate_board" << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 }
 
 void Game::move(uint16_t i)
