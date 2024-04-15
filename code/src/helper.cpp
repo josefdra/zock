@@ -118,3 +118,18 @@ uint16_t check_frontier(Map &m, uint16_t coord)
         }
     return score;
 }
+
+EvalOfField evalFieldSymbol(char c)
+{
+    if (c == '0')
+        return EvalOfField::empty;
+    else if (c == 'b')
+        return EvalOfField::bomb;
+    else if (c == 'i')
+        return EvalOfField::inversion;
+    else if (c == 'c')
+        return EvalOfField::choice;
+    for (int i = 0; i < players.size(); i++)
+        if (c == players.at(i))
+            return EvalOfField::enemy;
+}

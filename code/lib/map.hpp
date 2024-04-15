@@ -18,6 +18,8 @@
 // forward definition to prevent include errors
 class Player;
 
+class Player;
+
 class Map
 {
 public:
@@ -28,6 +30,7 @@ public:
     void print_map_with_transitions();
     void print_map_with_spectifications();
     void print_map();
+    void setFieldValue(Player &);
     void check_corners();
     void check_before_protected_fields(std::vector<Player> &); 
     void check_borders();

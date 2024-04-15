@@ -186,6 +186,16 @@ void Map::print_map()
     std::cout << std::endl;
 }
 
+void Map::setFieldValue(Player &p)
+{
+    p.staticMapEval.push_back(0);
+    for (int i = 1; i < m_symbol_and_transitions.size(); i++)
+    {
+        EvalOfField currVal = evalFieldSymbol(m_symbol_and_transitions.at(i).symbol);
+        p.staticMapEval.push_back((int)currVal);
+    }
+}
+
 /**
  * @brief adds the corners of the map to the set m_corners
  */
@@ -396,3 +406,4 @@ void Map::print_frontier_scores(std::vector<Player> &p)
         std::cout << "Player " << player.m_symbol << ": " << player.frontier_score << std::endl;
     }
 }
+
