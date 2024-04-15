@@ -22,7 +22,10 @@ public:
     void print_valid_moves(uint16_t);
     void print_frontiers(Map &);
     void get_frontier_score(Map &);
+    void get_moves_score(Map &);
+                    //end coord          //special field(0-4)       //coords of the way              
     std::unordered_map<uint16_t, std::tuple<uint16_t, std::unordered_set<uint16_t>>> m_valid_moves;
+    std::unordered_map<uint16_t, int16_t> moves_scores;
     bool m_has_valid_moves = false;
     char m_symbol;
     uint16_t m_overwrite_stones = 0;
