@@ -1,5 +1,5 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef MAP_HPP
+#define MAP_HPP
 
 #define NUM_OF_DIRECTIONS 8
 
@@ -28,9 +28,14 @@ public:
     void print_map_with_transitions();
     void print_map_with_spectifications();
     void print_map();
-    void check_corners(std::vector<Player> &);
-    void check_before_corners(std::vector<Player> &);
-    void check_before_before_corners(std::vector<Player> &);
+    void check_corners();
+    void check_before_protected_fields(std::vector<Player> &); 
+    void check_borders();
+    void check_before_borders();
+    void check_before_before_borders();
+    void check_special_fields();
+    void check_before_special_fields();
+    void check_before_before_special_fields();
     struct m_hash_map_element
     {
         unsigned char symbol;
@@ -43,11 +48,15 @@ public:
     uint16_t m_strength;
     uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
-    std::unordered_set<uint16_t> m_map_corners;
-    std::unordered_set<uint16_t> m_map_before_corners;
-    std::unordered_set<uint16_t> m_map_before_before_corners;
-
-private:
+    std::unordered_set<uint16_t> m_corners;
+    std::unordered_set<uint16_t> m_protected_fields;
+    std::unordered_set<uint16_t> m_before_protected_fields;
+    std::unordered_set<uint16_t> m_borders;
+    std::unordered_set<uint16_t> m_before_borders;
+    std::unordered_set<uint16_t> m_before_before_borders;
+    std::unordered_set<uint16_t> m_special_fields;
+    std::unordered_set<uint16_t> m_before_special_fields;
+    std::unordered_set<uint16_t> m_before_before_special_fields;
 };
 
-#endif // MAP_H
+#endif // MAP_HPP

@@ -1,5 +1,5 @@
-#ifndef HELPER_H
-#define HELPER_H
+#ifndef HELPER_HPP
+#define HELPER_HPP
 
 #include <functional>
 #include <iostream>
@@ -28,7 +28,7 @@ typedef std::chrono::high_resolution_clock h_res_clock;
 std::string getColorString(Colors);
 bool check_empty_fields(unsigned char);
 bool check_players(unsigned char);
+bool check_special(unsigned char);
 uint16_t check_frontier(Map &, uint16_t);
-void print_corners(Map &);
 
-#endif // HELPER_H
+#endif // HELPER_HPP

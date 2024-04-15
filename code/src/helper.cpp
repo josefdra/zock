@@ -1,7 +1,9 @@
 #include "helper.hpp"
+#include "player.hpp"
 
 std::array<unsigned char, 4> empty_fields{'0', 'i', 'c', 'b'};
 std::array<unsigned char, 8> players{'1', '2', '3', '4', '5', '6', '7', '8'};
+std::array<unsigned char, 3> special{'c', 'i', 'b'};
 
 std::string getColorString(Colors color)
 {
@@ -60,6 +62,22 @@ bool check_players(unsigned char c)
     return var;
 }
 
+/// @brief check if input is a special char
+/// @param c current symbol at a certain coordinate
+/// @return true/false
+bool check_special(unsigned char c)
+{
+    bool var = false;
+    for (int i = 0; i < special.size(); i++)
+    {
+        if (c == special[i])
+        {
+            var = true;
+        }
+    }
+    return var;
+}
+
 /**
  * @brief Measures how long it takes, to execute a function.
  * @brief Example Usage:
@@ -87,36 +105,6 @@ void timer_function(F func, std::string func_name)
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 }
 */
-
-void print_corners(Map &m)
-{
-    for (int i = 1; i < (m.m_height * m.m_width + 1); i++)
-    {
-        auto corner = std::find(m.m_map_corners.begin(), m.m_map_corners.end(), i);
-        auto before_corner = std::find(m.m_map_before_corners.begin(), m.m_map_before_corners.end(), i);
-        auto before_before_corner = std::find(m.m_map_before_before_corners.begin(), m.m_map_before_before_corners.end(), i);
-        if (corner != m.m_map_corners.end())
-        {
-            std::cout << 9 << " ";
-        }
-        else if (before_corner != m.m_map_before_corners.end())
-        {
-            std::cout << 1 << " ";
-        }
-        else if (before_before_corner != m.m_map_before_before_corners.end())
-        {
-            std::cout << 6 << " ";
-        }
-        else
-        {
-            std::cout << 0 << " ";
-        }
-        if ((i % m.m_width) == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
-}
 
 uint16_t check_frontier(Map &m, uint16_t i)
 {

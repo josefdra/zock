@@ -1,5 +1,5 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#ifndef PLAYER_HPP
+#define PLAYER_HPP
 
 #include <stdint.h>
 #include <unordered_set>
@@ -21,15 +21,23 @@ public:
     bool has_bombs();
     void print_valid_moves(uint16_t);
     void print_frontiers(Map &);
+    bool check_if_corner(Map &, uint16_t);
+    void check_protected_fields(Map &);
+    void check_before_before_protected_fields(Map &);
+    bool check_if_remove_border(Map &, uint16_t);
+    void update_borders(Map &);
     std::unordered_map<uint16_t, std::tuple<uint16_t, std::unordered_set<uint16_t>>> m_valid_moves;
     bool m_has_valid_moves = false;
     char m_symbol;
     uint16_t m_overwrite_stones = 0;
     uint16_t m_bombs = 0;
     uint16_t m_points = 0;
-    std::unordered_set<uint16_t> m_player_corners;
-
-private:
+    std::unordered_set<uint16_t> m_protected_fields;
+    std::unordered_set<uint16_t> m_before_before_protected_fields;
+    std::unordered_set<uint16_t> m_borders;
+    std::unordered_set<uint16_t> m_before_borders;
+    std::unordered_set<uint16_t> m_before_before_borders;
+    int m_map_value;
 };
 
-#endif // PLAYER_H
+#endif // PLAYER_HPP
