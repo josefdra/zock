@@ -10,6 +10,9 @@
 Map::Map(std::string map_name)
 {
     read_hash_map(map_name);
+    check_corners();
+    check_before_before_borders();
+    check_before_before_special_fields();
 };
 Map::~Map(){};
 
@@ -183,76 +186,215 @@ void Map::print_map()
     std::cout << std::endl;
 }
 
-void Map::check_corners(std::vector<Player> &p)
+void Map::setFieldValue(Player &p)
 {
-    m_map_corners.clear();
-    for (auto &player : p)
+    p.staticMapEval.push_back(0);
+    for (int i = 1; i < m_symbol_and_transitions.size(); i++)
     {
-        player.m_player_corners.clear();
-        for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
+        EvalOfField currVal = evalFieldSymbol(m_symbol_and_transitions.at(i).symbol);
+        p.staticMapEval.push_back((int)currVal);
+    }
+}
+
+/**
+ * @brief adds the corners of the map to the set m_corners
+ */
+void Map::check_corners()
+{
+    m_corners.clear();
+    for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
+    {
+        if (m_symbol_and_transitions[i].symbol != '-')
         {
-            if (check_empty_fields(m_symbol_and_transitions[i].symbol) || m_symbol_and_transitions[i].symbol == player.m_symbol)
+            bool corner = false;
+            std::vector<uint16_t> transitions;
+            for (uint16_t j = 0; j < 8; j++)
             {
-                bool corner = false;
-                std::vector<uint16_t> transitions;
-                for (uint16_t j = 0; j < 8; j++)
+                if (m_symbol_and_transitions[i].transitions[j] != 0)
                 {
-                    if (m_symbol_and_transitions[i].transitions[j] != 0 && m_symbol_and_transitions[m_symbol_and_transitions[i].transitions[j] / 10].symbol != player.m_symbol)
+                    transitions.push_back(j);
+                }
+            }
+            if (transitions.size() < 5)
+            {
+                corner = true;
+                for (auto &t : transitions)
+                {
+                    if (m_symbol_and_transitions[i].transitions[(t + 4) % 8] != 0)
                     {
-                        transitions.push_back(j);
+                        corner = false;
                     }
                 }
-                if (transitions.size() < 5)
+            }
+            if (corner)
+            {
+                m_corners.insert(i);
+            }
+        }
+    }
+}
+
+void Map::check_before_protected_fields(std::vector<Player> &players)
+{
+    m_before_protected_fields.clear();
+    for (auto &p : players)
+    {
+        for (auto &c : p.m_protected_fields)
+        {
+            if (m_corners.find(c) != m_corners.end())
+            {
+                for (int i = 0; i < NUM_OF_DIRECTIONS; i++)
                 {
-                    corner = true;
-                    for (auto &t : transitions)
+                    if (m_symbol_and_transitions[c].transitions[i] != 0)
                     {
-                        if (m_symbol_and_transitions[i].transitions[(t + 4) % 8] != 0 && m_symbol_and_transitions[m_symbol_and_transitions[i].transitions[(t + 4) % 8] / 10].symbol != player.m_symbol)
-                        {
-                            corner = false;
-                        }
+                        m_before_protected_fields.insert(m_symbol_and_transitions[c].transitions[i] / 10);
                     }
                 }
-                if (corner)
+            }
+            else
+            {
+                for (int i = 0; i < NUM_OF_DIRECTIONS; i += 2)
                 {
-                    player.m_player_corners.insert(i);
-                    m_map_corners.insert(i);
+                    if (p.m_protected_fields.find(m_symbol_and_transitions[c].transitions[i] / 10) != p.m_protected_fields.end())
+                    {
+                        m_before_protected_fields.insert(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10);
+                        m_before_protected_fields.insert(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10);
+                        m_before_protected_fields.insert(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10);
+                    }
+                }
+            }
+        }
+    }
+    m_before_protected_fields.erase(0);
+}
+
+void Map::check_borders()
+{
+    m_borders.clear();
+
+    for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
+    {
+        if (m_symbol_and_transitions[i].symbol != '-')
+        {
+            for (uint16_t j = 0; j < 8; j++)
+            {
+                if (m_symbol_and_transitions[i].transitions[j] == 0)
+                {
+                    m_borders.insert(i);
+                }
+            }
+        }
+        m_borders.erase(0);
+    }
+}
+
+void Map::check_before_borders()
+{
+    check_borders();
+    m_before_borders.clear();
+    for (auto &c : m_borders)
+    {
+        for (int i = 0; i < NUM_OF_DIRECTIONS; i += 2)
+        {
+            if (m_symbol_and_transitions[c].transitions[i] == 0)
+            {
+                if (m_borders.find(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10) == m_borders.end())
+                {
+                    m_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10);
+                }
+                if (m_borders.find(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10) == m_borders.end())
+                {
+                    m_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10);
+                }
+                if (m_borders.find(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10) == m_borders.end())
+                {
+                    m_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10);
+                }
+            }
+        }
+    }
+    m_before_borders.erase(0);
+}
+
+void Map::check_before_before_borders()
+{
+    check_before_borders();
+    m_before_before_borders.clear();
+    for (auto &c : m_before_borders)
+    {
+        for (int i = 0; i < NUM_OF_DIRECTIONS; i += 2)
+        {
+            if (m_symbol_and_transitions[m_symbol_and_transitions[c].transitions[i] / 10].transitions[i] == 0)
+            {
+                if (m_before_borders.find(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10) == m_borders.end())
+                {
+                    m_before_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10);
+                }
+                if (m_before_borders.find(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10) == m_borders.end())
+                {
+                    m_before_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10);
+                }
+                if (m_before_borders.find(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10) == m_borders.end())
+                {
+                    m_before_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10);
+                }
+            }
+        }
+    }
+    m_before_before_borders.erase(0);
+}
+
+void Map::check_special_fields()
+{
+    m_special_fields.clear();
+    for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
+    {
+        if (check_special(m_symbol_and_transitions[i].symbol))
+        {
+            m_special_fields.insert(i);
+        }
+    }
+}
+
+void Map::check_before_special_fields()
+{
+    check_special_fields();
+    m_before_special_fields.clear();
+    for (auto &c : m_special_fields)
+    {
+        for (int j = 0; j < NUM_OF_DIRECTIONS; j++)
+        {
+            if (m_symbol_and_transitions[c].transitions[j] != 0)
+            {
+                if (m_corners.find(m_symbol_and_transitions[c].transitions[j] / 10) == m_corners.end())
+                {
+                    if (m_borders.find(m_symbol_and_transitions[c].transitions[j] / 10) == m_borders.end())
+                    {
+                        m_before_special_fields.insert(m_symbol_and_transitions[c].transitions[j] / 10);
+                    }
                 }
             }
         }
     }
 }
 
-void Map::check_before_corners(std::vector<Player> &p)
+void Map::check_before_before_special_fields()
 {
-    check_corners(p);
-    m_map_before_corners.clear();
-    for (auto &coord : m_map_corners)
+    check_before_special_fields();
+    m_before_before_special_fields.clear();
+    for (auto &c : m_before_special_fields)
     {
-        for (uint16_t i = 0; i < NUM_OF_DIRECTIONS; i++)
+        for (int j = 0; j < NUM_OF_DIRECTIONS; j++)
         {
-            if (check_empty_fields(m_symbol_and_transitions[m_symbol_and_transitions[coord].transitions[i] / 10].symbol))
+            if (m_special_fields.find(m_symbol_and_transitions[c].transitions[j] / 10) != m_special_fields.end())
             {
-                m_map_before_corners.insert(m_symbol_and_transitions[coord].transitions[i] / 10);
+                m_before_before_special_fields.insert(m_symbol_and_transitions[c].transitions[(j + 4) % 8] / 10);
+                m_before_before_special_fields.insert(m_symbol_and_transitions[c].transitions[(j + 3) % 8] / 10);
+                m_before_before_special_fields.insert(m_symbol_and_transitions[c].transitions[(j + 5) % 8] / 10);
             }
         }
     }
-}
-
-void Map::check_before_before_corners(std::vector<Player> &p)
-{
-    check_before_corners(p);
-    m_map_before_before_corners.clear();
-    for (auto &coord : m_map_before_corners)
-    {
-        for (uint16_t i = 0; i < NUM_OF_DIRECTIONS; i++)
-        {
-            if (check_empty_fields(m_symbol_and_transitions[m_symbol_and_transitions[coord].transitions[i] / 10].symbol))
-            {
-                m_map_before_before_corners.insert(m_symbol_and_transitions[coord].transitions[i] / 10);
-            }
-        }
-    }
+    m_before_before_special_fields.erase(0);
 }
 
 void Map::print_frontier_scores(std::vector<Player> &p)
@@ -264,3 +406,4 @@ void Map::print_frontier_scores(std::vector<Player> &p)
         std::cout << getColorString(Colors(player.m_symbol - '0')) << "Player " << player.m_symbol << ": " << player.frontier_score << "\e[0m" << std::endl;
     }
 }
+
