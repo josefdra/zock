@@ -49,6 +49,7 @@ void Game::determine_winner()
 
 void Game::calculate_map_value()
 {
+    // @todo add defines
     int corner = 256;
     int before_corner = -256;
     int before_before_corner = 128;
@@ -128,9 +129,15 @@ void Game::calculate_map_value()
                 std::cout << std::endl;
             }
         }
+        p.m_map_value += p.m_frontier_score;
+        for (auto &m : p.m_moves_scores)
+        {
+            p.m_map_value += m.second;
+        }
         std::cout << std::endl;
-        std::cout << "Total map value for Player " << p.m_symbol << ": " << p.m_map_value << std::endl
-                  << std::endl;
+        std::cout << getColorString(Colors(p.m_symbol - '0')) << "Total map value for Player " << p.m_symbol << ": " << p.m_map_value << std::endl
+                  << std::endl
+                  << "\e[0m";
     }
 }
 
@@ -167,7 +174,7 @@ void Game::run()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, m_map.m_player_count - 1);
     uint16_t start_player = dis(gen);
-    for (int j = 0; j < 10; j++)
+    for (int j = 0; j < 15; j++)
     {
         if (valid_moves)
         {
@@ -195,6 +202,13 @@ void Game::run()
         << std::endl;
     m_map.print_map();
     determine_winner();
+    for (auto &p : m_players)
+    {
+        check_moves(m_map, p);
+        p.get_moves_score(m_map);
+        p.print_frontiers(m_map);
+    }
+    m_map.print_m_frontier_scores(m_players);
     h_res_clock::time_point start_time = h_res_clock::now();
     evaluate_board();
     h_res_clock::time_point end_time = h_res_clock::now();

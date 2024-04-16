@@ -160,7 +160,7 @@ void Player::get_frontier_score(Map &m)
     {
         if (m.m_symbol_and_transitions[i].symbol == m_symbol)
         {
-            frontier_score += check_frontier(m, i);
+            m_frontier_score += check_frontier(m, i);
         }
     }
 }
@@ -168,7 +168,10 @@ void Player::get_frontier_score(Map &m)
 void Player::get_moves_score(Map &m)
 {
     std::cout << getColorString(Colors(m_symbol - '0')) << "Number of moves for Player " << m_symbol << ": " << m_valid_moves.size() << "\e[0m" << std::endl;
-    std::cout << "-----------Scores:" << std::endl;
+    std::cout << getColorString(Colors(m_symbol - '0')) << std::endl
+              << "-----------Scores:"
+              << "\e[0m" << std::endl
+              << std::endl;
     std::string msg = "";
     for (auto &move : m_valid_moves)
     {
@@ -177,33 +180,33 @@ void Player::get_moves_score(Map &m)
         {
             if (check_empty_fields(m.m_symbol_and_transitions[move.first].symbol)) // empty field (0)
             {
-                moves_scores[move.first] = 1;
+                m_moves_scores[move.first] = 1;
                 msg = "(0)";
             }
             else if (check_players(m.m_symbol_and_transitions[move.first].symbol)) // enemy player
             {
-                moves_scores[move.first] = -20;
+                m_moves_scores[move.first] = -20;
                 msg = "enemy player";
             }
             else // expansion-stone
             {
-                moves_scores[move.first] = -10;
+                m_moves_scores[move.first] = -10;
                 msg = "expansion-stone";
             }
         }
         else if (special == 1) // inversion
         {
-            moves_scores[move.first] = 25;
+            m_moves_scores[move.first] = 25;
             msg = "inversion";
         }
         else if (special == 2) // choice
         {
-            moves_scores[move.first] = 25;
+            m_moves_scores[move.first] = 25;
             msg = "choice";
         }
         else if (special == 3) // bonus
         {
-            moves_scores[move.first] = 25;
+            m_moves_scores[move.first] = 25;
             msg = "bonus";
         }
         else
@@ -211,6 +214,7 @@ void Player::get_moves_score(Map &m)
             std::cout << "invalid special value" << std::endl;
         }
         std::cout << getColorString(Colors(m_symbol - '0')) << move.first << "-Move (" << move.first % m.m_width - 1 << "," << move.first / m.m_width << "): "
-                  << moves_scores[move.first] << " - " << msg << "\e[0m" << std::endl;
+                  << m_moves_scores[move.first] << " - " << msg << "\e[0m" << std::endl;
     }
+    std::cout << std::endl;
 }

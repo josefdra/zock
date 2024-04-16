@@ -32,12 +32,12 @@ public:
     void print_map();
     void setFieldValue(Player &);
     void check_corners_borders_special_fields();
-    void check_before_protected_fields(std::vector<Player> &); 
+    void check_before_protected_fields(std::vector<Player> &);
     void check_before_borders();
     void check_before_before_borders();
     void check_before_special_fields();
     void check_before_before_special_fields();
-    void print_frontier_scores(std::vector<Player> &);
+    void print_m_frontier_scores(std::vector<Player> &);
     struct m_hash_map_element
     {
         unsigned char symbol;

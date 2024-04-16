@@ -241,7 +241,7 @@ void Map::check_corners_borders_special_fields()
             }
         }
     }
-    
+
     m_borders.erase(0);
 }
 
@@ -374,12 +374,13 @@ void Map::check_before_before_special_fields()
     m_before_before_special_fields.erase(0);
 }
 
-void Map::print_frontier_scores(std::vector<Player> &p)
+void Map::print_m_frontier_scores(std::vector<Player> &p)
 {
-    std::cout << "frontier_scores:" << std::endl;
+    std::cout << "Frontier_scores:" << std::endl << std::endl;
     for (auto &player : p)
     {
         player.get_frontier_score(*this);
-        std::cout << getColorString(Colors(player.m_symbol - '0')) << "Player " << player.m_symbol << ": " << player.frontier_score << "\e[0m" << std::endl;
+        std::cout << getColorString(Colors(player.m_symbol - '0')) << "Player " << player.m_symbol << ": " << player.m_frontier_score << "\e[0m" << std::endl;
     }
+    std::cout << std::endl;
 }
