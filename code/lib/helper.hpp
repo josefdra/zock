@@ -1,5 +1,5 @@
-#ifndef HELPER_H
-#define HELPER_H
+#ifndef HELPER_HPP
+#define HELPER_HPP
 
 #include <functional>
 #include <iostream>
@@ -13,14 +13,26 @@
 
 enum Colors
 {
-    black = 1,
-    red,
-    green,
-    yellow,
+    red = 1,
     blue,
+    green,
+    orange,
     magenta,
-    cyan,
+    yellow,
     dark_black,
+    cyan,
+};
+
+enum EvalOfField
+{
+    empty = -1,
+    corner = 30,
+    aroundCorner = -20,
+    bomb = 20,
+    inversion = 10,
+    choice = 20,
+    enemy = -20,
+    aroundSpecial = -20
 };
 
 typedef std::chrono::high_resolution_clock h_res_clock;
@@ -30,5 +42,8 @@ bool check_empty_fields(unsigned char);
 bool check_players(unsigned char);
 uint16_t check_frontier(Map &, uint16_t);
 void print_corners(Map &);
+EvalOfField evalFieldSymbol(char);
+bool check_special(unsigned char);
+uint16_t check_frontier(Map &, uint16_t);
 
-#endif // HELPER_H
+#endif // HELPER_HPP

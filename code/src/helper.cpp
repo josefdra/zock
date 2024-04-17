@@ -1,14 +1,16 @@
 #include "helper.hpp"
+#include "player.hpp"
 
 std::array<unsigned char, 4> empty_fields{'0', 'i', 'c', 'b'};
 std::array<unsigned char, 8> players{'1', '2', '3', '4', '5', '6', '7', '8'};
+std::array<unsigned char, 3> special{'c', 'i', 'b'};
 
 std::string getColorString(Colors color)
 {
     switch (color)
     {
-    case black:
-        return "\e[90m";
+    case orange:
+        return "\e[38;5;208m";
     case red:
         return "\e[91m";
     case green:
@@ -60,6 +62,22 @@ bool check_players(unsigned char c)
     return var;
 }
 
+/// @brief check if input is a special char
+/// @param c current symbol at a certain coordinate
+/// @return true/false
+bool check_special(unsigned char c)
+{
+    bool var = false;
+    for (int i = 0; i < special.size(); i++)
+    {
+        if (c == special[i])
+        {
+            var = true;
+        }
+    }
+    return var;
+}
+
 /**
  * @brief Measures how long it takes, to execute a function.
  * @brief Example Usage:
@@ -88,49 +106,36 @@ void timer_function(F func, std::string func_name)
 }
 */
 
-void print_corners(Map &m)
-{
-    for (int i = 1; i < (m.m_height * m.m_width + 1); i++)
-    {
-        auto corner = std::find(m.m_map_corners.begin(), m.m_map_corners.end(), i);
-        auto before_corner = std::find(m.m_map_before_corners.begin(), m.m_map_before_corners.end(), i);
-        auto before_before_corner = std::find(m.m_map_before_before_corners.begin(), m.m_map_before_before_corners.end(), i);
-        if (corner != m.m_map_corners.end())
-        {
-            std::cout << 9 << " ";
-        }
-        else if (before_corner != m.m_map_before_corners.end())
-        {
-            std::cout << 1 << " ";
-        }
-        else if (before_before_corner != m.m_map_before_before_corners.end())
-        {
-            std::cout << 6 << " ";
-        }
-        else
-        {
-            std::cout << 0 << " ";
-        }
-        if ((i % m.m_width) == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
-}
-
-uint16_t check_frontier(Map &m, uint16_t i)
+uint16_t check_frontier(Map &m, uint16_t coord)
 {
     uint16_t score = 8;
-    for (uint16_t j = 0; j < NUM_OF_DIRECTIONS; j++)
+    for (int j = 0; j < NUM_OF_DIRECTIONS; j++)
     {
-        if ((m.m_symbol_and_transitions[i].transitions[j] % 10) == 0)
+        if (check_empty_fields(m.m_symbol_and_transitions[m.m_symbol_and_transitions[coord].transitions[j] / 10].symbol))
         {
             score--;
         }
     }
-    if (score == 8)
-    {
-        score += 7;
-    }
     return score;
+}
+
+EvalOfField evalFieldSymbol(char c)
+{
+    if (c == '0')
+        return EvalOfField::empty;
+    else if (c == 'b')
+        return EvalOfField::bomb;
+    else if (c == 'i')
+        return EvalOfField::inversion;
+    else if (c == 'c')
+        return EvalOfField::choice;
+    // @todo implement else case
+    else
+        // This return is wrong and has to be removed. Is just here to get rid of the warning.
+        return EvalOfField::enemy;
+    for (int i = 0; i < players.size(); i++)
+    {
+        if (c == players.at(i))
+            return EvalOfField::enemy;
+    }
 }
