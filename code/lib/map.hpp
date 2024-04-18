@@ -18,8 +18,6 @@
 // forward definition to prevent include errors
 class Player;
 
-class Player;
-
 class Map
 {
 public:
@@ -27,8 +25,8 @@ public:
     ~Map();
     void check_neighbours(uint16_t);
     void set_symbol(uint16_t, unsigned char);
-    char get_symbol(uint16_t);
-    void set_transition(uint16_t, uint16_t, uint8_t);
+    unsigned char get_symbol(uint16_t);
+    void set_transition(uint16_t, uint8_t, uint16_t);
     uint16_t get_transition(uint16_t, uint8_t);
     uint8_t get_direction(uint16_t, uint8_t);
     void read_hash_map(const std::string);
@@ -43,21 +41,16 @@ public:
     void check_before_special_fields();
     void check_before_before_special_fields();
     void print_m_frontier_scores(std::vector<Player> &);
-    struct m_hash_map_element
-    {
-        unsigned char symbol;
-        std::array<uint16_t, 8> transitions;
-    };
     std::unordered_map<uint16_t, unsigned char> m_symbols;
     std::unordered_map<uint16_t, uint64_t> m_lower_transitions;
     std::unordered_map<uint16_t, uint64_t> m_upper_transitions;
-    std::unordered_map<uint16_t, m_hash_map_element> m_symbol_and_transitions;
     uint16_t m_height;
     uint16_t m_width;
     uint16_t m_player_count;
     uint16_t m_strength;
     uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
+    uint16_t m_num_of_fields;
     std::unordered_set<uint16_t> m_corners;
     std::unordered_set<uint16_t> m_protected_fields;
     std::unordered_set<uint16_t> m_before_protected_fields;

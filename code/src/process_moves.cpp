@@ -5,205 +5,179 @@
  *
  */
 
-void check_coordinate(uint16_t coord, Map &map, Player &p, bool paint)
+void check_coordinate(uint16_t c, Map &m, Player &p)
 {
-    bool valid = false, playerFound = false, foundSelf = false;
-    uint16_t position, nextTransition, currentDirection, special_move;
-    std::unordered_set<uint16_t> tempCellSet;
-    std::unordered_set<uint16_t> addSet;
-    special_move = 0;
-
-    // check whether the cell can be entered without certain stones or whether the required stones are available
-    if (check_empty_fields(map.m_symbol_and_transitions.at(coord).symbol) || p.has_overwrite_stones())
+    uint16_t pos;
+    uint8_t dir;
+    bool valid_once = false;
+    std::unordered_set<uint16_t> moves;
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
-        position = coord;
-        if (map.m_symbol_and_transitions.at(position).symbol == 'i')
+        std::unordered_set<uint16_t> temp1;
+        bool valid_move = false, wall = false;
+        temp1.insert(c);
+        dir = m.get_direction(c, d);
+        pos = m.get_transition(c, d);
+        while (!check_empty_fields(m.get_symbol(pos)) && m.get_symbol(pos) != p.m_symbol && !wall)
         {
-            special_move = 1;
-        }
-        else if (map.m_symbol_and_transitions.at(position).symbol == 'c')
-        {
-            special_move = 2;
-        }
-        else if (map.m_symbol_and_transitions.at(position).symbol == 'b')
-        {
-            special_move = 3;
-        }
-        for (int i = 0; i < NUM_OF_DIRECTIONS; i++)
-        {
-            playerFound = false;
-            foundSelf = false;
-            currentDirection = i;
-            position = coord;
-            tempCellSet.insert(position);
-
-            do
+            std::unordered_set<uint16_t> temp2;
+            temp2.insert(pos);
+            dir = m.get_direction(pos, dir);
+            pos = m.get_transition(pos, d);            
+            if (pos == 0)
             {
-                // get the coordinate of the next cell according to the current cell and direction of movement
-                nextTransition = map.m_symbol_and_transitions.at(position).transitions.at(currentDirection);
-
-                if (nextTransition == 0)
+                valid_move = false;
+                wall = true;
+            }
+            if (check_empty_fields(m.get_symbol(pos)))
+            {
+                valid_move = true;
+                valid_once = true;
+                temp2.insert(pos);
+            }
+            else if (!check_empty_fields(m.get_symbol(pos)) && m.get_symbol(pos) != p.m_symbol && p.has_overwrite_stones())
+            {
+                std::unordered_set<uint16_t> temp3;
+                temp2.insert(pos);
+                uint16_t curr_pos = pos;
+                bool found_self = false;
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
                 {
-                    tempCellSet.clear();
-                    break;
-                }
-
-                currentDirection = nextTransition % 10;
-                nextTransition /= 10;
-
-                if (nextTransition == coord)
-                {
-                    foundSelf = true;
-                    tempCellSet.clear();
-                    break;
-                }
-
-                // check if enemy found
-                if (!check_empty_fields(map.m_symbol_and_transitions.at(nextTransition).symbol) && map.m_symbol_and_transitions.at(nextTransition).symbol != p.m_symbol)
-                {
-                    tempCellSet.insert(nextTransition);
-                    playerFound = true;
-                    position = nextTransition;
-                }
-                // check whether other of our stones have been found
-                else if (playerFound && map.m_symbol_and_transitions.at(nextTransition).symbol == p.m_symbol)
-                {
-                    if (!foundSelf)
+                    pos = m.get_transition(curr_pos, d);
+                    dir = d;
+                    while (!check_empty_fields(m.get_symbol(pos)))
                     {
-                        valid = true;
-                        for (auto &element : tempCellSet)
-                        {
-                            addSet.insert(element);
+                        temp3.insert(pos);
+                        if(m.get_symbol(pos) == p.m_symbol){
+                            found_self = true;
+                            break;
                         }
+                        dir = m.get_direction(pos, d);
+                        pos = m.get_transition(pos, d);                        
                     }
-                    playerFound = false;
-                    tempCellSet.clear();
-                    break;
                 }
-                // check if other symbol is found
-                else if (playerFound && check_empty_fields(map.m_symbol_and_transitions.at(nextTransition).symbol))
-                {
-                    tempCellSet.clear();
-                    playerFound = false;
-                }
-
-            } while (playerFound);
-        }
-    }
-
-    if (valid)
-    {
-        p.m_valid_moves[coord] = std::make_tuple(special_move, addSet);
-    }
-}
-
-void change_players(Map &m, char p1, char p2)
-{
-    for (uint16_t i = 1; i < (m.m_width * m.m_height + 1); i++)
-    {
-        if (m.m_symbol_and_transitions.at(i).symbol == p1)
-        {
-            m.m_symbol_and_transitions.at(i).symbol = p2;
-        }
-        else if (m.m_symbol_and_transitions.at(i).symbol == p2)
-        {
-            m.m_symbol_and_transitions.at(i).symbol = p1;
-        }
-    }
-}
-
-void execute_move(uint16_t coord, Player &p, Map &m)
-{
-    if (!check_empty_fields(m.m_symbol_and_transitions.at(coord).symbol))
-    {
-        p.m_overwrite_stones--;
-    }
-
-    auto elem = p.m_valid_moves.find(coord);
-
-    if (elem != p.m_valid_moves.end())
-    {
-        uint16_t special;
-        std::unordered_set<uint16_t> fields;
-        std::tie(special, fields) = elem->second;
-
-        // normal
-        if (special == 0)
-        {
-            for (auto &field : fields)
-            {
-                m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
             }
         }
-        // inversion
-        else if (special == 1)
+        if ()
+    }
+    if (valid_once)
+    {
+        if (m.get_symbol(pos) == 'i')
         {
-            for (auto &field : fields)
-            {
-                m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
-            }
-            uint16_t helper = p.m_symbol - 1 - '0';
-            helper = helper % m.m_player_count;
-            char next_player = helper + 1 + '0';
-            change_players(m, p.m_symbol, next_player);
-            m.check_before_before_special_fields();
+            p.m_valid_moves[pos] = std::tuple(1, temp);
         }
-        // choice
-        else if (special == 2)
+        else if (m.get_symbol(pos) == 'c')
         {
-            m.print_map();
-            int next_player;
-            do
-            {
-                std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
-                std::cin >> next_player;
-                if (next_player > m.m_player_count)
-                {
-                    std::cout << "not a valid player, try again" << std::endl;
-                }
-            } while (next_player > m.m_player_count);
-            for (auto &field : fields)
-            {
-                m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
-            }
-            change_players(m, p.m_symbol, ('0' + next_player));
-            m.check_before_before_special_fields();
+            p.m_valid_moves[pos] = std::tuple(2, temp);
         }
-        // bonus
-        else if (special == 3)
+        else if (m.get_symbol(pos) == 'b')
         {
-            char bonus;
-            do
-            {
-                std::cout << "Wollen Sie eine Bombe(b) oder einen Überschreibstein(u)?: ";
-                std::cin >> bonus;
-                if (bonus == 'b')
-                {
-                    p.m_bombs++;
-                }
-                else if (bonus == 'u')
-                {
-                    p.m_overwrite_stones++;
-                }
-                else
-                {
-                    std::cout << "not a valid input, try again" << std::endl;
-                }
-            } while (bonus != 'b' && bonus != 'u');
-            for (auto &field : fields)
-            {
-                m.m_symbol_and_transitions.at(field).symbol = p.m_symbol;
-            }
-            m.check_before_before_special_fields();
+            p.m_valid_moves[pos] = std::tuple(3, temp);
         }
         else
         {
-            std::cout << "invalid special value" << std::endl;
+            p.m_valid_moves[pos] = std::tuple(0, temp);
         }
+    }
+}
+
+void change_players(Map &m, unsigned char p1, unsigned char p2)
+{
+    for (uint16_t i = 1; i < m.m_num_of_fields + 1; i++)
+    {
+        if (m.get_symbol(i) == p1)
+        {
+            m.set_symbol(i, p2);
+        }
+        else if (m.get_symbol(i) == p2)
+        {
+            m.set_symbol(i, p1);
+        }
+    }
+}
+
+void execute_move(uint16_t c, Player &p, Map &m)
+{
+    if (!check_empty_fields(m.get_symbol(c)))
+    {
+        p.m_overwrite_stones--;
+    }
+    uint16_t special;
+    std::unordered_set<uint16_t> fields;
+    std::tie(special, fields) = p.m_valid_moves[c];
+
+    // normal
+    if (special == 0)
+    {
+        for (auto &field : fields)
+        {
+            m.set_symbol(field, p.m_symbol);
+        }
+    }
+    // inversion
+    else if (special == 1)
+    {
+        for (auto &field : fields)
+        {
+            m.set_symbol(field, p.m_symbol);
+        }
+        uint16_t helper = p.m_symbol - 1 - '0';
+        helper = helper % m.m_player_count;
+        unsigned char next_player = helper + 1 + '0';
+        change_players(m, p.m_symbol, next_player);
+        m.check_before_before_special_fields();
+    }
+    // choice
+    else if (special == 2)
+    {
+        m.print_map();
+        uint16_t next_player;
+        do
+        {
+            std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
+            std::cin >> next_player;
+            if (next_player > m.m_player_count)
+            {
+                std::cout << "not a valid player, try again" << std::endl;
+            }
+        } while (next_player > m.m_player_count);
+        for (auto &field : fields)
+        {
+            m.set_symbol(field, p.m_symbol);
+        }
+        change_players(m, p.m_symbol, ('0' + next_player));
+        m.check_before_before_special_fields();
+    }
+    // bonus
+    else if (special == 3)
+    {
+        char bonus;
+        do
+        {
+            std::cout << "Wollen Sie eine Bombe(b) oder einen Überschreibstein(u)?: ";
+            std::cin >> bonus;
+            if (bonus == 'b')
+            {
+                p.m_bombs++;
+            }
+            else if (bonus == 'u')
+            {
+                p.m_overwrite_stones++;
+            }
+            else
+            {
+                std::cout << "not a valid input, try again" << std::endl;
+            }
+        } while (bonus != 'b' && bonus != 'u');
+        for (auto &field : fields)
+        {
+            m.set_symbol(field, p.m_symbol);
+        }
+        m.check_before_before_special_fields();
     }
     else
     {
-        std::cout << "invalid move" << std::endl;
+        std::cout << "invalid special value" << std::endl;
     }
 }
 
@@ -212,33 +186,19 @@ void execute_move(uint16_t coord, Player &p, Map &m)
 /// @param player_number current player at turn
 void check_moves(Map &map, Player &player)
 {
-    uint16_t coord, row, column;
-    for (int i = 1; i < (map.m_width * map.m_height) + 1; i++)
+    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
     {
-        if (map.m_symbol_and_transitions[i].symbol != '-')
+        if (map.get_symbol(c) == player.m_symbol)
         {
-            check_coordinate(i, map, player, false);
+            check_coordinate(c, map, player);
         }
     }
-    // std::cout << "Das sind alle möglichen Züge für Spieler " << player.get_symbol() << ":" << std::endl;
-    // player.print_valid_moves(map.m_width);
-    // std::cout << "Wo wollen Sie setzen? Format (x y): " << std::endl;
-    // std::cin >> column >> row;
-    // coord = column + 1 + row * map.m_width;
-    // execute_move(coord, player, map);
-    // map.print_map();
 }
 
 void paint_cells(std::unordered_set<uint16_t> &set, unsigned char player_number, Map &map)
 {
     for (auto &elem : set)
     {
-        map.m_symbol_and_transitions.at(elem).symbol = player_number;
+        map.set_symbol(elem, player_number);
     }
-}
-
-float eveluate(uint16_t coord, Player &p, Map &m)
-{
-    float return_value = -INFINITY;
-    return return_value;
 }

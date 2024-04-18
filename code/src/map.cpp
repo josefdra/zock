@@ -11,6 +11,7 @@ Map::Map(std::string map_name)
 {
     read_hash_map(map_name);
 };
+
 Map::~Map(){};
 
 /**
@@ -18,75 +19,131 @@ Map::~Map(){};
  *
  * @param n current coordinate
  */
-void Map::check_neighbours(uint16_t n)
+void Map::check_neighbours(uint16_t c)
 {
-    n > m_width &&m_symbol_and_transitions[n - m_width].symbol != '-' ? m_symbol_and_transitions[n].transitions[0] = (n - m_width) * 10 : m_symbol_and_transitions[n].transitions[0] = 0;
-    n % m_width != 0 && n > m_width &&m_symbol_and_transitions[n - m_width + 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[1] = (n - m_width + 1) * 10 + 1 : m_symbol_and_transitions[n].transitions[1] = 0;
-    n % m_width != 0 && m_symbol_and_transitions[n + 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[2] = (n + 1) * 10 + 2 : m_symbol_and_transitions[n].transitions[2] = 0;
-    n % m_width != 0 && n <= m_width *(m_height - 1) && m_symbol_and_transitions[n + m_width + 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[3] = (n + m_width + 1) * 10 + 3 : m_symbol_and_transitions[n].transitions[3] = 0;
-    n <= m_width *(m_height - 1) && m_symbol_and_transitions[n + m_width].symbol != '-' ? m_symbol_and_transitions[n].transitions[4] = (n + m_width) * 10 + 4 : m_symbol_and_transitions[n].transitions[4] = 0;
-    n % m_width != 1 && n <= m_width *(m_height - 1) && m_symbol_and_transitions[n + m_width - 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[5] = (n + m_width - 1) * 10 + 5 : m_symbol_and_transitions[n].transitions[5] = 0;
-    n % m_width != 1 && m_symbol_and_transitions[n - 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[6] = (n - 1) * 10 + 6 : m_symbol_and_transitions[n].transitions[6] = 0;
-    n % m_width != 1 && n > m_width &&m_symbol_and_transitions[n - m_width - 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[7] = (n - m_width - 1) * 10 + 7 : m_symbol_and_transitions[n].transitions[7] = 0;
-}
-
-void Map::set_symbol(uint16_t coord, unsigned char c)
-{
-    m_symbols[coord] = c;
-}
-
-char Map::get_symbol(uint16_t coord)
-{
-    return m_symbols[coord];
-}
-
-void Map::set_transition(uint16_t coord, uint16_t t, uint8_t dir)
-{
-    uint8_t dir_next = t % 10;
-    uint16_t trans = t / 10;
-    uint64_t temp = 0;
-    if (dir > 3)
+    if (c > m_width && get_symbol(c - m_width) != '-') // checks if there is a field above
     {
-        temp &= ~(0xFFFF << ((dir - 4) * 16));
-        temp |= (trans << ((dir - 4) * 16 + 3));
-        temp |= (dir_next << ((dir - 4) * 16));
-        m_upper_transitions[coord] |= temp;
+        set_transition(c, 0, (c - m_width) * 10);
     }
     else
     {
-        temp &= ~(0xFFFF << (dir * 16));
-        temp |= (trans << (dir * 16 + 3));
-        temp |= (dir_next << (dir * 16));
-        m_lower_transitions[coord] |= temp;
+        set_transition(c, 0, 0);
+    }
+    if (c % m_width != 0 && c > m_width && get_symbol(c - m_width + 1) != '-') // checks if there is a field top right
+    {
+        set_transition(c, 1, (c - m_width + 1) * 10 + 1);
+    }
+    else
+    {
+        set_transition(c, 1, 0);
+    }
+    if (c % m_width != 0 && get_symbol(c + 1) != '-') // checks if there is a field to the right
+    {
+        set_transition(c, 2, (c + 1) * 10 + 2);
+    }
+    else
+    {
+        set_transition(c, 2, 0);
+    }
+    if (c % m_width != 0 && c <= m_width * (m_height - 1) && get_symbol(c + m_width + 1) != '-') // checks if there is a field bottom right
+    {
+        set_transition(c, 3, (c + m_width + 1) * 10 + 3);
+    }
+    else
+    {
+        set_transition(c, 3, 0);
+    }
+    if (c <= m_width * (m_height - 1) && get_symbol(c + m_width) != '-') // checks if there is a field below
+    {
+        set_transition(c, 4, (c + m_width) * 10 + 4);
+    }
+    else
+    {
+        set_transition(c, 4, 0);
+    }
+    if (c % m_width != 1 && c <= m_width * (m_height - 1) && get_symbol(c + m_width - 1) != '-') // check if there is a field bottom left
+    {
+        set_transition(c, 5, (c + m_width - 1) * 10 + 5);
+    }
+    else
+    {
+        set_transition(c, 5, 0);
+    }
+    if (c % m_width != 1 && get_symbol(c - 1) != '-') // checks if there is a field to the left
+    {
+        set_transition(c, 6, (c - 1) * 10 + 6);
+    }
+    else
+    {
+        set_transition(c, 6, 0);
+    }
+    if (c % m_width != 1 && c > m_width && get_symbol(c - m_width - 1) != '-') // checks if there is a field top left
+    {
+        set_transition(c, 7, (c - m_width - 1) * 10 + 7);
+    }
+    else
+    {
+        set_transition(c, 7, 0);
     }
 }
 
-uint16_t Map::get_transition(uint16_t coord, uint8_t dir)
+void Map::set_symbol(uint16_t c, unsigned char s)
+{
+    m_symbols[c] = s;
+}
+
+unsigned char Map::get_symbol(uint16_t c)
+{
+    return m_symbols[c];
+}
+
+void Map::set_transition(uint16_t c, uint8_t d, uint16_t t)
+{
+    uint64_t dir_next = t % 10;
+    uint64_t trans = t / 10;
+    uint64_t temp = 0;
+    if (d > 3)
+    {
+        temp = ~(0xFFFFULL << ((d - 4) * 16));
+        temp |= (trans << ((d - 4) * 16 + 3));
+        temp |= (dir_next << ((d - 4) * 16));
+        m_upper_transitions[c] &= temp;
+    }
+    else
+    {
+        temp = ~(0xFFFFULL << (d * 16));
+        temp |= (trans << (d * 16 + 3));
+        temp |= (dir_next << (d * 16));
+        m_lower_transitions[c] &= temp;
+    }
+}
+
+uint16_t Map::get_transition(uint16_t c, uint8_t d)
 {
     uint16_t temp = 0;
-    if (dir > 3)
+    if (d > 3)
     {
-        temp = (m_upper_transitions[coord] >> ((dir - 4) * 16 + 3));
+        temp = (m_upper_transitions[c] >> ((d - 4) * 16 + 3));
         return (temp &= 0x1FFF);
     }
     else
     {
-        temp = (m_lower_transitions[coord] >> (dir * 16 + 3));
+        temp = (m_lower_transitions[c] >> (d * 16 + 3));
         return (temp &= 0x1FFF);
     }
 }
 
-uint8_t Map::get_direction(uint16_t coord, uint8_t dir)
+uint8_t Map::get_direction(uint16_t c, uint8_t d)
 {
     uint8_t temp = 0;
-    if (dir > 3)
+    if (d > 3)
     {
-        temp = (m_upper_transitions[coord] >> ((dir - 4) * 16));
+        temp = (m_upper_transitions[c] >> ((d - 4) * 16));
         return (temp &= 0x07);
     }
     else
     {
-        temp = (m_lower_transitions[coord] >> (dir * 16));
+        temp = (m_lower_transitions[c] >> (d * 16));
         return (temp &= 0x07);
     }
 }
@@ -100,25 +157,24 @@ void Map::read_hash_map(const std::string map_name)
 {
     std::ifstream inputFile(map_name);
     std::stringstream mapfile;
-    m_hash_map_element elem;
+    unsigned char temp;
     mapfile << inputFile.rdbuf();
     // 65000 is set to check for end of file
     mapfile << '\n'
             << 65000;
     inputFile.close();
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
+    m_num_of_fields = m_height * m_width;
     // every coordinate gets a symbol and it's neighbours are being set
-    for (int i = 1; i < (m_width * m_height + 1); i++)
+    for (int c = 1; c < m_num_of_fields + 1; c++)
     {
-        mapfile >> elem.symbol;
-        elem.transitions = {0, 0, 0, 0, 0, 0, 0, 0};
-        m_symbol_and_transitions[i] = elem;
-    }
-    for (int i = 1; i < (m_width * m_height + 1); i++)
-    {
-        if (m_symbol_and_transitions[i].symbol != '-')
+        mapfile >> temp;
+        set_symbol(c, temp);
+        m_lower_transitions[c] = 0xFFFFFFFFFFFFFFFF;
+        m_upper_transitions[c] = 0xFFFFFFFFFFFFFFFF;
+        if (temp != '-')
         {
-            check_neighbours(i);
+            check_neighbours(c);
         }
     }
     while (mapfile)
@@ -136,37 +192,10 @@ void Map::read_hash_map(const std::string map_name)
             pos2 = (x2) + (y2)*m_width;
             pos1r = pos1 * 10 + ((r1 + 4) % 8);
             pos2r = pos2 * 10 + ((r2 + 4) % 8);
-            m_symbol_and_transitions[pos1].transitions[r1] = pos2r;
-            m_symbol_and_transitions[pos2].transitions[r2] = pos1r;
+            set_transition(pos1, r1, pos2r);
+            set_transition(pos2, r2, pos1r);
         }
     }
-    m_symbol_and_transitions[1].symbol = 'k';
-    m_symbol_and_transitions[1].transitions[1] = 1234;
-    m_symbol_and_transitions[1].transitions[5] = 4321;
-    set_symbol(1, 'k');
-    set_transition(1, 1234, 1);
-    set_transition(1, 4321, 5);
-    h_res_clock::time_point start_time = h_res_clock::now();
-    std::cout << m_symbol_and_transitions[1].symbol << std::endl;
-    std::cout << m_symbol_and_transitions[1].transitions[1] / 10 << std::endl;
-    std::cout << m_symbol_and_transitions[1].transitions[1] % 10 << std::endl;
-    std::cout << m_symbol_and_transitions[1].transitions[5] / 10 << std::endl;
-    std::cout << m_symbol_and_transitions[1].transitions[5] % 10 << std::endl;
-    h_res_clock::time_point end_time = h_res_clock::now();
-    std::chrono::duration<double, std::micro> elapsed_time =
-        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-    std::cout << "big: " << std::endl;
-    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
-    start_time = h_res_clock::now();
-    std::cout << get_symbol(1) << std::endl;
-    std::cout << get_transition(1, 1) << std::endl;
-    std::cout << (int)get_direction(1, 1) << std::endl;
-    std::cout << get_transition(1, 5) << std::endl;
-    std::cout << (int)get_direction(1, 5) << std::endl;
-    end_time = h_res_clock::now();
-    elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-    std::cout << "small: " << std::endl;
-    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 }
 
 /**
@@ -179,40 +208,40 @@ void Map::print_map_with_transitions()
     std::cout << m_initial_bombs << " " << m_strength << std::endl;
     std::cout << m_height << " " << m_width << std::endl;
     std::cout << std::endl;
-    for (int y = 0; y < m_height; y++)
+    for (uint8_t y = 0; y < m_height; y++)
     {
-        for (int n = 1; n < m_width + 1; n++)
+        for (uint8_t x = 1; x < m_width + 1; x++)
         {
-            int x = m_width * y + n;
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[7] << " ";
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[0] << " ";
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[1] << " ";
+            uint16_t c = m_width * y + x;
+            std::cout << std::setw(3) << get_transition(c, 7) << " ";
+            std::cout << std::setw(3) << get_transition(c, 0) << " ";
+            std::cout << std::setw(3) << get_transition(c, 1) << " ";
             std::cout << "  ";
         }
         std::cout << std::endl;
-        for (int n = 1; n < m_width + 1; n++)
+        for (uint8_t x = 1; x < m_width + 1; x++)
         {
-            int x = m_width * y + n;
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[6] << " ";
-            if (check_players(m_symbol_and_transitions[x].symbol))
+            uint16_t c = m_width * y + x;
+            std::cout << std::setw(3) << get_transition(c, 6) << " ";
+            if (check_players(get_symbol(c)))
             {
-                std::cout << getColorString(Colors((m_symbol_and_transitions[x].symbol - '0'))) << std::setw(3) << m_symbol_and_transitions[x].symbol << " "
+                std::cout << getColorString(Colors((get_symbol(c) - '0'))) << std::setw(3) << get_symbol(c) << " "
                           << "\e[0m";
             }
             else
             {
-                std::cout << std::setw(3) << m_symbol_and_transitions[x].symbol << " ";
+                std::cout << std::setw(3) << get_symbol(x) << " ";
             }
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[2] << " ";
+            std::cout << std::setw(3) << get_transition(x, 2) << " ";
             std::cout << "  ";
         }
         std::cout << std::endl;
-        for (int n = 1; n < m_width + 1; n++)
+        for (uint8_t x = 1; x < m_width + 1; x++)
         {
-            int x = m_width * y + n;
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[5] << " ";
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[4] << " ";
-            std::cout << std::setw(3) << m_symbol_and_transitions[x].transitions[3] << " ";
+            uint16_t c = m_width * y + x;
+            std::cout << std::setw(3) << get_transition(c, 5) << " ";
+            std::cout << std::setw(3) << get_transition(c, 4) << " ";
+            std::cout << std::setw(3) << get_transition(c, 3) << " ";
             std::cout << "  ";
         }
         std::cout << std::endl;
@@ -229,18 +258,18 @@ void Map::print_map_with_spectifications()
     std::cout << m_initial_overwrite_stones << std::endl;
     std::cout << m_initial_bombs << " " << m_strength << std::endl;
     std::cout << m_height << " " << m_width << std::endl;
-    for (int i = 1; i < (m_width * m_height + 1); i++)
+    for (uint16_t c = 1; c < m_num_of_fields + 1; c++)
     {
-        if (check_players(m_symbol_and_transitions[i].symbol))
+        if (check_players(get_symbol(c)))
         {
-            std::cout << getColorString(Colors((m_symbol_and_transitions[i].symbol - '0'))) << std::setw(3) << m_symbol_and_transitions[i].symbol << " "
+            std::cout << getColorString(Colors((get_symbol(c) - '0'))) << std::setw(3) << get_symbol(c) << " "
                       << "\e[0m";
         }
         else
         {
-            std::cout << std::setw(3) << m_symbol_and_transitions[i].symbol << " ";
+            std::cout << std::setw(3) << get_symbol(c) << " ";
         }
-        if (i % m_width == 0)
+        if (c % m_width == 0)
         {
             std::cout << std::endl;
         }
@@ -252,18 +281,18 @@ void Map::print_map_with_spectifications()
  */
 void Map::print_map()
 {
-    for (int i = 1; i < (m_width * m_height + 1); i++)
+    for (uint16_t c = 1; c < m_num_of_fields + 1; c++)
     {
-        if (check_players(m_symbol_and_transitions[i].symbol))
+        if (check_players(get_symbol(c)))
         {
-            std::cout << getColorString(Colors((m_symbol_and_transitions[i].symbol - '0'))) << std::setw(3) << m_symbol_and_transitions[i].symbol << " "
+            std::cout << getColorString(Colors((get_symbol(c) - '0'))) << std::setw(3) << get_symbol(c) << " "
                       << "\e[0m";
         }
         else
         {
-            std::cout << std::setw(3) << m_symbol_and_transitions[i].symbol << " ";
+            std::cout << std::setw(3) << get_symbol(c) << " ";
         }
-        if (i % m_width == 0)
+        if (c % m_width == 0)
         {
             std::cout << std::endl;
         }
@@ -274,9 +303,9 @@ void Map::print_map()
 void Map::setFieldValue(Player &p)
 {
     p.staticMapEval.push_back(0);
-    for (int i = 1; i < m_symbol_and_transitions.size(); i++)
+    for (uint16_t c = 1; c < m_num_of_fields + 1; c++)
     {
-        EvalOfField currVal = evalFieldSymbol(m_symbol_and_transitions.at(i).symbol);
+        EvalOfField currVal = evalFieldSymbol(get_symbol(c));
         p.staticMapEval.push_back((int)currVal);
     }
 }
@@ -290,25 +319,25 @@ void Map::check_corners_borders_special_fields()
     m_borders.clear();
     m_special_fields.clear();
 
-    for (uint16_t i = 1; i < (m_width * m_height + 1); i++)
+    for (uint16_t c = 1; c < m_num_of_fields + 1; c++)
     {
-        if (check_special(m_symbol_and_transitions[i].symbol))
+        if (check_special(get_symbol(c)))
         {
-            m_special_fields.insert(i);
+            m_special_fields.insert(c);
         }
-        else if (m_symbol_and_transitions[i].symbol != '-')
+        else if (get_symbol(c) != '-')
         {
             bool corner = false;
             std::vector<uint16_t> transitions;
-            for (uint16_t j = 0; j < 8; j++)
+            for (uint16_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
-                if (m_symbol_and_transitions[i].transitions[j] != 0)
+                if (get_transition(c, d) != 0)
                 {
-                    transitions.push_back(j);
+                    transitions.push_back(d);
                 }
-                else if (m_symbol_and_transitions[i].transitions[j] == 0)
+                else if (get_transition(c, d) == 0)
                 {
-                    m_borders.insert(i);
+                    m_borders.insert(c);
                     break;
                 }
             }
@@ -317,7 +346,7 @@ void Map::check_corners_borders_special_fields()
                 corner = true;
                 for (auto &t : transitions)
                 {
-                    if (m_symbol_and_transitions[i].transitions[(t + 4) % 8] != 0)
+                    if (get_transition(c, (t + 4) % 8) != 0)
                     {
                         corner = false;
                     }
@@ -325,7 +354,7 @@ void Map::check_corners_borders_special_fields()
             }
             if (corner)
             {
-                m_corners.insert(i);
+                m_corners.insert(c);
             }
         }
     }
@@ -342,23 +371,23 @@ void Map::check_before_protected_fields(std::vector<Player> &players)
         {
             if (m_corners.find(c) != m_corners.end())
             {
-                for (int i = 0; i < NUM_OF_DIRECTIONS; i++)
+                for (int d = 0; d < NUM_OF_DIRECTIONS; d++)
                 {
-                    if (m_symbol_and_transitions[c].transitions[i] != 0)
+                    if (get_transition(c, d) != 0)
                     {
-                        m_before_protected_fields.insert(m_symbol_and_transitions[c].transitions[i] / 10);
+                        m_before_protected_fields.insert(get_transition(c, d));
                     }
                 }
             }
             else
             {
-                for (int i = 0; i < NUM_OF_DIRECTIONS; i += 2)
+                for (int d = 0; d < NUM_OF_DIRECTIONS; d += 2)
                 {
-                    if (p.m_protected_fields.find(m_symbol_and_transitions[c].transitions[i] / 10) != p.m_protected_fields.end())
+                    if (p.m_protected_fields.find(get_transition(c, d)) != p.m_protected_fields.end())
                     {
-                        m_before_protected_fields.insert(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10);
-                        m_before_protected_fields.insert(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10);
-                        m_before_protected_fields.insert(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10);
+                        m_before_protected_fields.insert(get_transition(c, (d + 4) % 8));
+                        m_before_protected_fields.insert(get_transition(c, (d + 3) % 8));
+                        m_before_protected_fields.insert(get_transition(c, (d + 5) % 8));
                     }
                 }
             }
@@ -372,21 +401,21 @@ void Map::check_before_borders()
     m_before_borders.clear();
     for (auto &c : m_borders)
     {
-        for (int i = 0; i < NUM_OF_DIRECTIONS; i += 2)
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d += 2)
         {
-            if (m_symbol_and_transitions[c].transitions[i] == 0)
+            if (get_transition(c, d) == 0)
             {
-                if (m_borders.find(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10) == m_borders.end())
+                if (m_borders.find(get_transition(c, (d + 4) % 8)) == m_borders.end())
                 {
-                    m_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10);
+                    m_before_borders.insert(get_transition(c, (d + 4) % 8));
                 }
-                if (m_borders.find(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10) == m_borders.end())
+                if (m_borders.find(get_transition(c, (d + 3) % 8)) == m_borders.end())
                 {
-                    m_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10);
+                    m_before_borders.insert(get_transition(c, (d + 3) % 8));
                 }
-                if (m_borders.find(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10) == m_borders.end())
+                if (m_borders.find(get_transition(c, (d + 5) % 8)) == m_borders.end())
                 {
-                    m_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10);
+                    m_before_borders.insert(get_transition(c, (d + 5) % 8));
                 }
             }
         }
@@ -400,21 +429,21 @@ void Map::check_before_before_borders()
     m_before_before_borders.clear();
     for (auto &c : m_before_borders)
     {
-        for (int i = 0; i < NUM_OF_DIRECTIONS; i += 2)
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d += 2)
         {
-            if (m_symbol_and_transitions[m_symbol_and_transitions[c].transitions[i] / 10].transitions[i] == 0)
+            if (get_transition(get_transition(c, d), d) == 0)
             {
-                if (m_before_borders.find(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10) == m_borders.end())
+                if (m_before_borders.find(get_transition(c, (d + 4) % 8)) == m_borders.end())
                 {
-                    m_before_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 4) % 8] / 10);
+                    m_before_before_borders.insert(get_transition(c, (d + 4) % 8));
                 }
-                if (m_before_borders.find(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10) == m_borders.end())
+                if (m_before_borders.find(get_transition(c, (d + 3) % 8)) == m_borders.end())
                 {
-                    m_before_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 3) % 8] / 10);
+                    m_before_before_borders.insert(get_transition(c, (d + 3) % 8));
                 }
-                if (m_before_borders.find(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10) == m_borders.end())
+                if (m_before_borders.find(get_transition(c, (d + 5) % 8)) == m_borders.end())
                 {
-                    m_before_before_borders.insert(m_symbol_and_transitions[c].transitions[(i + 5) % 8] / 10);
+                    m_before_before_borders.insert(get_transition(c, (d + 5) % 8));
                 }
             }
         }
@@ -427,15 +456,15 @@ void Map::check_before_special_fields()
     m_before_special_fields.clear();
     for (auto &c : m_special_fields)
     {
-        for (int j = 0; j < NUM_OF_DIRECTIONS; j++)
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            if (m_symbol_and_transitions[c].transitions[j] != 0)
+            if (get_transition(c, d) != 0)
             {
-                if (m_corners.find(m_symbol_and_transitions[c].transitions[j] / 10) == m_corners.end())
+                if (m_corners.find(get_transition(c, d)) == m_corners.end())
                 {
-                    if (m_borders.find(m_symbol_and_transitions[c].transitions[j] / 10) == m_borders.end())
+                    if (m_borders.find(get_transition(c, d)) == m_borders.end())
                     {
-                        m_before_special_fields.insert(m_symbol_and_transitions[c].transitions[j] / 10);
+                        m_before_special_fields.insert(get_transition(c, d));
                     }
                 }
             }
@@ -449,13 +478,13 @@ void Map::check_before_before_special_fields()
     m_before_before_special_fields.clear();
     for (auto &c : m_before_special_fields)
     {
-        for (int j = 0; j < NUM_OF_DIRECTIONS; j++)
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            if (m_special_fields.find(m_symbol_and_transitions[c].transitions[j] / 10) != m_special_fields.end())
+            if (m_special_fields.find(get_transition(c, d)) != m_special_fields.end())
             {
-                m_before_before_special_fields.insert(m_symbol_and_transitions[c].transitions[(j + 4) % 8] / 10);
-                m_before_before_special_fields.insert(m_symbol_and_transitions[c].transitions[(j + 3) % 8] / 10);
-                m_before_before_special_fields.insert(m_symbol_and_transitions[c].transitions[(j + 5) % 8] / 10);
+                m_before_before_special_fields.insert(get_transition(c, (d + 4) % 8));
+                m_before_before_special_fields.insert(get_transition(c, (d + 3) % 8));
+                m_before_before_special_fields.insert(get_transition(c, (d + 5) % 8));
             }
         }
     }

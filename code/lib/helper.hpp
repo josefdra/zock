@@ -42,7 +42,7 @@ bool check_empty_fields(unsigned char);
 bool check_players(unsigned char);
 uint16_t check_frontier(Map &, uint16_t);
 void print_corners(Map &);
-EvalOfField evalFieldSymbol(char);
+EvalOfField evalFieldSymbol(unsigned char);
 bool check_special(unsigned char);
 uint16_t check_frontier(Map &, uint16_t);
 

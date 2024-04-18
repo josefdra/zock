@@ -1,5 +1,4 @@
 /*
-
 #include "algorithms.hpp"
 
 int minimaxWithPruning(uint16_t position, uint8_t depth, uint8_t alpha, uint8_t beta, bool maximizingPlayer, Map &map, Player &p)
@@ -13,7 +12,7 @@ int minimaxWithPruning(uint16_t position, uint8_t depth, uint8_t alpha, uint8_t 
     Player pcopy = p;
     pcopy.staticMapEval = p.staticMapEval;
     pcopy.m_valid_moves = p.m_valid_moves;
-    mapcopy.m_symbol_and_transitions = map.m_symbol_and_transitions;
+    mapcopy.m_symbols = map.m_symbols;
 
     if (depth == 0)
     {
@@ -54,5 +53,4 @@ int minimaxWithPruning(uint16_t position, uint8_t depth, uint8_t alpha, uint8_t 
         }
     }
 }
-
 */

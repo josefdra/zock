@@ -106,12 +106,12 @@ void timer_function(F func, std::string func_name)
 }
 */
 
-uint16_t check_frontier(Map &m, uint16_t coord)
+uint16_t check_frontier(Map &m, uint16_t c)
 {
     uint16_t score = 8;
-    for (int j = 0; j < NUM_OF_DIRECTIONS; j++)
+    for (int d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
-        if (check_empty_fields(m.m_symbol_and_transitions[m.m_symbol_and_transitions[coord].transitions[j] / 10].symbol))
+        if (check_empty_fields(m.get_symbol(m.get_transition(c, d))))
         {
             score--;
         }
@@ -119,7 +119,7 @@ uint16_t check_frontier(Map &m, uint16_t coord)
     return score;
 }
 
-EvalOfField evalFieldSymbol(char c)
+EvalOfField evalFieldSymbol(unsigned char c)
 {
     if (c == '0')
         return EvalOfField::empty;
