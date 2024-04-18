@@ -30,6 +30,67 @@ void Map::check_neighbours(uint16_t n)
     n % m_width != 1 && n > m_width &&m_symbol_and_transitions[n - m_width - 1].symbol != '-' ? m_symbol_and_transitions[n].transitions[7] = (n - m_width - 1) * 10 + 7 : m_symbol_and_transitions[n].transitions[7] = 0;
 }
 
+void Map::set_symbol(uint16_t coord, unsigned char c)
+{
+    m_symbols[coord] = c;
+}
+
+char Map::get_symbol(uint16_t coord)
+{
+    return m_symbols[coord];
+}
+
+void Map::set_transition(uint16_t coord, uint16_t t, uint8_t dir)
+{
+    uint8_t dir_next = t % 10;
+    uint16_t trans = t / 10;
+    uint64_t temp = 0;
+    if (dir > 3)
+    {
+        temp &= ~(0xFFFF << ((dir - 4) * 16));
+        temp |= (trans << ((dir - 4) * 16 + 3));
+        temp |= (dir_next << ((dir - 4) * 16));
+        m_upper_transitions[coord] |= temp;
+    }
+    else
+    {
+        temp &= ~(0xFFFF << (dir * 16));
+        temp |= (trans << (dir * 16 + 3));
+        temp |= (dir_next << (dir * 16));
+        m_lower_transitions[coord] |= temp;
+    }
+}
+
+uint16_t Map::get_transition(uint16_t coord, uint8_t dir)
+{
+    uint16_t temp = 0;
+    if (dir > 3)
+    {
+        temp = (m_upper_transitions[coord] >> ((dir - 4) * 16 + 3));
+        return (temp &= 0x1FFF);
+    }
+    else
+    {
+        temp = (m_lower_transitions[coord] >> (dir * 16 + 3));
+        return (temp &= 0x1FFF);
+    }
+}
+
+uint8_t Map::get_direction(uint16_t coord, uint8_t dir)
+{
+    uint8_t temp = 0;
+    if (dir > 3)
+    {
+        temp = (m_upper_transitions[coord] >> ((dir - 4) * 16));
+        return (temp &= 0x07);
+    }
+    else
+    {
+        temp = (m_lower_transitions[coord] >> (dir * 16));
+        return (temp &= 0x07);
+    }
+}
+
 /**
  * @brief reads the input and sets all the information required for the game map
  *
@@ -79,6 +140,33 @@ void Map::read_hash_map(const std::string map_name)
             m_symbol_and_transitions[pos2].transitions[r2] = pos1r;
         }
     }
+    m_symbol_and_transitions[1].symbol = 'k';
+    m_symbol_and_transitions[1].transitions[1] = 1234;
+    m_symbol_and_transitions[1].transitions[5] = 4321;
+    set_symbol(1, 'k');
+    set_transition(1, 1234, 1);
+    set_transition(1, 4321, 5);
+    h_res_clock::time_point start_time = h_res_clock::now();
+    std::cout << m_symbol_and_transitions[1].symbol << std::endl;
+    std::cout << m_symbol_and_transitions[1].transitions[1] / 10 << std::endl;
+    std::cout << m_symbol_and_transitions[1].transitions[1] % 10 << std::endl;
+    std::cout << m_symbol_and_transitions[1].transitions[5] / 10 << std::endl;
+    std::cout << m_symbol_and_transitions[1].transitions[5] % 10 << std::endl;
+    h_res_clock::time_point end_time = h_res_clock::now();
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    std::cout << "big: " << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+    start_time = h_res_clock::now();
+    std::cout << get_symbol(1) << std::endl;
+    std::cout << get_transition(1, 1) << std::endl;
+    std::cout << (int)get_direction(1, 1) << std::endl;
+    std::cout << get_transition(1, 5) << std::endl;
+    std::cout << (int)get_direction(1, 5) << std::endl;
+    end_time = h_res_clock::now();
+    elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    std::cout << "small: " << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 }
 
 /**
@@ -376,7 +464,8 @@ void Map::check_before_before_special_fields()
 
 void Map::print_m_frontier_scores(std::vector<Player> &p)
 {
-    std::cout << "Frontier_scores:" << std::endl << std::endl;
+    std::cout << "Frontier_scores:" << std::endl
+              << std::endl;
     for (auto &player : p)
     {
         player.get_frontier_score(*this);
