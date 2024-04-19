@@ -25,65 +25,33 @@ void Map::check_neighbours(uint16_t c)
     {
         set_transition(c, 0, (c - m_width) * 10);
     }
-    else
-    {
-        set_transition(c, 0, 0);
-    }
     if (c % m_width != 0 && c > m_width && get_symbol(c - m_width + 1) != '-') // checks if there is a field top right
     {
         set_transition(c, 1, (c - m_width + 1) * 10 + 1);
-    }
-    else
-    {
-        set_transition(c, 1, 0);
     }
     if (c % m_width != 0 && get_symbol(c + 1) != '-') // checks if there is a field to the right
     {
         set_transition(c, 2, (c + 1) * 10 + 2);
     }
-    else
-    {
-        set_transition(c, 2, 0);
-    }
     if (c % m_width != 0 && c <= m_width * (m_height - 1) && get_symbol(c + m_width + 1) != '-') // checks if there is a field bottom right
     {
         set_transition(c, 3, (c + m_width + 1) * 10 + 3);
-    }
-    else
-    {
-        set_transition(c, 3, 0);
     }
     if (c <= m_width * (m_height - 1) && get_symbol(c + m_width) != '-') // checks if there is a field below
     {
         set_transition(c, 4, (c + m_width) * 10 + 4);
     }
-    else
-    {
-        set_transition(c, 4, 0);
-    }
     if (c % m_width != 1 && c <= m_width * (m_height - 1) && get_symbol(c + m_width - 1) != '-') // check if there is a field bottom left
     {
         set_transition(c, 5, (c + m_width - 1) * 10 + 5);
-    }
-    else
-    {
-        set_transition(c, 5, 0);
     }
     if (c % m_width != 1 && get_symbol(c - 1) != '-') // checks if there is a field to the left
     {
         set_transition(c, 6, (c - 1) * 10 + 6);
     }
-    else
-    {
-        set_transition(c, 6, 0);
-    }
     if (c % m_width != 1 && c > m_width && get_symbol(c - m_width - 1) != '-') // checks if there is a field top left
     {
         set_transition(c, 7, (c - m_width - 1) * 10 + 7);
-    }
-    else
-    {
-        set_transition(c, 7, 0);
     }
 }
 
@@ -99,53 +67,18 @@ unsigned char Map::get_symbol(uint16_t c)
 
 void Map::set_transition(uint16_t c, uint8_t d, uint16_t t)
 {
-    uint64_t dir_next = t % 10;
-    uint64_t trans = t / 10;
-    uint64_t temp = 0;
-    if (d > 3)
-    {
-        temp = ~(0xFFFFULL << ((d - 4) * 16));
-        temp |= (trans << ((d - 4) * 16 + 3));
-        temp |= (dir_next << ((d - 4) * 16));
-        m_upper_transitions[c] &= temp;
-    }
-    else
-    {
-        temp = ~(0xFFFFULL << (d * 16));
-        temp |= (trans << (d * 16 + 3));
-        temp |= (dir_next << (d * 16));
-        m_lower_transitions[c] &= temp;
-    }
+    m_transitions[(c - 1) * 8 + d] = t;
 }
 
 uint16_t Map::get_transition(uint16_t c, uint8_t d)
 {
-    uint16_t temp = 0;
-    if (d > 3)
-    {
-        temp = (m_upper_transitions[c] >> ((d - 4) * 16 + 3));
-        return (temp &= 0x1FFF);
-    }
-    else
-    {
-        temp = (m_lower_transitions[c] >> (d * 16 + 3));
-        return (temp &= 0x1FFF);
-    }
+    return m_transitions[(c - 1) * 8 + d] / 10;
 }
 
 uint8_t Map::get_direction(uint16_t c, uint8_t d)
 {
-    uint8_t temp = 0;
-    if (d > 3)
-    {
-        temp = (m_upper_transitions[c] >> ((d - 4) * 16));
-        return (temp &= 0x07);
-    }
-    else
-    {
-        temp = (m_lower_transitions[c] >> (d * 16));
-        return (temp &= 0x07);
-    }
+
+    return m_transitions[(c - 1) * 8 + d] % 10;
 }
 
 /**
@@ -168,11 +101,16 @@ void Map::read_hash_map(const std::string map_name)
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields + 1; c++)
     {
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            set_transition(c, d, 0);
+        }
         mapfile >> temp;
         set_symbol(c, temp);
-        m_lower_transitions[c] = 0xFFFFFFFFFFFFFFFF;
-        m_upper_transitions[c] = 0xFFFFFFFFFFFFFFFF;
-        if (temp != '-')
+    }
+    for (int c = 1; c < m_num_of_fields + 1; c++)
+    {
+        if (get_symbol(c) != '-')
         {
             check_neighbours(c);
         }
@@ -230,9 +168,9 @@ void Map::print_map_with_transitions()
             }
             else
             {
-                std::cout << std::setw(3) << get_symbol(x) << " ";
+                std::cout << std::setw(3) << get_symbol(c) << " ";
             }
-            std::cout << std::setw(3) << get_transition(x, 2) << " ";
+            std::cout << std::setw(3) << get_transition(c, 2) << " ";
             std::cout << "  ";
         }
         std::cout << std::endl;

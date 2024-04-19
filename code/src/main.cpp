@@ -4,9 +4,9 @@ int main()
 {
     // Game game("../../maps/grimFace.map");
     // Game game("../../maps/norm12x12.map");
-    Game game("../../maps/boeseMap01.map");
+    Game game("../../maps/norm12x12test.map");
     // game.m_map.print_map();
-    game.run(1);
+    game.run(50);
     while (1)
     {
     }

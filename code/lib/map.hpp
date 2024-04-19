@@ -42,8 +42,7 @@ public:
     void check_before_before_special_fields();
     void print_m_frontier_scores(std::vector<Player> &);
     std::unordered_map<uint16_t, unsigned char> m_symbols;
-    std::unordered_map<uint16_t, uint64_t> m_lower_transitions;
-    std::unordered_map<uint16_t, uint64_t> m_upper_transitions;
+    std::unordered_map<uint16_t, uint16_t> m_transitions;
     uint16_t m_height;
     uint16_t m_width;
     uint16_t m_player_count;
