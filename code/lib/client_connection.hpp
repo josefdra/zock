@@ -22,7 +22,9 @@ public:
     void init_socket();
     void init_server();
     void connect_to_server();
-    void send_data(uint8_t type, uint32_t len_of_message, char *message);
+
+    template <typename DataType>
+    void send_data(const uint8_t type, const uint32_t len_of_message, const DataType *message);
     void receive_data();
 };
 

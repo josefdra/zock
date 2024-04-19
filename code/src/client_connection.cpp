@@ -48,12 +48,26 @@ void Network::connect_to_server()
     }
 }
 
-void Network::send_data(uint8_t type, uint32_t len_of_message, char *message)
+template <typename DataType>
+void Network::send_data(const uint8_t type, const uint32_t len_of_message, const DataType *message)
 {
     // @todo convert input to bytestream
-    char *message_to_send;
+    uint8_t message_to_send[sizeof(type) + sizeof(len_of_message) + len_of_message]{0};
 
-    int bytes_to_send = send(csocket, message_to_send, len_of_message, 0);
+    uint8_t len_of_message_hex_buffer[4];
+    len_of_message_hex_buffer[0] = (len_of_message >> 24) & 0xFF;
+    len_of_message_hex_buffer[1] = (len_of_message >> 16) & 0xFF;
+    len_of_message_hex_buffer[2] = (len_of_message >> 8) & 0xFF;
+    len_of_message_hex_buffer[3] = len_of_message & 0xFF;
+
+    std::cout << std::hex << *message << std::endl;
+
+    std::memcpy(message_to_send, &type, sizeof(type));
+    std::memcpy(message_to_send + sizeof(type), &len_of_message_hex_buffer, sizeof(len_of_message_hex_buffer));
+    // wrong result if len_of_message > 1, don't know why
+    std::memcpy(message_to_send + sizeof(type) + sizeof(len_of_message_hex_buffer), message, 4);
+
+    int bytes_to_send = send(csocket, message_to_send, sizeof(message_to_send), 0);
     if (bytes_to_send > 0)
     {
         std::cout << "Sent " << bytes_to_send << " bytes with message:\n"
@@ -64,6 +78,9 @@ void Network::send_data(uint8_t type, uint32_t len_of_message, char *message)
         // @todo Fehlerbehandlung
     }
 }
+template void Network::send_data<uint8_t>(const uint8_t type, const uint32_t len_of_message, const uint8_t *message);
+template void Network::send_data<uint16_t>(const uint8_t type, const uint32_t len_of_message, const uint16_t *message);
+template void Network::send_data<uint32_t>(const uint8_t type, const uint32_t len_of_message, const uint32_t *message);
 
 void Network::receive_data()
 {
