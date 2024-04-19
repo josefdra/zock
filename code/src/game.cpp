@@ -1,8 +1,7 @@
 #include "game.hpp"
 
 // initialize Game
-Game::Game(const std::string map_name) : m_map_name(map_name),
-                                         m_map(map_name)
+Game::Game(const std::string map_name) : m_map(map_name)
 {
     // initialize players
     for (int i = 1; i < m_map.m_player_count + 1; i++)
@@ -17,14 +16,14 @@ Game::~Game() {}
 void Game::determine_winner()
 {
     uint16_t possible_points = 0;
-    for (int i = 1; i < (m_map.m_width * m_map.m_height + 1); i++)
+    for (int c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        if (m_map.m_symbol_and_transitions[i].symbol != '-')
+        if (m_map.get_symbol(c) != '-')
         {
             possible_points++;
-            if (check_players(m_map.m_symbol_and_transitions[i].symbol))
+            if (check_players(m_map.get_symbol(c)))
             {
-                m_players[m_map.m_symbol_and_transitions[i].symbol - '0' - 1].m_points += 1;
+                m_players[m_map.get_symbol(c) - '0' - 1].m_points += 1;
             }
         }
     }
@@ -50,46 +49,46 @@ void Game::determine_winner()
 void Game::calculate_map_value()
 {
     // @todo add defines
-    int corner = 256;
-    int before_corner = -256;
-    int before_before_corner = 128;
-    int border = 96;
-    int before_border = -96;
-    int before_before_border = 48;
-    int special = 256;
-    int before_special = -256;
-    int before_before_special = 128;
-    int cost_of_overwrite_stone = -128;
-    int field_value;
+    int16_t corner = 256;
+    int16_t before_corner = -256;
+    int16_t before_before_corner = 128;
+    int16_t border = 96;
+    int16_t before_border = -96;
+    int16_t before_before_border = 48;
+    int16_t special = 256;
+    int16_t before_special = -256;
+    int16_t before_before_special = 128;
+    int16_t cost_of_overwrite_stone = -128;
+    int16_t field_value;
     bool player_field = false;
     for (auto &p : m_players)
     {
         p.m_map_value = 0;
         std::cout << getColorString(Colors(p.m_symbol - '0')) << "Output for Player " << p.m_symbol << ":" << std::endl
                   << "\e[0m" << std::endl;
-        for (int i = 1; i < (m_map.m_height * m_map.m_width + 1); i++)
+        for (int c = 1; c < m_map.m_num_of_fields + 1; c++)
         {
-            if (std::find(p.m_protected_fields.begin(), p.m_protected_fields.end(), i) != p.m_protected_fields.end() || std::find(m_map.m_corners.begin(), m_map.m_corners.end(), i) != m_map.m_corners.end())
+            if (std::find(p.m_protected_fields.begin(), p.m_protected_fields.end(), c) != p.m_protected_fields.end() || std::find(m_map.m_corners.begin(), m_map.m_corners.end(), c) != m_map.m_corners.end())
             {
                 field_value = corner;
             }
-            else if (std::find(m_map.m_before_protected_fields.begin(), m_map.m_before_protected_fields.end(), i) != m_map.m_before_protected_fields.end())
+            else if (std::find(m_map.m_before_protected_fields.begin(), m_map.m_before_protected_fields.end(), c) != m_map.m_before_protected_fields.end())
             {
                 field_value = before_corner;
             }
-            else if (std::find(p.m_before_before_protected_fields.begin(), p.m_before_before_protected_fields.end(), i) != p.m_before_before_protected_fields.end())
+            else if (std::find(p.m_before_before_protected_fields.begin(), p.m_before_before_protected_fields.end(), c) != p.m_before_before_protected_fields.end())
             {
                 field_value = before_before_corner;
             }
-            else if (std::find(p.m_borders.begin(), p.m_borders.end(), i) != p.m_borders.end())
+            else if (std::find(p.m_borders.begin(), p.m_borders.end(), c) != p.m_borders.end())
             {
                 field_value = border;
             }
-            else if (std::find(p.m_before_borders.begin(), p.m_before_borders.end(), i) != p.m_before_borders.end())
+            else if (std::find(p.m_before_borders.begin(), p.m_before_borders.end(), c) != p.m_before_borders.end())
             {
                 field_value = before_border;
             }
-            else if (std::find(p.m_before_before_borders.begin(), p.m_before_before_borders.end(), i) != p.m_before_before_borders.end())
+            else if (std::find(p.m_before_before_borders.begin(), p.m_before_before_borders.end(), c) != p.m_before_before_borders.end())
             {
                 field_value = before_before_border;
             }
@@ -97,19 +96,19 @@ void Game::calculate_map_value()
             {
                 field_value = 0;
             }
-            if (std::find(m_map.m_special_fields.begin(), m_map.m_special_fields.end(), i) != m_map.m_special_fields.end())
+            if (std::find(m_map.m_special_fields.begin(), m_map.m_special_fields.end(), c) != m_map.m_special_fields.end())
             {
                 field_value += special;
             }
-            else if (std::find(m_map.m_before_special_fields.begin(), m_map.m_before_special_fields.end(), i) != m_map.m_before_special_fields.end())
+            else if (std::find(m_map.m_before_special_fields.begin(), m_map.m_before_special_fields.end(), c) != m_map.m_before_special_fields.end())
             {
                 field_value += before_special;
             }
-            else if (std::find(m_map.m_before_before_special_fields.begin(), m_map.m_before_before_special_fields.end(), i) != m_map.m_before_before_special_fields.end())
+            else if (std::find(m_map.m_before_before_special_fields.begin(), m_map.m_before_before_special_fields.end(), c) != m_map.m_before_before_special_fields.end())
             {
                 field_value += before_before_special;
             }
-            if (m_map.m_symbol_and_transitions[i].symbol == p.m_symbol)
+            if (m_map.get_symbol(c) == p.m_symbol)
             {
                 p.m_map_value += field_value;
                 player_field = true;
@@ -124,7 +123,7 @@ void Game::calculate_map_value()
             {
                 std::cout << std::setw(4) << field_value << " ";
             }
-            if ((i % m_map.m_width) == 0)
+            if ((c % m_map.m_width) == 0)
             {
                 std::cout << std::endl;
             }
@@ -163,7 +162,7 @@ void Game::evaluate_board()
     calculate_map_value();
 }
 
-void Game::run()
+void Game::run(uint16_t num_of_iterations)
 {
     std::cout
         << "------------------------------ Start -------------------------------" << std::endl
@@ -174,15 +173,15 @@ void Game::run()
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, m_map.m_player_count - 1);
     uint16_t start_player = dis(gen);
-    for (int j = 0; j < 15; j++)
+    for (int j = 0; j < num_of_iterations; j++)
     {
         if (valid_moves)
         {
             valid_moves = false;
-            for (int i = 0; i < m_map.m_player_count; i++)
+            for (int p = 0; p < m_map.m_player_count; p++)
             {
 
-                move((start_player + i) % m_map.m_player_count);
+                move((start_player + p) % m_map.m_player_count);
             }
             for (auto &player : m_players)
             {
@@ -219,14 +218,14 @@ void Game::run()
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 }
 
-void Game::move(uint16_t i)
+void Game::move(uint16_t p)
 {
-    uint16_t coord;
+    uint16_t c;
     std::cout
-        << "------------------------ Next Move: Player " << i + 1 << "------------------------" << std::endl
+        << "------------------------ Next Move: Player " << p + 1 << "------------------------" << std::endl
         << std::endl;
     h_res_clock::time_point start_time = h_res_clock::now();
-    check_moves(m_map, m_players[i]);
+    check_moves(m_map, m_players[p]);
     uint16_t bestpos;
     // m_map.setFieldValue(m_players.at(i));
     h_res_clock::time_point end_time = h_res_clock::now();
@@ -236,15 +235,15 @@ void Game::move(uint16_t i)
               << "check_moves" << std::endl;
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 
-    if (m_players[i].m_valid_moves.size() > 0)
+    if (m_players[p].m_valid_moves.size() > 0)
     {
-        m_players[i].m_has_valid_moves = true;
-        auto elem = m_players[i].m_valid_moves.begin();
+        m_players[p].m_has_valid_moves = true;
+        auto elem = m_players[p].m_valid_moves.begin();
         // bestpos = minimaxWithPruning(0, 10, -INFINITY, INFINITY, true, m_map, m_players.at(i));
-        coord = elem->first;
+        c = elem->first;
         start_time = h_res_clock::now();
-        std::cout << "coord: " << coord << std::endl;
-        execute_move(coord, m_players[i], m_map);
+        std::cout << "coord: " << c << std::endl;
+        execute_move(c, m_players[p], m_map);
         h_res_clock::time_point end_time = h_res_clock::now();
         std::chrono::duration<double, std::micro> elapsed_time =
             std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
@@ -252,13 +251,13 @@ void Game::move(uint16_t i)
                   << "execute_move" << std::endl;
         std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 
-        m_players[i].m_valid_moves.clear();
+        m_players[p].m_valid_moves.clear();
         m_map.print_map();
     }
     else
     {
-        std::cout << "No valid moves for player " << m_players[i].m_symbol << std::endl
+        std::cout << "No valid moves for player " << m_players[p].m_symbol << std::endl
                   << std::endl;
-        m_players[i].m_has_valid_moves = false;
+        m_players[p].m_has_valid_moves = false;
     }
 }
