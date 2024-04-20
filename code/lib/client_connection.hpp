@@ -12,19 +12,20 @@
 class Network
 {
 public:
-    bool client_initialized = false;
-    bool server_initialized = false;
+    bool m_client_initialized = false;
+    bool m_server_initialized = false;
 
-    int csocket;
+    int m_csocket;
 
     struct sockaddr_in server_addr;
 
     void init_socket();
     void init_server();
     void connect_to_server();
-
     template <typename DataType>
-    void send_data(const uint8_t type, const uint32_t len_of_message, const DataType *message);
+    void send_data(const uint8_t &type, const uint32_t &len_of_message, const std::vector<DataType> &message_vec);
+    template <typename DataType>
+    uint8_t *format_data_to_byte_array(const uint8_t &type, const uint32_t &len_of_message, const std::vector<DataType> &message_vec);
     void receive_data();
 };
 
