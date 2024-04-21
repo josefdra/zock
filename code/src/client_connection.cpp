@@ -117,7 +117,7 @@ bool Network::parse_connect_command(std::stringstream &stream, std::string &ipAd
                 }
                 else
                 {
-                    std::cerr << "Invalid port number. Please enter a valid port between 0 and 65535." << std::endl;
+                    std::cerr << "Invalid port number. Please enter a valid port between 1023 and 65535." << std::endl;
                 }
             }
             else
@@ -179,6 +179,15 @@ void Network::connect_to_server()
         std::cerr << "Error: Socket or server address not initialized." << std::endl;
     }
 }
+
+void Network::close_socket()
+{
+    int result = close(m_csocket);
+    if (result < 0)
+    {
+        // Handle error if closing fails (e.g., errno)
+    }
+}
 void Network::send_data(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint8_t> &message_vec)
 {
     if (len_of_message != message_vec.size())
@@ -217,13 +226,9 @@ uint8_t *Network::format_data_to_byte_array(const uint8_t &type, const uint32_t 
 
     return message_to_send;
 }
-
-void Network::receive_data()
+void Network::receive_type()
 {
     uint8_t type = 0;
-    uint32_t message_length = 0;
-
-    // receive Header type
     int recv_type = recv(m_csocket, &type, sizeof(type), 0);
 
     if (recv_type > 0)
@@ -235,7 +240,10 @@ void Network::receive_data()
     {
         // @todo Fehlerbehandlung
     }
-
+}
+void Network::receive_data()
+{
+    uint32_t message_length = 0;
     int recv_msg_length = recv(m_csocket, &message_length, sizeof(message_length), 0);
     uint32_t actual_message_length;
     if (recv_msg_length > 0)
@@ -259,9 +267,40 @@ void Network::receive_data()
     {
         // @todo Fehlerbehandlung
     }
+
+    if (m_type == TYPE_RECEIVE_TURN_REQUEST)
+    {
+        // set time value
+        for (int i = 0; i < sizeof(uint32_t); i++)
+        { // little endian calculation, maybe with if also for big endian systems
+            m_time |= (m_message[i] << (sizeof(uint8_t) * i));
+        }
+        // depth = last Byte of message
+        m_search_depth = m_message[sizeof(m_message)];
+    }
+}
+
+void Network::get_type6_values(uint16_t &x, uint16_t &y, uint8_t &spec, uint8_t &player)
+{
+    // message order: x_high[0] x_low[1] y_high[2] y_low[3] special[4] player[5]
+    x |= (m_message[0] << sizeof(uint8_t)) | m_message[1];
+    y |= (m_message[2] << sizeof(uint8_t)) | m_message[3];
+    spec = m_message[4];
+    player = m_message[5];
 }
 
 void Network::send_type_1(uint8_t playernum)
 {
-    send_data(TYPE_SENDING_GROUP, 1, std::vector<uint8_t>{playernum});
+    send_data(TYPE_SENDING_GROUP, sizeof(uint8_t), std::vector<uint8_t>{playernum});
+}
+
+void Network::send_type_5(uint16_t x, uint16_t y, uint8_t spec)
+{
+    std::vector<uint8_t> message;
+    uint8_t x_byte[sizeof(uint16_t)] = {(x >> 8) & 0xFF, x & 0xFF};
+    message.insert(message.end(), x_byte, x_byte + sizeof(uint16_t));
+    uint8_t y_byte[sizeof(uint16_t)] = {(y >> 8) & 0xFF, y & 0xFF};
+    message.insert(message.end(), y_byte, y_byte + sizeof(uint16_t));
+    message.push_back(spec);
+    send_data(TYPE_SEND_TURN, sizeof(uint16_t) * 2 + sizeof(uint8_t), message);
 }

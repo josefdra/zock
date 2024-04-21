@@ -287,11 +287,65 @@ void Game::move(uint16_t i)
 
 void Game::run_network_game()
 {
+    bool phase2 = false;
+    bool game_end = false;
     std::vector<Network> player_net;
     init_player_clients(player_net);
     connect_players_and_send_groupnumbers(player_net);
     receive_map_data(player_net);
     receive_playernumber(player_net);
+
+    do
+    {
+        m_map.print_map();
+        bool already_changed = false; // just to test - ever client should have his own map_layout to make execute_move work
+        for (uint16_t i = 0; i < m_map.m_player_count; i++)
+        {
+
+            player_net.at(i).receive_type();
+            if (player_net.at(i).m_type == TYPE_DISQUALIFICATION)
+            {
+                player_net.at(i).receive_data();
+                player_net.at(i).close_socket();
+            }
+            else if (player_net.at(i).m_type == TYPE_PHASE1_END)
+            {
+                player_net.at(i).receive_data();
+                phase2 = true;
+            }
+            else if (player_net.at(i).m_type == TYPE_GAME_END)
+            {
+                player_net.at(i).receive_data();
+                player_net.at(i).close_socket();
+                if (i == m_map.m_player_count - 1)
+                {
+                    game_end = true;
+                }
+            }
+            else if (player_net.at(i).m_type == TYPE_RECEIVE_TURN_REQUEST)
+            {
+                player_net.at(i).receive_data();
+                // do something for m_time
+                // search depth ...
+                uint8_t spec = 0; // special stone value needs to be added
+                uint16_t turn = get_turn(player_net, i, spec);
+                uint16_t x = 0, y = 0;
+                one_dimension_2_second_dimension(turn, x, y, m_map);
+                player_net.at(i).send_type_5(x, y, spec);
+            }
+
+            // needs change that it doesn't want to change everything for number of players times
+            else if (player_net.at(1).m_type == TYPE_RECEIVE_PLAYER_TURN)
+            {
+                player_net.at(i).receive_data();
+                uint16_t x, y;
+                uint8_t spec, player;
+                player_net.at(i).get_type6_values(x, y, spec, player);
+                execute_last_players_turn_local(x, y, spec, player, already_changed);
+            }
+        }
+    } while (!game_end);
+    std::cout << "Game ended" << std::endl;
 }
 
 void Game::init_player_clients(std::vector<Network> &player_net)
@@ -321,6 +375,7 @@ void Game::receive_map_data(std::vector<Network> &player_net)
 {
     for (uint8_t i = 0; i < m_map.m_player_count; i++)
     {
+        player_net.at(i).receive_type();
         player_net.at(i).receive_data();
         // m_map.read_network_map(player_net.at(i).m_message, player_net.at(i).m_message_size); just for debug use cases or to compare internal map with actual map data of the server
     }
@@ -330,6 +385,33 @@ void Game::receive_playernumber(std::vector<Network> &player_net)
 {
     for (uint8_t i = 0; i < m_map.m_player_count; i++)
     {
+
+        player_net.at(i).receive_type();
         player_net.at(i).receive_data();
     }
+}
+
+uint16_t Game::get_turn(std::vector<Network> &player_net, uint16_t &currPlayer, uint8_t &spec)
+{
+    uint16_t coord = 0;
+
+    check_moves(m_map, m_players[currPlayer]);
+    if (m_players[currPlayer].m_valid_moves.size() > 0)
+    {
+        m_players[currPlayer].m_has_valid_moves = true;
+        auto elem = m_players[currPlayer].m_valid_moves.begin();
+        // bestpos = minimaxWithPruning(0, 10, -INFINITY, INFINITY, true, m_map, m_players.at(i));
+        coord = elem->first;
+    }
+
+    return coord;
+}
+
+void Game::execute_last_players_turn_local(uint16_t &x, uint16_t &y, uint8_t &spec, uint8_t &players_turn, bool &already_changed)
+{
+
+    uint16_t coord = y * m_map.m_width + x + 1;
+    execute_move(coord, m_players[players_turn - 1], m_map);
+    already_changed = true;
+    m_players[players_turn - 1].m_valid_moves.clear();
 }

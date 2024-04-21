@@ -31,6 +31,8 @@ public:
     void connect_players_and_send_groupnumbers(std::vector<Network> &player_net);
     void receive_map_data(std::vector<Network> &player_net);
     void receive_playernumber(std::vector<Network> &player_net);
+    uint16_t get_turn(std::vector<Network> &player_net, uint16_t &currPlayer, uint8_t &spec);
+    void execute_last_players_turn_local(uint16_t &x, uint16_t &y, uint8_t &spec, uint8_t &players_turn, bool &already_changed);
 };
 
 #endif // GAME_HPP
