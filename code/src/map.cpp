@@ -1,7 +1,7 @@
 #include "map.hpp"
 #include "helper.hpp"
 #include "player.hpp"
-
+#include <cstring>
 /**
  * @brief map.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships
  *
@@ -81,6 +81,27 @@ void Map::read_hash_map(const std::string map_name)
     }
 }
 
+/**
+ * @brief this function can be used to debug if there occur problems with map data sent by server and actual map
+ * currently there are just the first values assigned which works correctly for further information the whole map data received needs to be assigned
+ *
+ * @param net_map byte array that has stored the map data
+ * @param size_of_byte_array determines the size of the map data sent by server
+ */
+void Map::read_network_map(const uint8_t *net_map, uint32_t size_of_byte_array)
+{
+    std::vector<uint8_t> byte_vec(size_of_byte_array);
+    std::memcpy(byte_vec.data(), net_map, size_of_byte_array);
+    std::stringstream map_stream;
+    uint16_t player_c, os, ib, st, h, wi;
+    for (auto byte : byte_vec)
+    {
+        map_stream << byte;
+    }
+    map_stream << '\n'
+               << 65000;
+    map_stream >> player_c >> os >> ib >> st >> h >> wi;
+}
 /**
  * @brief prints the map with transitions
  */
@@ -376,7 +397,8 @@ void Map::check_before_before_special_fields()
 
 void Map::print_m_frontier_scores(std::vector<Player> &p)
 {
-    std::cout << "Frontier_scores:" << std::endl << std::endl;
+    std::cout << "Frontier_scores:" << std::endl
+              << std::endl;
     for (auto &player : p)
     {
         player.get_frontier_score(*this);

@@ -1,8 +1,139 @@
 #include "client_connection.hpp"
 #include <iostream>
-#include <cstring>
 #include <stdexcept>
-#define SWAP_BYTES(x) ((x) >> 8) | ((x) << 8)
+
+Network::Network(uint8_t p) : m_player(p) {}
+Network::~Network() {}
+
+bool Network::handle_user_input()
+{
+    std::cout << "CLIENT FOR PLAYER " << std::to_string(m_player) << " READY" << std::endl;
+
+    while (true)
+    {
+        std::string inputLine;
+        std::getline(std::cin, inputLine);
+        std::stringstream stream(inputLine);
+
+        std::string command;
+        std::string ipAddress;
+        uint16_t port;
+
+        stream >> command;
+
+        if (command == "connect")
+        {
+            if (parse_connect_command(stream, ipAddress, port))
+            {
+                std::cout << "Data set successfully.\nREADY TO CONNECT\n\nCONNECTING\n\n"
+                          << std::endl;
+                return true;
+            }
+            else
+            {
+                std::cerr << "Incomplete command. Please enter IP address using '-i <ip>' and port using '-p <port>'." << std::endl;
+            }
+        }
+        else
+        {
+            std::cerr << "Invalid command. Please use 'connect'." << std::endl;
+        }
+    }
+}
+
+bool Network::parse_connect_command(std::stringstream &stream, std::string &ipAddress, uint16_t &port)
+{
+    bool hasIPAddress = false;
+    bool hasPort = false;
+
+    std::string option;
+
+    while (stream >> std::ws >> option)
+    {
+        if (option == "-i")
+        {
+            stream >> ipAddress;
+            hasIPAddress = true;
+            m_ip = ipAddress.c_str();
+        }
+        else if (option == "-p")
+        {
+            stream >> port;
+            if (validate_port(port))
+            {
+                hasPort = true;
+                m_port = port;
+            }
+            else
+            {
+                std::cerr << "Invalid port number. Please enter a valid port between 0 and 65535." << std::endl;
+                return false;
+            }
+        }
+        else
+        {
+            std::cerr << "Invalid option. Please use '-i <ip>' or '-p <port>'." << std::endl;
+            return false;
+        }
+    }
+
+    if (hasIPAddress && hasPort)
+    {
+        return true;
+    }
+
+    if (!hasIPAddress)
+    {
+        std::cerr << "Missing IP address. Please use '-i <ip>'." << std::endl;
+    }
+
+    if (!hasPort)
+    {
+        std::cerr << "Missing port number. Please use '-p <port>'." << std::endl;
+    }
+
+    while (!(hasIPAddress && hasPort))
+    {
+        std::string inputLine;
+
+        std::getline(std::cin, inputLine);
+
+        stream.clear();
+        stream.str(inputLine);
+
+        while (stream >> std::ws >> option)
+        {
+            if (option == "-i")
+            {
+                stream >> ipAddress;
+                hasIPAddress = true;
+            }
+            else if (option == "-p")
+            {
+                stream >> port;
+                if (validate_port(port))
+                {
+                    hasPort = true;
+                }
+                else
+                {
+                    std::cerr << "Invalid port number. Please enter a valid port between 0 and 65535." << std::endl;
+                }
+            }
+            else
+            {
+                std::cerr << "Invalid option. Please use '-i <ip>' or '-p <port>'." << std::endl;
+            }
+        }
+    }
+    return true;
+}
+
+bool Network::validate_port(uint16_t &port)
+{
+    return port >= 1023 && port <= 65535;
+}
+
 void Network::init_socket()
 {
     /**
@@ -23,8 +154,8 @@ void Network::init_socket()
 void Network::init_server()
 {
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(65432);
-    server_addr.sin_addr.s_addr = inet_addr("192.168.178.27");
+    server_addr.sin_port = htons(m_port);
+    server_addr.sin_addr.s_addr = inet_addr(m_ip);
     m_server_initialized = true;
 }
 
@@ -48,10 +179,9 @@ void Network::connect_to_server()
         std::cerr << "Error: Socket or server address not initialized." << std::endl;
     }
 }
-template <typename DataType>
-void Network::send_data(const uint8_t &type, const uint32_t &len_of_message, const std::vector<DataType> &message_vec)
+void Network::send_data(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint8_t> &message_vec)
 {
-    if (len_of_message != (message_vec.size() * sizeof(DataType)))
+    if (len_of_message != message_vec.size())
     {
         throw std::runtime_error("IN: client_connection.cpp/send_data()\nInvalid length of data! Assure that length of data and actual data size are the same!");
     }
@@ -61,7 +191,7 @@ void Network::send_data(const uint8_t &type, const uint32_t &len_of_message, con
     if (bytes_to_send > 0)
     {
         std::cout << "Sent " << bytes_to_send << " bytes with message:\n"
-                  << message << std::endl;
+                  << std::endl;
     }
     else
     {
@@ -69,12 +199,7 @@ void Network::send_data(const uint8_t &type, const uint32_t &len_of_message, con
     }
 }
 
-template void Network::send_data<uint8_t>(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint8_t> &message_vec);
-template void Network::send_data<uint16_t>(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint16_t> &message_vec);
-template void Network::send_data<uint32_t>(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint32_t> &message_vec);
-
-template <typename DataType>
-uint8_t *Network::format_data_to_byte_array(const uint8_t &type, const uint32_t &len_of_message, const std::vector<DataType> &message_vec)
+uint8_t *Network::format_data_to_byte_array(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint8_t> &message_vec)
 {
     // @todo convert input to bytestream
     uint8_t *message_to_send = new uint8_t[sizeof(type) + sizeof(len_of_message) + len_of_message];
@@ -90,50 +215,21 @@ uint8_t *Network::format_data_to_byte_array(const uint8_t &type, const uint32_t 
     std::memcpy(message_to_send + sizeof(type) + sizeof(len_of_message_hex_buffer), message_vec.data(), len_of_message);
     std::cout << message_to_send[sizeof(type) + sizeof(len_of_message_hex_buffer)] << std::endl;
 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-    if (typeid(DataType) == typeid(uint16_t))
-    {
-        DataType helper = message_to_send[sizeof(type) + sizeof(len_of_message_hex_buffer)];
-        message_to_send[sizeof(type) + sizeof(len_of_message_hex_buffer)] = message_to_send[sizeof(type) + sizeof(len_of_message_hex_buffer) + 1];
-        message_to_send[sizeof(type) + sizeof(len_of_message_hex_buffer) + 1] = helper;
-    }
-    else
-    {
-        for (size_t i = 0; i < len_of_message; i += sizeof(DataType))
-        {
-            for (size_t j = 0; j < sizeof(DataType) / 2; ++j)
-            {
-                uint8_t *data_ptr1 = &message_to_send[sizeof(type) + sizeof(len_of_message_hex_buffer) + i + j];
-                uint8_t *data_ptr2 = &message_to_send[sizeof(type) + sizeof(len_of_message_hex_buffer) + i + sizeof(DataType) - 1 - j];
-
-                // Swap bytes using bitwise operations
-                uint8_t temp = *data_ptr1;
-                *data_ptr1 = *data_ptr2;
-                *data_ptr2 = temp;
-            }
-        }
-    }
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-    continue;
-#else
-#error "Unknown endian"
-#endif
     return message_to_send;
 }
-template uint8_t *Network::format_data_to_byte_array<uint8_t>(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint8_t> &message_vec);
-template uint8_t *Network::format_data_to_byte_array<uint16_t>(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint16_t> &message_vec);
-template uint8_t *Network::format_data_to_byte_array<uint32_t>(const uint8_t &type, const uint32_t &len_of_message, const std::vector<uint32_t> &message_vec);
 
 void Network::receive_data()
 {
-    uint8_t type;
-    uint32_t message_length;
+    uint8_t type = 0;
+    uint32_t message_length = 0;
 
     // receive Header type
     int recv_type = recv(m_csocket, &type, sizeof(type), 0);
+
     if (recv_type > 0)
     {
-        std::cout << "received Header type: " << type << std::endl;
+        m_type = type;
+        std::cout << "received Header type: " << std::to_string(m_type) << std::endl;
     }
     else
     {
@@ -141,24 +237,31 @@ void Network::receive_data()
     }
 
     int recv_msg_length = recv(m_csocket, &message_length, sizeof(message_length), 0);
+    uint32_t actual_message_length;
     if (recv_msg_length > 0)
     {
-        std::cout << "received message length: " << message_length << std::endl;
+        actual_message_length = ntohl(message_length); // converts the unsigned integer from network byte order to host byte order.
+        m_message_size = actual_message_length;
+        std::cout << "received message length: " << std::to_string(actual_message_length) << std::endl;
     }
     else
     {
         // @todo Fehlerbehandlung
     }
 
-    char message[message_length];
+    uint8_t message[actual_message_length];
     int recv_msg = recv(m_csocket, &message, sizeof(message), 0);
     if (recv_msg_length > 0)
     {
-        std::cout << "received message:\n"
-                  << message << std::endl;
+        m_message = message;
     }
     else
     {
         // @todo Fehlerbehandlung
     }
+}
+
+void Network::send_type_1(uint8_t playernum)
+{
+    send_data(TYPE_SENDING_GROUP, 1, std::vector<uint8_t>{playernum});
 }

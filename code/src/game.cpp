@@ -168,13 +168,14 @@ void Game::run()
     std::cout
         << "------------------------------ Start -------------------------------" << std::endl
         << std::endl;
-    m_map.print_map();
+    // m_map.print_map();
     bool valid_moves = true;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, m_map.m_player_count - 1);
+
     uint16_t start_player = dis(gen);
-    for (int j = 0; j < 15; j++)
+    /*for (int j = 0; j < 15; j++)
     {
         if (valid_moves)
         {
@@ -216,7 +217,7 @@ void Game::run()
         std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     std::cout << "Function: "
               << "evaluate_board" << std::endl;
-    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;*/
 }
 
 void Game::move(uint16_t i)
@@ -260,5 +261,75 @@ void Game::move(uint16_t i)
         std::cout << "No valid moves for player " << m_players[i].m_symbol << std::endl
                   << std::endl;
         m_players[i].m_has_valid_moves = false;
+    }
+}
+
+//////////////////////// NETWORK GAMES ////////////////////////
+
+/**
+ * @brief Maybe add something like this for network games:
+ *
+ * Process of a network game:
+ * 1. establish TCP connection
+ * 2. send groupnumber to server (type 1)
+ * 3. receive Map (type 2)
+ * 4. receive Playernumber (type 3)
+ * 5. while (!type 8)
+ * {
+ *      receive turn notification (type 4)
+ *      send turn (type 5)
+ *      receive Players turn (type 6)
+ *      (Maybe) receive disqualification of player (type 7)
+ * }
+ *
+ *
+ */
+
+void Game::run_network_game()
+{
+    std::vector<Network> player_net;
+    init_player_clients(player_net);
+    connect_players_and_send_groupnumbers(player_net);
+    receive_map_data(player_net);
+    receive_playernumber(player_net);
+}
+
+void Game::init_player_clients(std::vector<Network> &player_net)
+{
+    for (uint8_t i = 1; i <= m_map.m_player_count; i++)
+    {
+        Network net(i);
+        player_net.push_back(net);
+    }
+}
+
+void Game::connect_players_and_send_groupnumbers(std::vector<Network> &player_net)
+{
+    for (uint8_t i = 0; i < m_map.m_player_count; i++)
+    {
+        if (player_net.at(i).handle_user_input())
+        {
+            player_net.at(i).init_socket();
+            player_net.at(i).init_server();
+            player_net.at(i).connect_to_server();
+            player_net.at(i).send_type_1(i + 1);
+        }
+    }
+}
+
+void Game::receive_map_data(std::vector<Network> &player_net)
+{
+    for (uint8_t i = 0; i < m_map.m_player_count; i++)
+    {
+        player_net.at(i).receive_data();
+        // m_map.read_network_map(player_net.at(i).m_message, player_net.at(i).m_message_size); just for debug use cases or to compare internal map with actual map data of the server
+    }
+}
+
+void Game::receive_playernumber(std::vector<Network> &player_net)
+{
+    for (uint8_t i = 0; i < m_map.m_player_count; i++)
+    {
+        player_net.at(i).receive_data();
     }
 }
