@@ -4,7 +4,7 @@ int main()
 {
     // Game game("../../maps/grimFace.map");
     // Game game("../../maps/norm12x12.map");
-    Game game("../../maps/norm12x12test.map");
+    Game game("/home/josefdra/ZOCK/g01/maps/norm12x12test.map");
     // game.m_map.print_map();
     game.run(50);
     while (1)

@@ -87,7 +87,7 @@ uint8_t Map::get_direction(uint16_t c, uint8_t d)
  * @param inputfile mapfile to read
  */
 void Map::read_hash_map(const std::string map_name)
-{
+{   
     std::ifstream inputFile(map_name);
     std::stringstream mapfile;
     unsigned char temp;
@@ -98,6 +98,7 @@ void Map::read_hash_map(const std::string map_name)
     inputFile.close();
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     m_num_of_fields = m_height * m_width;
+    std::cout << m_num_of_fields << std::endl;
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields + 1; c++)
     {

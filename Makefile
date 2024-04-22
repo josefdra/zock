@@ -7,6 +7,8 @@ CXX ?= g++
 SRC_EXT = cpp
 # Path to the source directory, relative to the makefile
 SRC_PATH = ./src/src
+# Space-separated pkg-config libraries used by this project
+LIBS =
 # General compiler flags
 COMPILE_FLAGS = -std=c++11 -Wall -Wextra -g
 # Additional release-specific flags
@@ -14,18 +16,18 @@ RCOMPILE_FLAGS = -D NDEBUG
 # Additional debug-specific flags
 DCOMPILE_FLAGS = -D DEBUG
 # Add additional include paths
-INCLUDES = -I ./src/libs
+INCLUDES = -I ./src/lib
 # General linker settings
 LINK_FLAGS =
 # Additional release-specific linker settings
 RLINK_FLAGS =
 # Additional debug-specific linker settings
 DLINK_FLAGS =
-# Destination directory, like a jail or mounted system
-DESTDIR = ./bin
-# Install path (bin/ is appended automatically)
-INSTALL_PREFIX = usr/local
 #### END PROJECT SETTINGS ####
+
+# Optionally you may move the section above to a separate config.mk file, and
+# uncomment the line below
+# include config.mk
 
 # Generally should not need to edit below this line
 
@@ -169,32 +171,15 @@ dirs:
 	@mkdir -p $(dir $(OBJECTS))
 	@mkdir -p $(BIN_PATH)
 
-# Installs to the set path
-.PHONY: install
-install:
-	@echo "Installing to $(DESTDIR)$(INSTALL_PREFIX)/bin"
-	@$(INSTALL_PROGRAM) $(BIN_PATH)/$(BIN_NAME) $(DESTDIR)$(INSTALL_PREFIX)/bin
-
-# Uninstalls the program
-.PHONY: uninstall
-uninstall:
-	@echo "Removing $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)"
-	@$(RM) $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)
-
 # Removes all build files
 .PHONY: clean
 clean:
-	@echo "Deleting $(BIN_NAME) symlink"
-	@$(RM) $(BIN_NAME)
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin
 
 # Main rule, checks the executable and symlinks to the output
 all: $(BIN_PATH)/$(BIN_NAME)
-	@echo "Making symlink: $(BIN_NAME) -> $<"
-	@$(RM) $(BIN_NAME)
-	@ln -s $(BIN_PATH)/$(BIN_NAME) $(BIN_NAME)
 
 # Link the executable
 $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
