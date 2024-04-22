@@ -294,59 +294,59 @@ void Game::run_network_game()
     receive_map_data(player_net);
     receive_playernumber(player_net);
 
-    do
+    while (true)
     {
+        check_socket_acitivity(m_map.m_player_count);
         m_map.print_map();
-        // bool already_changed = false; // just to test - ever client should have his own map_layout to make execute_move work
-        for (uint16_t i = 0; i < m_map.m_player_count; i++)
+        for (uint8_t i = 0; i < socket_flags_vec.size(); i++)
         {
+            if (socket_flags_vec.at(i))
+            {
+                socket_flags_vec.at(i) == false;
+                receive_type(player_net.at(i));
+                receive_data(player_net.at(i));
 
-            player_net.at(i).receive_type();
-            if (player_net.at(i).m_type == TYPE_DISQUALIFICATION)
-            {
-                player_net.at(i).receive_data();
-                player_net.at(i).close_socket();
-            }
-            else if (player_net.at(i).m_type == TYPE_PHASE1_END)
-            {
-                player_net.at(i).receive_data();
-                phase2 = true;
-            }
-            else if (player_net.at(i).m_type == TYPE_GAME_END)
-            {
-                player_net.at(i).receive_data();
-                player_net.at(i).close_socket();
-                if (i == m_map.m_player_count - 1)
+                if (player_net.at(i).m_type == TYPE_DISQUALIFICATION)
                 {
-                    game_end = true;
+                    close_socket(player_net.at(i));
+                }
+                else if (player_net.at(i).m_type == TYPE_PHASE1_END)
+                {
+                    phase2 = true;
+                }
+                else if (player_net.at(i).m_type == TYPE_GAME_END)
+                {
+                    close_socket(player_net.at(i));
+                    if (i == m_map.m_player_count - 1)
+                    {
+                        game_end = true;
+                    }
+                    std::cout << "Game ended." << std::endl;
+                }
+                else if (player_net.at(i).m_type == TYPE_RECEIVE_TURN_REQUEST)
+                {
+                    // do something for m_time
+                    // search depth ...
+                    uint8_t spec = 0; // special stone value needs to be added
+                    uint16_t currplayer = i;
+                    uint16_t turn = get_turn(player_net, currplayer, spec);
+                    uint16_t x = 0, y = 0;
+                    one_dimension_2_second_dimension(turn, x, y, m_map);
+                    send_type_5(x, y, spec, player_net.at(i));
+                    execute_last_players_turn_local(x, y, spec, i);
+                }
+
+                // needs change that it doesn't want to change everything for number of players times
+                else if (player_net.at(i).m_type == TYPE_RECEIVE_PLAYER_TURN)
+                {
+                    uint16_t x, y;
+                    uint8_t spec, player;
+                    get_type6_values(x, y, spec, i, player_net.at(i));
+                    // execute_last_players_turn_local(x, y, spec, player, already_changed);
                 }
             }
-            else if (player_net.at(i).m_type == TYPE_RECEIVE_TURN_REQUEST)
-            {
-                player_net.at(i).receive_data();
-                // do something for m_time
-                // search depth ...
-                uint8_t spec = 0; // special stone value needs to be added
-                uint16_t turn = get_turn(player_net, i, spec);
-                uint16_t x = 0, y = 0;
-                one_dimension_2_second_dimension(turn, x, y, m_map);
-                player_net.at(i).send_type_5(x, y, spec);
-                uint8_t player = i + 1;
-                execute_last_players_turn_local(x, y, spec, player);
-            }
-
-            // needs change that it doesn't want to change everything for number of players times
-            else if (player_net.at(i).m_type == TYPE_RECEIVE_PLAYER_TURN)
-            {
-                player_net.at(i).receive_data();
-                uint16_t x, y;
-                uint8_t spec, player;
-                player_net.at(i).get_type6_values(x, y, spec, player);
-                // execute_last_players_turn_local(x, y, spec, player, already_changed);
-            }
         }
-    } while (!game_end);
-    std::cout << "Game ended" << std::endl;
+    }
 }
 
 void Game::init_player_clients(std::vector<Network> &player_net)
@@ -362,12 +362,12 @@ void Game::connect_players_and_send_groupnumbers(std::vector<Network> &player_ne
 {
     for (uint8_t i = 0; i < m_map.m_player_count; i++)
     {
-        if (player_net.at(i).handle_user_input())
+        if (handle_user_input(player_net.at(i)))
         {
-            player_net.at(i).init_socket();
-            player_net.at(i).init_server();
-            player_net.at(i).connect_to_server();
-            player_net.at(i).send_type_1(i + 1);
+            init_socket(player_net.at(i));
+            init_server(player_net.at(i));
+            connect_to_server(player_net.at(i));
+            send_type_1(i + 1, player_net.at(i));
         }
     }
 }
@@ -376,8 +376,8 @@ void Game::receive_map_data(std::vector<Network> &player_net)
 {
     for (uint8_t i = 0; i < m_map.m_player_count; i++)
     {
-        player_net.at(i).receive_type();
-        player_net.at(i).receive_data();
+        receive_type(player_net.at(i));
+        receive_data(player_net.at(i));
         // m_map.read_network_map(player_net.at(i).m_message, player_net.at(i).m_message_size); just for debug use cases or to compare internal map with actual map data of the server
     }
 }
@@ -387,14 +387,15 @@ void Game::receive_playernumber(std::vector<Network> &player_net)
     for (uint8_t i = 0; i < m_map.m_player_count; i++)
     {
 
-        player_net.at(i).receive_type();
-        player_net.at(i).receive_data();
+        receive_type(player_net.at(i));
+        receive_data(player_net.at(i));
     }
 }
 
 uint16_t Game::get_turn(std::vector<Network> &player_net, uint16_t &currPlayer, uint8_t &spec)
 {
     uint16_t coord = 0;
+    char answer;
 
     check_moves(m_map, m_players[currPlayer]);
     if (m_players[currPlayer].m_valid_moves.size() > 0)
@@ -403,6 +404,29 @@ uint16_t Game::get_turn(std::vector<Network> &player_net, uint16_t &currPlayer, 
         auto elem = m_players[currPlayer].m_valid_moves.begin();
         // bestpos = minimaxWithPruning(0, 10, -INFINITY, INFINITY, true, m_map, m_players.at(i));
         coord = elem->first;
+        if (m_map.get_symbol(coord) == 'c')
+        {
+            std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
+            std::cin >> spec;
+            spec -= '0';
+        }
+        else if (m_map.get_symbol(coord) == 'b')
+        {
+            do
+            {
+                std::cout << "Wollen Sie eine Bombe(b) oder einen Überschreibstein(u)?: ";
+                std::cin >> answer;
+                if (answer == 'b')
+                {
+                    spec = 20;
+                }
+                else if (answer == 'u')
+                {
+                    spec = 21;
+                }
+
+            } while (answer != 'b' && answer != 'u');
+        }
     }
 
     return coord;
@@ -412,6 +436,6 @@ void Game::execute_last_players_turn_local(uint16_t &x, uint16_t &y, uint8_t &sp
 {
 
     uint16_t coord = y * m_map.m_width + x + 1;
-    execute_move(coord, m_players[players_turn - 1], m_map);
-    m_players[players_turn - 1].m_valid_moves.clear();
+    execute_move(coord, m_players[players_turn], m_map);
+    m_players[players_turn].m_valid_moves.clear();
 }

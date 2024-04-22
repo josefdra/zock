@@ -4,7 +4,7 @@
 int main()
 {
     // MAP NAME MUST BE THE SAME AS SERVER MAP
-    Game game("../../maps/original.map");
+    Game game("../../maps/2013_comp_9_2.map");
     game.run_network_game();
 
     while (1)

@@ -153,7 +153,7 @@ void execute_move(uint16_t c, Player &p, Map &m)
         uint16_t next_player;
         do
         {
-            std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
+            std::cout << "Mit welchem Spieler wollen Sie tauschen?: (Muss die selbe Antwort wie zuvor sein)";
             std::cin >> next_player;
             if (next_player > m.m_player_count)
             {
@@ -173,7 +173,7 @@ void execute_move(uint16_t c, Player &p, Map &m)
         char bonus;
         do
         {
-            std::cout << "Wollen Sie eine Bombe(b) oder einen Überschreibstein(u)?: ";
+            std::cout << "Wollen Sie eine Bombe(b) oder einen Überschreibstein(u)?: (Muss die selbe Antwort)";
             std::cin >> bonus;
             if (bonus == 'b')
             {
