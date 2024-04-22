@@ -114,9 +114,10 @@ void change_players(Map &m, char p1, char p2)
 
 void execute_move(uint16_t coord, Player &p, Map &m)
 {
+
     if (!check_empty_fields(m.m_symbol_and_transitions.at(coord).symbol))
     {
-        p.m_overwrite_stones--;
+        // p.m_overwrite_stones--;
     }
 
     auto elem = p.m_valid_moves.find(coord);

@@ -298,7 +298,7 @@ void Game::run_network_game()
     do
     {
         m_map.print_map();
-        bool already_changed = false; // just to test - ever client should have his own map_layout to make execute_move work
+        // bool already_changed = false; // just to test - ever client should have his own map_layout to make execute_move work
         for (uint16_t i = 0; i < m_map.m_player_count; i++)
         {
 
@@ -332,16 +332,18 @@ void Game::run_network_game()
                 uint16_t x = 0, y = 0;
                 one_dimension_2_second_dimension(turn, x, y, m_map);
                 player_net.at(i).send_type_5(x, y, spec);
+                uint8_t player = i + 1;
+                execute_last_players_turn_local(x, y, spec, player);
             }
 
             // needs change that it doesn't want to change everything for number of players times
-            else if (player_net.at(1).m_type == TYPE_RECEIVE_PLAYER_TURN)
+            else if (player_net.at(i).m_type == TYPE_RECEIVE_PLAYER_TURN)
             {
                 player_net.at(i).receive_data();
                 uint16_t x, y;
                 uint8_t spec, player;
                 player_net.at(i).get_type6_values(x, y, spec, player);
-                execute_last_players_turn_local(x, y, spec, player, already_changed);
+                // execute_last_players_turn_local(x, y, spec, player, already_changed);
             }
         }
     } while (!game_end);
@@ -407,11 +409,10 @@ uint16_t Game::get_turn(std::vector<Network> &player_net, uint16_t &currPlayer, 
     return coord;
 }
 
-void Game::execute_last_players_turn_local(uint16_t &x, uint16_t &y, uint8_t &spec, uint8_t &players_turn, bool &already_changed)
+void Game::execute_last_players_turn_local(uint16_t &x, uint16_t &y, uint8_t &spec, uint8_t &players_turn)
 {
 
     uint16_t coord = y * m_map.m_width + x + 1;
     execute_move(coord, m_players[players_turn - 1], m_map);
-    already_changed = true;
     m_players[players_turn - 1].m_valid_moves.clear();
 }

@@ -22,6 +22,11 @@
 // unsigned int message_length;
 // unsigned int message;
 
+/**
+ * connect -i 127.0.0.1 -p 7777
+ *
+ */
+
 class Network
 {
 public:
