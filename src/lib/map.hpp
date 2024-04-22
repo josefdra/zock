@@ -15,6 +15,7 @@
 #include <chrono>
 #include <iomanip>
 #include <unordered_set>
+#include <cstring>
 // forward definition to prevent include errors
 class Player;
 
