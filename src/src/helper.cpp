@@ -139,3 +139,9 @@ EvalOfField evalFieldSymbol(unsigned char c)
             return EvalOfField::enemy;
     }
 }
+
+void one_dimension_2_second_dimension(uint16_t &_1D_coord, uint16_t &x, uint16_t &y, Map &m)
+{
+    _1D_coord % m.m_width == 0 ? x = m.m_width - 1 : x = _1D_coord % m.m_width - 1;
+    y = (_1D_coord - (x + 1)) / m.m_width;
+}

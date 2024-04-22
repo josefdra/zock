@@ -30,6 +30,7 @@ public:
     uint16_t get_transition(uint16_t, uint8_t);
     uint8_t get_direction(uint16_t, uint8_t);
     void read_hash_map(const std::string);
+    void read_network_map(const uint8_t *byte_array, uint32_t);
     void print_map_with_transitions();
     void print_map_with_spectifications();
     void print_map();
