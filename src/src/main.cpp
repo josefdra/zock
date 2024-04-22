@@ -1,12 +1,12 @@
+#include "client_connection.hpp"
 #include "game.hpp"
 
 int main()
 {
-    // Game game("../../maps/grimFace.map");
-    // Game game("../../maps/norm12x12.map");
-    Game game("/home/josefdra/ZOCK/g01/maps/norm12x12test.map");
-    // game.m_map.print_map();
-    game.run(50);
+    // MAP NAME MUST BE THE SAME AS SERVER MAP
+    Game game("../../maps/original.map");
+    game.run_network_game();
+
     while (1)
     {
     }

@@ -87,7 +87,7 @@ uint8_t Map::get_direction(uint16_t c, uint8_t d)
  * @param inputfile mapfile to read
  */
 void Map::read_hash_map(const std::string map_name)
-{   
+{
     std::ifstream inputFile(map_name);
     std::stringstream mapfile;
     unsigned char temp;
@@ -135,6 +135,28 @@ void Map::read_hash_map(const std::string map_name)
             set_transition(pos2, r2, pos1r);
         }
     }
+}
+
+/**
+ * @brief this function can be used to debug if there occur problems with map data sent by server and actual map
+ * currently there are just the first values assigned which works correctly for further information the whole map data received needs to be assigned
+ *
+ * @param net_map byte array that has stored the map data
+ * @param size_of_byte_array determines the size of the map data sent by server
+ */
+void Map::read_network_map(const uint8_t *net_map, uint32_t size_of_byte_array)
+{
+    std::vector<uint8_t> byte_vec(size_of_byte_array);
+    std::memcpy(byte_vec.data(), net_map, size_of_byte_array);
+    std::stringstream map_stream;
+    uint16_t player_c, os, ib, st, h, wi;
+    for (auto byte : byte_vec)
+    {
+        map_stream << byte;
+    }
+    map_stream << '\n'
+               << 65000;
+    map_stream >> player_c >> os >> ib >> st >> h >> wi;
 }
 
 /**

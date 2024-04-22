@@ -21,7 +21,7 @@ public:
     void determine_winner();
     void calculate_map_value();
     void evaluate_board();
-    void run(uint16_t);
+    void run();
     void move(uint16_t);
 
     // for network games

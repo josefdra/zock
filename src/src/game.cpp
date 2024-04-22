@@ -162,26 +162,27 @@ void Game::evaluate_board()
     calculate_map_value();
 }
 
-void Game::run(uint16_t num_of_iterations)
+void Game::run()
 {
     std::cout
         << "------------------------------ Start -------------------------------" << std::endl
         << std::endl;
-    m_map.print_map();
+    // m_map.print_map();
     bool valid_moves = true;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, m_map.m_player_count - 1);
+
     uint16_t start_player = dis(gen);
-    for (int j = 0; j < num_of_iterations; j++)
+    /*for (int j = 0; j < 15; j++)
     {
         if (valid_moves)
         {
             valid_moves = false;
-            for (int p = 0; p < m_map.m_player_count; p++)
+            for (int i = 0; i < m_map.m_player_count; i++)
             {
 
-                move((start_player + p) % m_map.m_player_count);
+                move((start_player + i) % m_map.m_player_count);
             }
             for (auto &player : m_players)
             {
@@ -215,17 +216,17 @@ void Game::run(uint16_t num_of_iterations)
         std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
     std::cout << "Function: "
               << "evaluate_board" << std::endl;
-    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;*/
 }
 
-void Game::move(uint16_t p)
+void Game::move(uint16_t i)
 {
-    uint16_t c;
+    uint16_t coord;
     std::cout
-        << "------------------------ Next Move: Player " << p + 1 << "------------------------" << std::endl
+        << "------------------------ Next Move: Player " << i + 1 << "------------------------" << std::endl
         << std::endl;
     h_res_clock::time_point start_time = h_res_clock::now();
-    check_moves(m_map, m_players[p]);
+    check_moves(m_map, m_players[i]);
     uint16_t bestpos;
     // m_map.setFieldValue(m_players.at(i));
     h_res_clock::time_point end_time = h_res_clock::now();
@@ -235,15 +236,15 @@ void Game::move(uint16_t p)
               << "check_moves" << std::endl;
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 
-    if (m_players[p].m_valid_moves.size() > 0)
+    if (m_players[i].m_valid_moves.size() > 0)
     {
-        m_players[p].m_has_valid_moves = true;
-        auto elem = m_players[p].m_valid_moves.begin();
+        m_players[i].m_has_valid_moves = true;
+        auto elem = m_players[i].m_valid_moves.begin();
         // bestpos = minimaxWithPruning(0, 10, -INFINITY, INFINITY, true, m_map, m_players.at(i));
-        c = elem->first;
+        coord = elem->first;
         start_time = h_res_clock::now();
-        std::cout << "coord: " << c << std::endl;
-        execute_move(c, m_players[p], m_map);
+        std::cout << "coord: " << coord << std::endl;
+        execute_move(coord, m_players[i], m_map);
         h_res_clock::time_point end_time = h_res_clock::now();
         std::chrono::duration<double, std::micro> elapsed_time =
             std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
@@ -251,13 +252,166 @@ void Game::move(uint16_t p)
                   << "execute_move" << std::endl;
         std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 
-        m_players[p].m_valid_moves.clear();
+        m_players[i].m_valid_moves.clear();
         m_map.print_map();
     }
     else
     {
-        std::cout << "No valid moves for player " << m_players[p].m_symbol << std::endl
+        std::cout << "No valid moves for player " << m_players[i].m_symbol << std::endl
                   << std::endl;
-        m_players[p].m_has_valid_moves = false;
+        m_players[i].m_has_valid_moves = false;
     }
+}
+
+//////////////////////// NETWORK GAMES ////////////////////////
+
+/**
+ * @brief Maybe add something like this for network games:
+ *
+ * Process of a network game:
+ * 1. establish TCP connection
+ * 2. send groupnumber to server (type 1)
+ * 3. receive Map (type 2)
+ * 4. receive Playernumber (type 3)
+ * 5. while (!type 8)
+ * {
+ *      receive turn notification (type 4)
+ *      send turn (type 5)
+ *      receive Players turn (type 6)
+ *      (Maybe) receive disqualification of player (type 7)
+ * }
+ *
+ *
+ */
+
+void Game::run_network_game()
+{
+    bool phase2 = false;
+    bool game_end = false;
+    std::vector<Network> player_net;
+    init_player_clients(player_net);
+    connect_players_and_send_groupnumbers(player_net);
+    receive_map_data(player_net);
+    receive_playernumber(player_net);
+
+    do
+    {
+        m_map.print_map();
+        // bool already_changed = false; // just to test - ever client should have his own map_layout to make execute_move work
+        for (uint16_t i = 0; i < m_map.m_player_count; i++)
+        {
+
+            player_net.at(i).receive_type();
+            if (player_net.at(i).m_type == TYPE_DISQUALIFICATION)
+            {
+                player_net.at(i).receive_data();
+                player_net.at(i).close_socket();
+            }
+            else if (player_net.at(i).m_type == TYPE_PHASE1_END)
+            {
+                player_net.at(i).receive_data();
+                phase2 = true;
+            }
+            else if (player_net.at(i).m_type == TYPE_GAME_END)
+            {
+                player_net.at(i).receive_data();
+                player_net.at(i).close_socket();
+                if (i == m_map.m_player_count - 1)
+                {
+                    game_end = true;
+                }
+            }
+            else if (player_net.at(i).m_type == TYPE_RECEIVE_TURN_REQUEST)
+            {
+                player_net.at(i).receive_data();
+                // do something for m_time
+                // search depth ...
+                uint8_t spec = 0; // special stone value needs to be added
+                uint16_t turn = get_turn(player_net, i, spec);
+                uint16_t x = 0, y = 0;
+                one_dimension_2_second_dimension(turn, x, y, m_map);
+                player_net.at(i).send_type_5(x, y, spec);
+                uint8_t player = i + 1;
+                execute_last_players_turn_local(x, y, spec, player);
+            }
+
+            // needs change that it doesn't want to change everything for number of players times
+            else if (player_net.at(i).m_type == TYPE_RECEIVE_PLAYER_TURN)
+            {
+                player_net.at(i).receive_data();
+                uint16_t x, y;
+                uint8_t spec, player;
+                player_net.at(i).get_type6_values(x, y, spec, player);
+                // execute_last_players_turn_local(x, y, spec, player, already_changed);
+            }
+        }
+    } while (!game_end);
+    std::cout << "Game ended" << std::endl;
+}
+
+void Game::init_player_clients(std::vector<Network> &player_net)
+{
+    for (uint8_t i = 1; i <= m_map.m_player_count; i++)
+    {
+        Network net(i);
+        player_net.push_back(net);
+    }
+}
+
+void Game::connect_players_and_send_groupnumbers(std::vector<Network> &player_net)
+{
+    for (uint8_t i = 0; i < m_map.m_player_count; i++)
+    {
+        if (player_net.at(i).handle_user_input())
+        {
+            player_net.at(i).init_socket();
+            player_net.at(i).init_server();
+            player_net.at(i).connect_to_server();
+            player_net.at(i).send_type_1(i + 1);
+        }
+    }
+}
+
+void Game::receive_map_data(std::vector<Network> &player_net)
+{
+    for (uint8_t i = 0; i < m_map.m_player_count; i++)
+    {
+        player_net.at(i).receive_type();
+        player_net.at(i).receive_data();
+        // m_map.read_network_map(player_net.at(i).m_message, player_net.at(i).m_message_size); just for debug use cases or to compare internal map with actual map data of the server
+    }
+}
+
+void Game::receive_playernumber(std::vector<Network> &player_net)
+{
+    for (uint8_t i = 0; i < m_map.m_player_count; i++)
+    {
+
+        player_net.at(i).receive_type();
+        player_net.at(i).receive_data();
+    }
+}
+
+uint16_t Game::get_turn(std::vector<Network> &player_net, uint16_t &currPlayer, uint8_t &spec)
+{
+    uint16_t coord = 0;
+
+    check_moves(m_map, m_players[currPlayer]);
+    if (m_players[currPlayer].m_valid_moves.size() > 0)
+    {
+        m_players[currPlayer].m_has_valid_moves = true;
+        auto elem = m_players[currPlayer].m_valid_moves.begin();
+        // bestpos = minimaxWithPruning(0, 10, -INFINITY, INFINITY, true, m_map, m_players.at(i));
+        coord = elem->first;
+    }
+
+    return coord;
+}
+
+void Game::execute_last_players_turn_local(uint16_t &x, uint16_t &y, uint8_t &spec, uint8_t &players_turn)
+{
+
+    uint16_t coord = y * m_map.m_width + x + 1;
+    execute_move(coord, m_players[players_turn - 1], m_map);
+    m_players[players_turn - 1].m_valid_moves.clear();
 }
