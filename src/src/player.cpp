@@ -1,6 +1,14 @@
 #include "player.hpp"
 #include "map.hpp"
 
+//move values:
+#define EMPTY_FIELD 1
+#define ENEMY_PLAYER -20
+#define EXPANSION_STONE -10
+#define INVERSION_STONE 20
+#define CHOICE_STONE 50
+#define BONUS_STONE 25
+
 Player::Player(unsigned char s, uint16_t o, uint16_t b) : m_symbol(s),
                                                  m_overwrite_stones(o),
                                                  m_bombs(b)
@@ -180,33 +188,33 @@ void Player::get_moves_score(Map &m)
         {
             if (check_empty_fields(m.get_symbol(move.first))) // empty field (0)
             {
-                m_moves_scores[move.first] = 1;
+                m_moves_scores[move.first] = EMPTY_FIELD;
                 msg = "(0)";
             }
             else if (check_players(m.get_symbol(move.first))) // enemy player
             {
-                m_moves_scores[move.first] = -20;
+                m_moves_scores[move.first] = ENEMY_PLAYER;
                 msg = "enemy player";
             }
             else // expansion-stone
             {
-                m_moves_scores[move.first] = -10;
+                m_moves_scores[move.first] = EXPANSION_STONE;
                 msg = "expansion-stone";
             }
         }
         else if (special == 1) // inversion
         {
-            m_moves_scores[move.first] = 25;
+            m_moves_scores[move.first] = INVERSION_STONE;
             msg = "inversion";
         }
         else if (special == 2) // choice
         {
-            m_moves_scores[move.first] = 25;
+            m_moves_scores[move.first] = CHOICE_STONE;
             msg = "choice";
         }
         else if (special == 3) // bonus
         {
-            m_moves_scores[move.first] = 25;
+            m_moves_scores[move.first] = BONUS_STONE;
             msg = "bonus";
         }
         else
