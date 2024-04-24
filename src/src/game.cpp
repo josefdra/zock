@@ -9,12 +9,15 @@ Game::Game()
 
 Game::~Game() {}
 
-void Game::init_map(std::stringstream &ss){
+void Game::init_map(std::stringstream &ss)
+{
     m_map.read_hash_map(ss);
 }
 
-void Game::init_players(){
-    for(uint8_t p = 0; p < m_map.m_player_count; p++){
+void Game::init_players()
+{
+    for (uint8_t p = 0; p < m_map.m_player_count; p++)
+    {
         Player player;
         player.init(m_map.m_initial_overwrite_stones, m_map.m_initial_bombs, (p + 1 + '0'));
         m_players.push_back(player);
@@ -81,12 +84,22 @@ uint16_t Game::get_turn(uint8_t &spec)
     return coord;
 }
 
-uint16_t Game::get_bomb_throw(){
-    for(uint16_t c = 0; c < m_map.m_num_of_fields; c++){
-        if(m_map.get_symbol(c) == m_players[(m_player_number + 1) % m_map.m_player_count].m_symbol){
+uint16_t Game::get_bomb_throw()
+{
+    for (uint16_t c = 0; c < m_map.m_num_of_fields; c++)
+    {
+        if (m_map.get_symbol(c) == m_players[(m_player_number + 1) % m_map.m_player_count].m_symbol)
+        {
             return c;
         }
+        else
+        {
+            std::cout << "something went wrong in bomb throw 1" << std::endl;
+            return 0;
+        }
     }
+    std::cout << "something went wrong in bomb throw 2" << std::endl;
+    return 0;
 }
 
 /*
