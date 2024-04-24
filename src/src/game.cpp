@@ -86,19 +86,14 @@ uint16_t Game::get_turn(uint8_t &spec)
 
 uint16_t Game::get_bomb_throw()
 {
-    for (uint16_t c = 0; c < m_map.m_num_of_fields; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
         if (m_map.get_symbol(c) == m_players[(m_player_number + 1) % m_map.m_player_count].m_symbol)
         {
             return c;
         }
-        else
-        {
-            std::cout << "something went wrong in bomb throw 1" << std::endl;
-            return 0;
-        }
     }
-    std::cout << "something went wrong in bomb throw 2" << std::endl;
+    std::cout << "something went wrong in bomb throw" << std::endl;
     return 0;
 }
 
