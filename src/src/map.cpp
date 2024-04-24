@@ -7,10 +7,7 @@
  *
  */
 
-Map::Map(std::string map_name)
-{
-    read_hash_map(map_name);
-};
+Map::Map(){};
 
 Map::~Map(){};
 
@@ -86,19 +83,11 @@ uint8_t Map::get_direction(uint16_t c, uint8_t d)
  *
  * @param inputfile mapfile to read
  */
-void Map::read_hash_map(const std::string map_name)
+void Map::read_hash_map(std::stringstream &mapfile)
 {
-    std::ifstream inputFile(map_name);
-    std::stringstream mapfile;
-    unsigned char temp;
-    mapfile << inputFile.rdbuf();
-    // 65000 is set to check for end of file
-    mapfile << '\n'
-            << 65000;
-    inputFile.close();
+    char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     m_num_of_fields = m_height * m_width;
-    std::cout << m_num_of_fields << std::endl;
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields + 1; c++)
     {
@@ -261,6 +250,7 @@ void Map::print_map()
     std::cout << std::endl;
 }
 
+/*
 void Map::setFieldValue(Player &p)
 {
     p.staticMapEval.push_back(0);
@@ -274,6 +264,7 @@ void Map::setFieldValue(Player &p)
 /**
  * @brief adds the corners of the map to the set m_corners
  */
+/*
 void Map::check_corners_borders_special_fields()
 {
     m_corners.clear();
@@ -463,3 +454,4 @@ void Map::print_m_frontier_scores(std::vector<Player> &p)
     }
     std::cout << std::endl;
 }
+*/
