@@ -45,6 +45,7 @@ void print_corners(Map &);
 EvalOfField evalFieldSymbol(unsigned char);
 bool check_special(unsigned char);
 uint16_t check_frontier(Map &, uint16_t);
-void one_dimension_2_second_dimension(uint16_t &_1D_coord, uint16_t &x, uint16_t &y, Map &m);
+void one_dimension_2_second_dimension(uint16_t &, uint8_t &, uint8_t &, Map &);
+void two_dimension_2_one_dimension(uint16_t &, uint8_t &, uint8_t &, Map &);
 
 #endif // HELPER_HPP

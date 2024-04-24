@@ -140,8 +140,13 @@ EvalOfField evalFieldSymbol(unsigned char c)
     }
 }
 
-void one_dimension_2_second_dimension(uint16_t &_1D_coord, uint16_t &x, uint16_t &y, Map &m)
+void one_dimension_2_second_dimension(uint16_t &_1D_coord, uint8_t &x, uint8_t &y, Map &m)
 {
     _1D_coord % m.m_width == 0 ? x = m.m_width - 1 : x = _1D_coord % m.m_width - 1;
     y = (_1D_coord - (x + 1)) / m.m_width;
+}
+
+void two_dimension_2_one_dimension(uint16_t &_1D_coord, uint8_t &x, uint8_t &y, Map &m)
+{
+    _1D_coord = x + 1 + y * m.m_width;
 }

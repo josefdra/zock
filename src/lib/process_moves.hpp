@@ -7,8 +7,9 @@
 
 void check_coordinate(uint16_t, Map &, Player &);
 void change_players(Map &, unsigned char, unsigned char);
-void execute_move(uint16_t, Player &, Map &);
+void color(uint16_t c, char s, Map &);
+void execute_move(uint16_t, uint8_t, Player &, Map &);
+void execute_bomb(uint16_t, Map &, Player &);
 void check_moves(Map &, Player &);
-void paint_cells(std::unordered_set<uint16_t> &, unsigned char, Map &);
 
 #endif // PROCESS_MOVES_HPP

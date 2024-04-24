@@ -6,32 +6,42 @@
 
 #include "map.hpp"
 #include "player.hpp"
-#include "process_moves.hpp"
 #include "algorithms.hpp"
 #include "helper.hpp"
-#include "client_connection.hpp"
 
 class Game
 {
 public:
-    Game(const std::string);
+    Game();
     ~Game();
+    void init_map(std::stringstream &);
+    void init_players();
+
+    // void print_valid_moves(uint16_t);
+    // void print_frontiers(Map &);
+    // void check_protected_fields(Map &);
+    // void check_before_before_protected_fields(Map &);
+    // bool check_if_remove_border(Map &, uint16_t);
+    // void update_borders(Map &);
+    // void get_frontier_score(Map &);
+    // void get_moves_score(Map &);
+    // end coord          //special field(0-4)       //coords of the way
+    
+    std::unordered_map<uint16_t, int16_t> m_moves_scores;
+    uint16_t get_turn(uint8_t &);
+    uint16_t get_bomb_throw();
     Map m_map;
     std::vector<Player> m_players;
-    void determine_winner();
-    void calculate_map_value();
-    void evaluate_board();
-    void run();
-    void move(uint16_t);
+    uint8_t m_player_number;
 
-    // for network games
-    void run_network_game();
-    void init_player_clients(std::vector<Network> &player_net);
-    void connect_players_and_send_groupnumbers(std::vector<Network> &player_net);
-    void receive_map_data(std::vector<Network> &player_net);
-    void receive_playernumber(std::vector<Network> &player_net);
-    uint16_t get_turn(std::vector<Network> &player_net, uint16_t &currPlayer, uint8_t &spec);
-    void execute_last_players_turn_local(uint16_t &x, uint16_t &y, uint8_t &spec, uint8_t &players_turn);
+    // std::vector<int16_t> staticMapEval;
+    // std::unordered_set<uint16_t> m_protected_fields;
+    // std::unordered_set<uint16_t> m_before_before_protected_fields;
+    // std::unordered_set<uint16_t> m_borders;
+    // std::unordered_set<uint16_t> m_before_borders;
+    // std::unordered_set<uint16_t> m_before_before_borders;
+    // int32_t m_map_value;
+    // uint16_t m_frontier_score = 0;
 };
 
 #endif // GAME_HPP

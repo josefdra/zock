@@ -16,13 +16,14 @@
 #include <iomanip>
 #include <unordered_set>
 #include <cstring>
+
 // forward definition to prevent include errors
 class Player;
 
 class Map
 {
 public:
-    Map(std::string);
+    Map();
     ~Map();
     void check_neighbours(uint16_t);
     void set_symbol(uint16_t, unsigned char);
@@ -30,7 +31,7 @@ public:
     void set_transition(uint16_t, uint8_t, uint16_t);
     uint16_t get_transition(uint16_t, uint8_t);
     uint8_t get_direction(uint16_t, uint8_t);
-    void read_hash_map(const std::string);
+    void read_hash_map(std::stringstream &);
     void read_network_map(const uint8_t *byte_array, uint32_t);
     void print_map_with_transitions();
     void print_map_with_spectifications();
