@@ -21,6 +21,7 @@ public:
     void print_evaluation();
     int evaluate_board(uint8_t);
     void get_frontier_score(Player &);
+    void check_winner();
     // end coord          //special field(0-4)       //coords of the way
     std::unordered_map<uint16_t, int16_t> m_moves_scores;
     std::unordered_map<uint16_t, uint16_t> m_good_fields;

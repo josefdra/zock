@@ -91,7 +91,16 @@ uint16_t Game::get_bomb_throw()
         if (m_map.get_symbol(c) == m_players[(m_player_number + 1) % m_map.m_player_count].m_symbol)
         {
             return c;
-            std::cout << "Bomb at: " << c << std::endl;
+        }
+    }
+    // if the return doesn't happen, the next enemy has no more stones
+    // @todo change calculation of throw
+    // for now, this will throw a bomb at the first empty field
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    {
+        if (m_map.get_symbol(c) != m_players[m_player_number].m_symbol && m_map.get_symbol(c) != '-')
+        {
+            return c;
         }
     }
     std::cout << "something went wrong in bomb throw" << std::endl;
@@ -208,4 +217,27 @@ void Game::get_frontier_score(Player &p)
             p.m_frontier_score += check_frontier(m_map, c);
         }
     }
+}
+
+void Game::check_winner()
+{
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
+    {
+        if (!check_empty_fields(c) && m_map.get_symbol(c) != 'x')
+        {
+            m_players[m_map.get_symbol(c) - '0' - 1].m_points += 1;
+        }
+    }
+    uint16_t most_points = 0;
+    char winner;
+    for (auto &p : m_players)
+    {
+        std::cout << "Player " << p.m_symbol << " has " << p.m_points << " Points" << std::endl;
+        if (p.m_points > most_points)
+        {
+            winner = p.m_symbol;
+            most_points = p.m_points;
+        }
+    }
+    std::cout << "\nThe Winner is: Player " << winner << "!" << std::endl;
 }

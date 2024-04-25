@@ -161,7 +161,12 @@ void Network::receive_player_number(uint32_t actual_message_length)
 void Network::receive_move_prompt(uint32_t actual_message_length)
 {
     std::cout << "Received move prompt, calculating move" << std::endl;
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
     m_game.evaluate_board(m_game_phase);
+    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end - start;
+    std::cout << "Evaluation-Time: " << duration.count() << "s" << std::endl;
+    std::cout << std::endl;
     char message[actual_message_length];
     int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
     memcpy(&m_time, message, sizeof(m_time));
@@ -232,6 +237,7 @@ void Network::receive_end_of_phase_1()
 void Network::receive_end_of_game()
 {
     std::cout << "The game ended" << std::endl;
+    m_game.check_winner();
     return;
 }
 
