@@ -91,40 +91,28 @@ uint16_t Game::get_bomb_throw()
         if (m_map.get_symbol(c) == m_players[(m_player_number + 1) % m_map.m_player_count].m_symbol)
         {
             return c;
+            std::cout << "Bomb at: " << c << std::endl;
         }
     }
     std::cout << "something went wrong in bomb throw" << std::endl;
     return 0;
 }
 
-/*
-void Game::print_valid_moves(uint16_t width)
+void Game::print_evaluation()
 {
-    uint16_t x, y, c;
-    for (auto &elem : m_valid_moves)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        c = elem.first;
-        c % width == 0 ? x = width - 1 : x = c % width - 1;
-        y = (c - (x + 1)) / width;
-        std::cout << "(" << x << " , " << y << ")" << std::endl;
+        std::cout << std::setw(4) << m_good_fields[c] << " ";
+        if (c % m_map.m_width == 0)
+        {
+            std::cout << std::endl;
+        }
     }
-}
-
-
-void Game::print_frontiers(Map &m)
-{
-    for (uint16_t c = 1; c < m.m_num_of_fields + 1; c++)
+    std::cout << std::endl;
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        if (m.get_symbol(c) == m_symbol)
-        {
-            std::cout << getColorString(Colors((m.get_symbol(c) - '0'))) << std::setw(3) << check_frontier(m, c) << " "
-                      << "\e[0m";
-        }
-        else
-        {
-            std::cout << std::setw(3) << m.get_symbol(c) << " ";
-        }
-        if (c % m.m_width == 0)
+        std::cout << std::setw(4) << m_bad_fields[c] << " ";
+        if (c % m_map.m_width == 0)
         {
             std::cout << std::endl;
         }
@@ -132,157 +120,92 @@ void Game::print_frontiers(Map &m)
     std::cout << std::endl;
 }
 
-void Game::check_protected_fields(Map &m)
+int Game::evaluate_board(uint8_t game_phase)
 {
-    m_protected_fields.clear();
-    for (auto &c : m.m_corners)
+    for (auto &p : m_players)
     {
-        m.m_protected_fields.insert(c);
-        if (check_empty_fields(m.get_symbol(c)))
+        p.m_board_value = 0;
+    }
+    uint8_t value = 10;
+    uint8_t bonus_value = 30;
+    uint8_t choice_value = 20 * (game_phase + 1);
+    uint8_t inversion_value = 30;
+    uint8_t before_special_value = 30;
+    std::array<int, 9> wall_values{0, 1, 2, 3, 16, 12, 8, 4, 0};
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    {
+        m_good_fields[c] = 0;
+        m_bad_fields[c] = 0;
+    }
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    {
+        bool special = false;
+        char s = m_map.get_symbol(c);
+        switch (s)
         {
-            m_protected_fields.insert(c);
+        case 'b':
+            m_good_fields[c] += bonus_value;
+            special = true;
+            break;
+        case 'c':
+            m_good_fields[c] += choice_value;
+            special = true;
+            break;
+        case 'i':
+            m_bad_fields[c] -= inversion_value;
+            special = true;
+            break;
+        default:
+            break;
         }
-        else if (m.get_symbol(c) == m_symbol)
+        uint8_t value_to_add = 0;
+        uint8_t walls = 0;
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            m_protected_fields.insert(c);
-            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d += 2)
+            if (m_map.get_transition(c, d) == 0)
             {
-                if (m.get_transition(c, d) != 0)
+                walls++;
+                uint16_t trans = m_map.get_transition(c, (d + 4) % 8);
+                if (trans != 0)
                 {
-                    m_protected_fields.insert(m.get_transition(c, d));
-                    m.m_protected_fields.insert(m.get_transition(c, d));
+                    m_bad_fields[trans] -= 10;
+                }
+            }
+            if (special == true)
+            {
+                uint16_t trans = m_map.get_transition(c, d);
+                if (trans != 0)
+                {
+                    m_bad_fields[trans] -= before_special_value;
                 }
             }
         }
+        m_good_fields[c] += wall_values[walls] * value;
     }
-}
-
-void Game::check_before_before_protected_fields(Map &m)
-{
-    m_before_before_protected_fields.clear();
-    for (auto &c : m.m_before_protected_fields)
+    print_evaluation();
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        for (uint8_t p = 0; p < m_map.m_player_count; p++)
         {
-            if (m_protected_fields.find(m.get_transition(c, d)) != m_protected_fields.end())
+            if (m_map.get_symbol(c) == m_players[p].m_symbol)
             {
-                m_before_before_protected_fields.insert(m.get_transition(c, (d + 4) % 8) / 10);
-                m_before_before_protected_fields.insert(m.get_transition(c, (d + 3) % 8) / 10);
-                m_before_before_protected_fields.insert(m.get_transition(c, (d + 5) % 8) / 10);
+                m_players[p].m_board_value += m_good_fields[c] + m_bad_fields[c];
             }
         }
     }
-    m_before_before_protected_fields.erase(0);
-}
-
-bool Game::check_if_remove_border(Map &m, uint16_t c)
-{
-    bool val = false;
-    if (m.m_protected_fields.find(c) != m.m_protected_fields.end())
+    for (auto &p : m_players)
     {
-        val = true;
-    }
-    else if (m.m_before_protected_fields.find(c) != m.m_before_protected_fields.end())
-    {
-        val = true;
-    }
-    else if (m_before_before_protected_fields.find(c) != m_before_before_protected_fields.end())
-    {
-        val = true;
-    }
-    return val;
-}
-
-void Game::update_borders(Map &m)
-{
-    m_borders.clear();
-    m_before_borders.clear();
-    m_before_before_borders.clear();
-    for (auto &c : m.m_borders)
-    {
-        if (!check_if_remove_border(m, c))
-        {
-            m_borders.insert(c);
-        }
-    }
-    for (auto &c : m.m_before_borders)
-    {
-        if (!check_if_remove_border(m, c))
-        {
-            m_before_borders.insert(c);
-        }
-    }
-    for (auto &c : m.m_before_before_borders)
-    {
-        if (!check_if_remove_border(m, c))
-        {
-            m_before_before_borders.insert(c);
-        }
+        std::cout << "Board value of Player " << p.m_symbol << " right now: " << p.m_board_value << std::endl;
     }
 }
 
-void Game::get_frontier_score(Map &m)
+void Game::get_frontier_score(Player &p)
 {
-    for (uint16_t c = 1; c < m.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        if (m.get_symbol(c) == m_symbol)
+        if (m_map.get_symbol(c) == p.m_symbol)
         {
-            m_frontier_score += check_frontier(m, c);
+            p.m_frontier_score += check_frontier(m_map, c);
         }
     }
 }
-
-void Game::get_moves_score(Map &m)
-{
-    std::cout << getColorString(Colors(m_symbol - '0')) << "Number of moves for Player " << m_symbol << ": " << m_valid_moves.size() << "\e[0m" << std::endl;
-    std::cout << getColorString(Colors(m_symbol - '0')) << std::endl
-              << "-----------Scores:"
-              << "\e[0m" << std::endl
-              << std::endl;
-    std::string msg = "";
-    for (auto &move : m_valid_moves)
-    {
-        uint16_t special = std::get<0>(move.second);
-        if (special == 0) // normal
-        {
-            if (check_empty_fields(m.get_symbol(move.first))) // empty field (0)
-            {
-                m_moves_scores[move.first] = 1;
-                msg = "(0)";
-            }
-            else if (check_players(m.get_symbol(move.first))) // enemy player
-            {
-                m_moves_scores[move.first] = -20;
-                msg = "enemy player";
-            }
-            else // expansion-stone
-            {
-                m_moves_scores[move.first] = -10;
-                msg = "expansion-stone";
-            }
-        }
-        else if (special == 1) // inversion
-        {
-            m_moves_scores[move.first] = 25;
-            msg = "inversion";
-        }
-        else if (special == 2) // choice
-        {
-            m_moves_scores[move.first] = 25;
-            msg = "choice";
-        }
-        else if (special == 3) // bonus
-        {
-            m_moves_scores[move.first] = 25;
-            msg = "bonus";
-        }
-        else
-        {
-            std::cout << "invalid special value" << std::endl;
-        }
-        std::cout << getColorString(Colors(m_symbol - '0')) << move.first << "-Move (" << move.first % m.m_width - 1 << "," << move.first / m.m_width << "): "
-                  << m_moves_scores[move.first] << " - " << msg << "\e[0m" << std::endl;
-    }
-    std::cout << std::endl;
-}
-*/

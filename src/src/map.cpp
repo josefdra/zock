@@ -105,24 +105,20 @@ void Map::read_hash_map(std::stringstream &mapfile)
             check_neighbours(c);
         }
     }
-    while (mapfile)
+    uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2, pos1r, pos2r;
+    while (mapfile >> x1)
     {
         // special transitions are being set in same format to appear as neighbours
-        uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2, pos1r, pos2r = 0;
         unsigned char trash;
-        mapfile >> x1 >> y1 >> r1 >> trash >> trash >> trash >> x2 >> y2 >> r2;
-        // check if eof is reached
-        if (x1 != 65000)
-        {
-            x1++;
-            x2++;
-            pos1 = (x1) + (y1)*m_width;
-            pos2 = (x2) + (y2)*m_width;
-            pos1r = pos1 * 10 + ((r1 + 4) % 8);
-            pos2r = pos2 * 10 + ((r2 + 4) % 8);
-            set_transition(pos1, r1, pos2r);
-            set_transition(pos2, r2, pos1r);
-        }
+        mapfile >> y1 >> r1 >> trash >> trash >> trash >> x2 >> y2 >> r2;
+        x1++;
+        x2++;
+        pos1 = (x1) + (y1)*m_width;
+        pos2 = (x2) + (y2)*m_width;
+        pos1r = pos1 * 10 + ((r1 + 4) % 8);
+        pos2r = pos2 * 10 + ((r2 + 4) % 8);
+        set_transition(pos1, r1, pos2r);
+        set_transition(pos2, r2, pos1r);
     }
 }
 

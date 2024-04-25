@@ -7,8 +7,8 @@ int main(int argc, char *argv[])
     {
         if (argv[3] != "-p")
         {
-            Network network_handler(argv[2], atoi(argv[4]), group_number);
-            // Network network_handler("127.0.0.1", 7777, group_number);
+            // Network network_handler(argv[2], atoi(argv[4]), group_number);
+            Network network_handler("127.0.0.1", 7777, group_number);
 
         }
         else

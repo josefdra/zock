@@ -106,10 +106,20 @@ bool Network::check_socket_acitivity()
 void Network::run_game()
 {
     m_game.m_map.print_map();
+    uint16_t counter = 0;
+    bool phase_updated = false;
     while (true)
-    if (check_socket_acitivity())
     {
-        receive_data();
+        if (check_socket_acitivity())
+        {
+            if (counter >= m_game.m_map.m_num_of_fields / 2 && !phase_updated)
+            {
+                m_game_phase = 1;
+                phase_updated = true;
+            }
+            receive_data();
+        }
+        counter++;
     }
 }
 
@@ -151,13 +161,14 @@ void Network::receive_player_number(uint32_t actual_message_length)
 void Network::receive_move_prompt(uint32_t actual_message_length)
 {
     std::cout << "Received move prompt, calculating move" << std::endl;
+    m_game.evaluate_board(m_game_phase);
     char message[actual_message_length];
     int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
     memcpy(&m_time, message, sizeof(m_time));
     m_search_depth = message[4];
     uint8_t spec = 0; // special stone value needs to be added
     uint16_t turn;
-    if (m_phase2 == false)
+    if (m_game_phase != 2)
     {
         turn = m_game.get_turn(spec);
         std::cout << "Placing stone at: ";
@@ -185,9 +196,8 @@ void Network::receive_move(uint32_t actual_message_length)
     player = message[5];
     uint16_t coord;
     two_dimension_2_one_dimension(coord, x, y, m_game.m_map);
-    std::cout << "Player " << (int)player << " (symbol: " << m_game.m_players[player - 1].m_symbol << ")"
-              << " has " << m_game.m_players[player - 1].m_overwrite_stones << " overrides and " << m_game.m_players[player - 1].m_bombs << " bombs" << std::endl;
-    if (m_phase2 == false)
+    std::cout << "Player " << (int)player << " has " << m_game.m_players[player - 1].m_overwrite_stones << " overrides and " << m_game.m_players[player - 1].m_bombs << " bombs" << std::endl;
+    if (m_game_phase != 2)
     {
         std::cout << "Received move at: ";
         execute_move(coord, spec, m_game.m_players[player - 1], m_game.m_map);
@@ -215,7 +225,7 @@ void Network::receive_disqualification(uint32_t actual_message_length)
 
 void Network::receive_end_of_phase_1()
 {
-    m_phase2 = true;
+    m_game_phase = 2;
     std::cout << "Entering phase 2" << std::endl;
 }
 
