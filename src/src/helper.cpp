@@ -36,7 +36,7 @@ std::string getColorString(Colors color)
 bool check_empty_fields(unsigned char c)
 {
     bool var = false;
-    for (int i = 0; i < empty_fields.size(); i++)
+    for (uint8_t i = 0; i < empty_fields.size(); i++)
     {
         if (c == empty_fields[i])
         {
