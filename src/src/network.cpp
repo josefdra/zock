@@ -107,16 +107,14 @@ void Network::run_game()
 {
     m_game.m_map.print_map();
     uint16_t counter = 0;
-    bool phase_updated = false;
 
     while (true)
     {
         if (check_socket_acitivity())
         {
-            if (counter >= m_game.m_map.m_num_of_fields / 2 && !phase_updated)
+            if (counter >= m_game.m_map.m_num_of_fields / 2 && m_game_phase != 2)
             {
                 m_game_phase = 1;
-                phase_updated = true;
             }
             receive_data();
         }
