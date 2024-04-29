@@ -121,7 +121,7 @@ void execute_inversion(Map &m, char p)
     {
         if (check_players(c))
         {
-            m.set_symbol(c, (m.get_symbol(c) - '0') % m.m_player_count + '0');
+            m.set_symbol(c, ((m.get_symbol(c) - '0') % m.m_player_count) + '0');
         }
     }
 }
@@ -180,9 +180,6 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
     else if (curr_symbol == 'i')
     {
         color(c, p.m_symbol, m);
-        uint16_t helper = p.m_symbol - '0' - 1;
-        helper = (helper + 1) % m.m_player_count;
-        unsigned char next_player = helper + 1 + '0';
         execute_inversion(m, p.m_symbol);
     }
     // choice
