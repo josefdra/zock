@@ -101,7 +101,7 @@ void check_coordinate(uint16_t c, Map &m, Player &p)
 
 void change_players(Map &m, unsigned char p1, unsigned char p2)
 {
-    for (uint16_t c = 1; c < m.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
         unsigned char s = m.get_symbol(c);
         if (s == p1)
@@ -221,7 +221,7 @@ void execute_bomb(uint16_t c, Map &m, Player &p)
 void check_moves(Map &m, Player &p)
 {
     p.m_valid_moves.clear();
-    for (uint16_t c = 1; c < m.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
         unsigned char s = m.get_symbol(c);
         if (s != '-' && s != p.m_symbol)

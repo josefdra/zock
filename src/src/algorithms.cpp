@@ -1,5 +1,4 @@
 #include "algorithms.hpp"
-#include <iostream>
 
 // this algorithm could be optimized by adding functionality to check if enemy has direct influence in our player and if he can "attack" us, else his
 // possible turns could be ignored
