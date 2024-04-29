@@ -59,9 +59,13 @@ uint16_t Game::get_turn(uint8_t &spec)
         coord = elem->first;
         if (m_map.get_symbol(coord) == 'c')
         {
-            std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
-            std::cin >> spec;
-            spec -= '0';
+            do
+            {
+                std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
+                std::cin >> answer;
+                answer -= '0';
+            } while (!(0 < answer < (m_map.m_player_count + 1)));
+            spec = answer;
         }
         else if (m_map.get_symbol(coord) == 'b')
         {
@@ -109,6 +113,7 @@ uint16_t Game::get_bomb_throw()
 
 void Game::print_evaluation()
 {
+    /*
     for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
         std::cout << std::setw(4) << m_good_fields[c] << " ";
@@ -127,6 +132,7 @@ void Game::print_evaluation()
         }
     }
     std::cout << std::endl;
+    */
 }
 
 int Game::evaluate_board(uint8_t game_phase)
@@ -191,7 +197,7 @@ int Game::evaluate_board(uint8_t game_phase)
         }
         m_good_fields[c] += wall_values[walls] * value;
     }
-    print_evaluation();
+    // print_evaluation();
     for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
         for (uint8_t p = 0; p < m_map.m_player_count; p++)
