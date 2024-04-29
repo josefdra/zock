@@ -107,16 +107,14 @@ void Network::run_game()
 {
     m_game.m_map.print_map();
     uint16_t counter = 0;
-    bool phase_updated = false;
 
     while (true)
     {
         if (check_socket_acitivity())
         {
-            if (counter >= m_game.m_map.m_num_of_fields / 2 && !phase_updated)
+            if (counter >= m_game.m_map.m_num_of_fields / 2 && m_game_phase != 2)
             {
                 m_game_phase = 1;
-                phase_updated = true;
             }
             receive_data();
         }
@@ -165,8 +163,9 @@ void Network::receive_move_prompt(uint32_t actual_message_length)
     char message[actual_message_length];
     int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
     memcpy(&m_time, message, sizeof(m_time));
-    m_search_depth = message[4];
-    uint8_t spec = 0; // special stone value needs to be added
+    // m_search_depth = message[4];
+    m_search_depth = 3;
+    uint8_t spec = 0;
     uint16_t turn;
     if (m_game_phase != 2)
     {

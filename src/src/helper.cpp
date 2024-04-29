@@ -89,12 +89,12 @@ std::cout << "check_moves unordered_map: " << std::endl;
 std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 */
 
-uint16_t check_frontier(Map &m, uint16_t c)
+uint16_t check_frontier(Map &m, uint16_t c, std::vector<char> &currMap)
 {
     uint16_t score = 8;
     for (int d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
-        if (check_empty_fields(m.get_symbol(m.get_transition(c, d))))
+        if (check_empty_fields(currMap[m.get_transition(c, d)]))
         {
             score--;
         }
@@ -152,18 +152,3 @@ uint8_t checkForSpecial(char &c)
     }
 }
 
-bool affectsMyPlayer(Player &enemy, Player &myPlayer, std::vector<char> &prevMap)
-{
-    for (auto possibleMove : enemy.m_valid_moves)
-    {
-        for (auto &coord : prevMap)
-        {
-            char s = get_symbol(possibleMove.second, coord);
-            if (s == myPlayer.m_symbol && s != get_symbol(prevMap, coord))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}

@@ -13,8 +13,9 @@
 
 class Game;
 
-char get_symbol(std::vector<char> &, uint16_t);
-int minimaxOrParanoidWithPruning(uint8_t, int, int, bool, std::vector<char> &, Map &, uint8_t &, uint8_t &, Player &, uint16_t &);
+void get_frontier_score(Player &, std::vector<char> &, Map &);
+int evaluate_board(uint8_t, Player &, Map &, std::vector<char> &);
+int minimaxOrParanoidWithPruning(Game &, uint8_t, int, int, bool, std::vector<char> &, uint8_t &, uint8_t &, Player &, uint16_t &);
 uint8_t checkForSpecial(char &);
 
 #endif // ALGORITHMS_HPP

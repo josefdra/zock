@@ -84,19 +84,21 @@ uint8_t Map::get_direction(uint16_t c, uint8_t d)
  */
 void Map::read_hash_map(std::stringstream &mapfile)
 {
+    m_symbols.push_back(0);
+    m_transitions.push_back(0);
     char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     m_num_of_fields = m_height * m_width + 1;
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields; c++)
     {
-        m_symbols.push_back(0);
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
             m_transitions.push_back(0);
             set_transition(c, d, 0);
         }
         mapfile >> temp;
+        m_symbols.push_back(0);
         set_symbol(c, temp);
     }
     for (int c = 1; c < m_num_of_fields; c++)
