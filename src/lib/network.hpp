@@ -48,7 +48,7 @@ public:
     int m_csocket;
     int status;
     bool m_socket_flag = false;
-    bool m_phase2 = false;
+    uint8_t m_game_phase = 0;
     Game m_game;
     uint32_t m_time = 0;
     uint8_t m_search_depth = 0;

@@ -105,47 +105,21 @@ void Map::read_hash_map(std::stringstream &mapfile)
             check_neighbours(c);
         }
     }
-    while (mapfile)
+    uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2, pos1r, pos2r;
+    while (mapfile >> x1)
     {
         // special transitions are being set in same format to appear as neighbours
-        uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2, pos1r, pos2r = 0;
         unsigned char trash;
-        mapfile >> x1 >> y1 >> r1 >> trash >> trash >> trash >> x2 >> y2 >> r2;
-        // check if eof is reached
-        if (x1 != 65000)
-        {
-            x1++;
-            x2++;
-            pos1 = (x1) + (y1)*m_width;
-            pos2 = (x2) + (y2)*m_width;
-            pos1r = pos1 * 10 + ((r1 + 4) % 8);
-            pos2r = pos2 * 10 + ((r2 + 4) % 8);
-            set_transition(pos1, r1, pos2r);
-            set_transition(pos2, r2, pos1r);
-        }
+        mapfile >> y1 >> r1 >> trash >> trash >> trash >> x2 >> y2 >> r2;
+        x1++;
+        x2++;
+        pos1 = (x1) + (y1)*m_width;
+        pos2 = (x2) + (y2)*m_width;
+        pos1r = pos1 * 10 + ((r1 + 4) % 8);
+        pos2r = pos2 * 10 + ((r2 + 4) % 8);
+        set_transition(pos1, r1, pos2r);
+        set_transition(pos2, r2, pos1r);
     }
-}
-
-/**
- * @brief this function can be used to debug if there occur problems with map data sent by server and actual map
- * currently there are just the first values assigned which works correctly for further information the whole map data received needs to be assigned
- *
- * @param net_map byte array that has stored the map data
- * @param size_of_byte_array determines the size of the map data sent by server
- */
-void Map::read_network_map(const uint8_t *net_map, uint32_t size_of_byte_array)
-{
-    std::vector<uint8_t> byte_vec(size_of_byte_array);
-    std::memcpy(byte_vec.data(), net_map, size_of_byte_array);
-    std::stringstream map_stream;
-    uint16_t player_c, os, ib, st, h, wi;
-    for (auto byte : byte_vec)
-    {
-        map_stream << byte;
-    }
-    map_stream << '\n'
-               << 65000;
-    map_stream >> player_c >> os >> ib >> st >> h >> wi;
 }
 
 /**
@@ -251,198 +225,6 @@ void Map::print_map()
 }
 
 /*
-void Map::setFieldValue(Player &p)
-{
-    p.staticMapEval.push_back(0);
-    for (uint16_t c = 1; c < m_num_of_fields + 1; c++)
-    {
-        EvalOfField currVal = evalFieldSymbol(get_symbol(c));
-        p.staticMapEval.push_back((int)currVal);
-    }
-}
-
-/**
- * @brief adds the corners of the map to the set m_corners
- */
-/*
-void Map::check_corners_borders_special_fields()
-{
-    m_corners.clear();
-    m_borders.clear();
-    m_special_fields.clear();
-
-    for (uint16_t c = 1; c < m_num_of_fields + 1; c++)
-    {
-        if (check_special(get_symbol(c)))
-        {
-            m_special_fields.insert(c);
-        }
-        else if (get_symbol(c) != '-')
-        {
-            bool corner = false;
-            std::vector<uint16_t> transitions;
-            for (uint16_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-            {
-                if (get_transition(c, d) != 0)
-                {
-                    transitions.push_back(d);
-                }
-                else if (get_transition(c, d) == 0)
-                {
-                    m_borders.insert(c);
-                    break;
-                }
-            }
-            if (transitions.size() < 5)
-            {
-                corner = true;
-                for (auto &t : transitions)
-                {
-                    if (get_transition(c, (t + 4) % 8) != 0)
-                    {
-                        corner = false;
-                    }
-                }
-            }
-            if (corner)
-            {
-                m_corners.insert(c);
-            }
-        }
-    }
-
-    m_borders.erase(0);
-}
-
-void Map::check_before_protected_fields(std::vector<Player> &players)
-{
-    m_before_protected_fields.clear();
-    for (auto &p : players)
-    {
-        for (auto &c : p.m_protected_fields)
-        {
-            if (m_corners.find(c) != m_corners.end())
-            {
-                for (int d = 0; d < NUM_OF_DIRECTIONS; d++)
-                {
-                    if (get_transition(c, d) != 0)
-                    {
-                        m_before_protected_fields.insert(get_transition(c, d));
-                    }
-                }
-            }
-            else
-            {
-                for (int d = 0; d < NUM_OF_DIRECTIONS; d += 2)
-                {
-                    if (p.m_protected_fields.find(get_transition(c, d)) != p.m_protected_fields.end())
-                    {
-                        m_before_protected_fields.insert(get_transition(c, (d + 4) % 8));
-                        m_before_protected_fields.insert(get_transition(c, (d + 3) % 8));
-                        m_before_protected_fields.insert(get_transition(c, (d + 5) % 8));
-                    }
-                }
-            }
-        }
-    }
-    m_before_protected_fields.erase(0);
-}
-
-void Map::check_before_borders()
-{
-    m_before_borders.clear();
-    for (auto &c : m_borders)
-    {
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d += 2)
-        {
-            if (get_transition(c, d) == 0)
-            {
-                if (m_borders.find(get_transition(c, (d + 4) % 8)) == m_borders.end())
-                {
-                    m_before_borders.insert(get_transition(c, (d + 4) % 8));
-                }
-                if (m_borders.find(get_transition(c, (d + 3) % 8)) == m_borders.end())
-                {
-                    m_before_borders.insert(get_transition(c, (d + 3) % 8));
-                }
-                if (m_borders.find(get_transition(c, (d + 5) % 8)) == m_borders.end())
-                {
-                    m_before_borders.insert(get_transition(c, (d + 5) % 8));
-                }
-            }
-        }
-    }
-    m_before_borders.erase(0);
-}
-
-void Map::check_before_before_borders()
-{
-    check_before_borders();
-    m_before_before_borders.clear();
-    for (auto &c : m_before_borders)
-    {
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d += 2)
-        {
-            if (get_transition(get_transition(c, d), d) == 0)
-            {
-                if (m_before_borders.find(get_transition(c, (d + 4) % 8)) == m_borders.end())
-                {
-                    m_before_before_borders.insert(get_transition(c, (d + 4) % 8));
-                }
-                if (m_before_borders.find(get_transition(c, (d + 3) % 8)) == m_borders.end())
-                {
-                    m_before_before_borders.insert(get_transition(c, (d + 3) % 8));
-                }
-                if (m_before_borders.find(get_transition(c, (d + 5) % 8)) == m_borders.end())
-                {
-                    m_before_before_borders.insert(get_transition(c, (d + 5) % 8));
-                }
-            }
-        }
-    }
-    m_before_before_borders.erase(0);
-}
-
-void Map::check_before_special_fields()
-{
-    m_before_special_fields.clear();
-    for (auto &c : m_special_fields)
-    {
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-        {
-            if (get_transition(c, d) != 0)
-            {
-                if (m_corners.find(get_transition(c, d)) == m_corners.end())
-                {
-                    if (m_borders.find(get_transition(c, d)) == m_borders.end())
-                    {
-                        m_before_special_fields.insert(get_transition(c, d));
-                    }
-                }
-            }
-        }
-    }
-}
-
-void Map::check_before_before_special_fields()
-{
-    check_before_special_fields();
-    m_before_before_special_fields.clear();
-    for (auto &c : m_before_special_fields)
-    {
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-        {
-            if (m_special_fields.find(get_transition(c, d)) != m_special_fields.end())
-            {
-                m_before_before_special_fields.insert(get_transition(c, (d + 4) % 8));
-                m_before_before_special_fields.insert(get_transition(c, (d + 3) % 8));
-                m_before_before_special_fields.insert(get_transition(c, (d + 5) % 8));
-            }
-        }
-    }
-    m_before_before_special_fields.erase(0);
-}
-
 void Map::print_m_frontier_scores(std::vector<Player> &p)
 {
     std::cout << "Frontier_scores:" << std::endl
