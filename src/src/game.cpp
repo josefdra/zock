@@ -96,20 +96,49 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
 
 uint16_t Game::get_bomb_throw()
 {
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
+    std::vector<uint16_t> current_player_stones(m_map.m_player_count, 0);
+    uint8_t best_player;
+    // searches for enemy player with most stones
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        if (m_map.get_symbol(c) == m_players[(m_player_number + 1) % m_map.m_player_count].m_symbol)
+        if (check_players(m_map.get_symbol(c)) && m_map.get_symbol(c) != m_players[m_player_number].m_symbol)
         {
+            current_player_stones[m_map.get_symbol(c) - '0' - 1] += 1;
+        }
+    }
+    uint16_t stones = 0;
+    for (uint8_t i = 0; i < m_map.m_player_count; i++)
+    {
+        if (current_player_stones[i] > stones)
+        {
+            stones = current_player_stones[i];
+            best_player = i;
+        }
+    }
+    // second half of map
+    for (uint16_t c = m_map.m_num_of_fields / 2; c < m_map.m_num_of_fields + 1; c++)
+    {
+        if (m_map.get_symbol(c) == m_players[best_player].m_symbol)
+        {
+            execute_bomb(c, m_map, m_players[best_player]);
             return c;
         }
     }
-    // if the return doesn't happen, the next enemy has no more stones
-    // @todo change calculation of throw
-    // for now, this will throw a bomb at the first empty field
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
+    // first half of map
+    for (uint16_t c = 1; c < m_map.m_num_of_fields / 2; c++)
+    {
+        if (m_map.get_symbol(c) == m_players[best_player].m_symbol)
+        {
+            execute_bomb(c, m_map, m_players[best_player]);
+            return c;
+        }
+    }
+    // if for some reason no best player was found, this will throw a bomb at the first empty field
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
         if (m_map.get_symbol(c) != m_players[m_player_number].m_symbol && m_map.get_symbol(c) != '-')
         {
+            execute_bomb(c, m_map, m_players[c]);
             return c;
         }
     }

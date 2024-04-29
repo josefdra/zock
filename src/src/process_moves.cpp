@@ -173,7 +173,6 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
         helper = (helper + 1) % m.m_player_count;
         unsigned char next_player = helper + 1 + '0';
         change_players(m, p.m_symbol, next_player);
-        
     }
     // choice
     else if (curr_symbol == 'c')
@@ -203,16 +202,60 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
 
 void execute_bomb(uint16_t c, Map &m, Player &p)
 {
-    // @todo add strength and do something in case next player has no more fields;
-    m.set_symbol(c, '-');
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    if (m.m_strength == 0)
     {
-        uint16_t temp_transition = m.get_transition(c, d);
-        uint8_t temp_direction = m.get_direction(c, d);
-        m.set_transition(c, d, 0);
-        m.set_transition(temp_transition, temp_direction, 0);
+        m.set_symbol(c, '-');
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            uint16_t temp_transition = m.get_transition(c, d);
+            uint8_t temp_direction = m.get_direction(c, d);
+            m.set_transition(c, d, 0);
+            m.set_transition(temp_transition, (temp_direction + 4) % 8, 0);
+        }
+        p.m_bombs -= 1;
     }
-    p.m_bombs -= 1;
+    else
+    {
+        // bomb strength greater 0: destroy neighbour stones
+        std::unordered_set<uint16_t> bombed_stones;
+        bombed_stones.insert(c); // add stone in the center
+
+        for (uint8_t s = 1; s <= m.m_strength; ++s)
+        {
+            std::vector<uint16_t> next_bombed_stones;
+            for (auto stone : bombed_stones)
+            {
+                // Destroy neigbour stones for each level of bomb strength
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t transition = m.get_transition(stone, d);
+                    if (transition != 0 && m.get_symbol(transition) != '-')
+                    {
+                        m.set_symbol(transition, '-');
+                        next_bombed_stones.push_back(transition);
+                    }
+                }
+            }
+            bombed_stones.insert(next_bombed_stones.begin(), next_bombed_stones.end());
+        }
+
+        // Update transitions for all destroyed stones
+        for (auto stone : bombed_stones)
+        {
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t transition = m.get_transition(stone, d);
+                if (transition != 0)
+                {
+                    uint16_t direction = m.get_direction(stone, d);
+                    m.set_transition(stone, d, 0);
+                    m.set_transition(transition, (direction + 4) % 8, 0);
+                }
+            }
+        }
+        m.set_symbol(c, '-');
+        p.m_bombs -= 1;
+    }
 }
 
 /// @brief This function asks for a coordinate and checks if it's a valid move
