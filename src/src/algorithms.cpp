@@ -85,11 +85,11 @@ int evaluate_board(uint8_t game_phase, Player &p, Map &m, std::vector<char> &cur
     }
     if (game_phase == 0)
     {
-        player_points *= 5;
+        player_points *= 10;
     }
     else if (game_phase == 1)
     {
-        player_points *= 10;
+        player_points *= 20;
     }
     get_frontier_score(p, currMap, m);
     p.m_board_value += p.m_frontier_score;

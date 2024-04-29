@@ -197,6 +197,7 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
                 uint16_t next_transition = m.get_transition(temp_transition, temp_direction);
                 uint8_t next_direction = m.get_direction(temp_transition, temp_direction);
                 temp_transition = next_transition;
+                temp_direction = next_direction;
             }
         }
     }
@@ -228,33 +229,48 @@ void check_moves(Map &m, Player &p, std::vector<char> &currMap, bool &affectsMyP
     p.m_valid_moves.clear();
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
+        if (currMap[c] == 'x')
+        {
+            possible_moves.insert(c);
+        }
         if (currMap[c] == p.m_symbol)
         {
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_field = m.get_transition(c, d);
                 uint8_t next_direction = m.get_direction(c, d);
-                uint16_t temp;
+                uint16_t temp_trans;
+                uint8_t temp_dir;
                 bool valid = false;
                 while (next_field != 0)
                 {
-                    if ((check_empty_fields(currMap[next_field]) && valid))
+                    if (currMap[next_field] == p.m_symbol && overrides && valid)
                     {
                         possible_moves.insert(next_field);
                         break;
                     }
-                    else if (!check_empty_fields(currMap[next_field]) && overrides && currMap[next_field] != p.m_symbol)
+                    else if ((check_empty_fields(currMap[next_field]) && valid))
+                    {
+                        possible_moves.insert(next_field);
+                        break;
+                    }
+                    else if (valid && overrides)
                     {
                         possible_moves.insert(next_field);
                     }
-                    else if ((check_empty_fields(currMap[next_field]) && !valid) || currMap[next_field] == p.m_symbol)
+                    else if (currMap[next_field] == p.m_symbol || next_field == c || check_empty_fields(currMap[next_field]))
                     {
                         break;
                     }
                     valid = true;
-                    temp = next_field;
+                    temp_trans = next_field;
+                    temp_dir = next_direction;
                     next_field = m.get_transition(next_field, next_direction);
-                    next_direction = m.get_direction(temp, next_direction);
+                    next_direction = m.get_direction(temp_trans, next_direction);
+                    if (temp_trans == next_field && temp_dir == (next_direction + 4) % NUM_OF_DIRECTIONS)
+                    {
+                        break;
+                    }
                 }
             }
         }

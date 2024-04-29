@@ -74,7 +74,7 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     switch (m_map.m_symbols[bestCoord])
     {
     case 'c':
-        spec = m_player_number;
+        spec = m_player_number + 1;
         break;
     case 'b':
         spec = 20;
@@ -91,7 +91,7 @@ uint16_t Game::get_bomb_throw()
     std::vector<uint16_t> current_player_stones(m_map.m_player_count, 0);
     uint8_t best_player;
     // searches for enemy player with most stones
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (check_players(m_map.get_symbol(c)))
         {
@@ -108,7 +108,7 @@ uint16_t Game::get_bomb_throw()
         }
     }
     // second half of map
-    for (uint16_t c = m_map.m_num_of_fields / 2; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = m_map.m_num_of_fields / 2; c < m_map.m_num_of_fields; c++)
     {
         if (m_map.get_symbol(c) == m_players[best_player].m_symbol)
         {
@@ -124,7 +124,7 @@ uint16_t Game::get_bomb_throw()
         }
     }
     // if for some reason no best player was found, this will throw a bomb at the first empty field
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (m_map.get_symbol(c) != m_players[m_player_number].m_symbol && m_map.get_symbol(c) != '-')
         {

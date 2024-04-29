@@ -164,7 +164,7 @@ void Network::receive_move_prompt(uint32_t actual_message_length)
     int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
     memcpy(&m_time, message, sizeof(m_time));
     // m_search_depth = message[4];
-    m_search_depth = 3;
+    m_search_depth = 4;
     uint8_t spec = 0;
     uint16_t turn;
     if (m_game_phase != 2)
