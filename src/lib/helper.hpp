@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <tuple>
 #include <vector>
+#include <algorithm>
 
 #include "map.hpp"
 
