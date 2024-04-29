@@ -99,7 +99,7 @@ void check_coordinate(uint16_t c, Map &m, Player &p)
     }
 }
 
-void change_players(Map &m, unsigned char p1, unsigned char p2)
+void change_players(Map &m, char p1, char p2)
 {
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
@@ -111,6 +111,17 @@ void change_players(Map &m, unsigned char p1, unsigned char p2)
         else if (s == p2)
         {
             m.set_symbol(c, p1);
+        }
+    }
+}
+
+void execute_inversion(Map &m, char p)
+{
+    for (uint16_t c = 1; c < m.m_num_of_fields; c++)
+    {
+        if (check_players(c))
+        {
+            m.set_symbol(c, (m.get_symbol(c) - '0') % m.m_player_count + '0');
         }
     }
 }
@@ -172,7 +183,7 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
         uint16_t helper = p.m_symbol - '0' - 1;
         helper = (helper + 1) % m.m_player_count;
         unsigned char next_player = helper + 1 + '0';
-        change_players(m, p.m_symbol, next_player);
+        execute_inversion(m, p.m_symbol);
     }
     // choice
     else if (curr_symbol == 'c')
