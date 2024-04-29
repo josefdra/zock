@@ -57,7 +57,7 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     h_res_clock::time_point end_time = h_res_clock::now();
     std::chrono::duration<double, std::micro> elapsed_time =
         std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-    std::cout << "check_moves vector: " << std::endl;
+    std::cout << "check_moves unordered_map: " << std::endl;
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 
     if (m_players[m_player_number].m_valid_moves.size() > 0)

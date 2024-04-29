@@ -16,7 +16,7 @@ int minimaxOrParanoiaWithPruning(uint16_t position, uint8_t depth, int alpha, in
     // map.print_map();
     Player currPlayer = game.m_players[playersTurn];
     check_moves(map, currPlayer);
-    map.m_symbols = map.m_symbols;
+    // map.m_symbols = map.m_symbols;
     uint8_t nextPlayer = ((playersTurn + 1) % map.m_player_count);
 
     // check if current player has any influence on our player else skip his moves

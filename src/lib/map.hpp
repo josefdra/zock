@@ -38,8 +38,8 @@ public:
     void print_map();
     void setFieldValue(Player &);
     void print_m_frontier_scores(std::vector<Player> &);
-    std::vector<char> m_symbols;
-    std::vector<uint16_t> m_transitions;
+    std::array<char, 2501> m_symbols;
+    std::array<uint16_t, 20001> m_transitions;
     uint16_t m_height;
     uint16_t m_width;
     uint16_t m_player_count;
