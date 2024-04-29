@@ -134,6 +134,8 @@ uint16_t Game::get_bomb_throw()
             break;
         }
     }
+    // @todo on which field of the target player to throw the bomb
+    // for now: the first field
     for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (m_map.get_symbol(c) == m_players[target_player].m_symbol)
