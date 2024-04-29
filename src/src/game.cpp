@@ -50,7 +50,16 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     uint16_t coord = 0;
     char answer;
 
+    h_res_clock::time_point start_time = h_res_clock::now();
+
     check_moves(m_map, m_players[m_player_number]);
+
+    h_res_clock::time_point end_time = h_res_clock::now();
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    std::cout << "check_moves unordered_map: " << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+
     if (m_players[m_player_number].m_valid_moves.size() > 0)
     {
         m_players[m_player_number].m_has_valid_moves = true;
@@ -87,7 +96,7 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
 
 uint16_t Game::get_bomb_throw()
 {
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (m_map.get_symbol(c) == m_players[(m_player_number + 1) % m_map.m_player_count].m_symbol)
         {
@@ -97,7 +106,7 @@ uint16_t Game::get_bomb_throw()
     // if the return doesn't happen, the next enemy has no more stones
     // @todo change calculation of throw
     // for now, this will throw a bomb at the first empty field
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (m_map.get_symbol(c) != m_players[m_player_number].m_symbol && m_map.get_symbol(c) != '-')
         {
@@ -110,7 +119,7 @@ uint16_t Game::get_bomb_throw()
 
 void Game::print_evaluation(Map &m)
 {
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         std::cout << std::setw(4) << m.m_good_fields[c] << " ";
         if (c % m_map.m_width == 0)
@@ -119,7 +128,7 @@ void Game::print_evaluation(Map &m)
         }
     }
     std::cout << std::endl;
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         std::cout << std::setw(4) << m.m_bad_fields[c] << " ";
         if (c % m_map.m_width == 0)
@@ -140,12 +149,12 @@ int Game::evaluate_board(uint8_t game_phase, Player &pl, Map &map)
     uint8_t inversion_value = 30;
     uint8_t before_special_value = 30;
     std::array<int, 9> wall_values{0, 1, 2, 3, 16, 12, 8, 4, 0};
-    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
         map.m_good_fields[c] = 0;
         map.m_bad_fields[c] = 0;
     }
-    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
         bool special = false;
         char s = map.get_symbol(c);
@@ -191,7 +200,7 @@ int Game::evaluate_board(uint8_t game_phase, Player &pl, Map &map)
         map.m_good_fields[c] += wall_values[walls] * value;
     }
     // print_evaluation();
-    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
 
         // if (m_map.get_symbol(c) == m_players[p].m_symbol)
@@ -208,7 +217,7 @@ int Game::evaluate_board(uint8_t game_phase, Player &pl, Map &map)
 
 void Game::get_frontier_score(Player &p)
 {
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (m_map.get_symbol(c) == p.m_symbol)
         {

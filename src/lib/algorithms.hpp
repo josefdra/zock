@@ -1,13 +1,15 @@
 #ifndef ALGORITHMS_HPP
 #define ALGORITHMS_HPP
 
+#include <chrono>
+#include <iostream>
 #include <algorithm>
+
 #include "map.hpp"
 #include "player.hpp"
 #include "process_moves.hpp"
 #include "game.hpp"
 #include "helper.hpp"
-#include <chrono>
 
 class Game;
 

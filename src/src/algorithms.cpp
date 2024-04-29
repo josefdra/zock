@@ -1,5 +1,4 @@
 #include "algorithms.hpp"
-#include <iostream>
 
 // this algorithm could be optimized by adding functionality to check if enemy has direct influence in our player and if he can "attack" us, else his
 // possible turns could be ignored
@@ -17,7 +16,7 @@ int minimaxOrParanoiaWithPruning(uint16_t position, uint8_t depth, int alpha, in
     // map.print_map();
     Player currPlayer = game.m_players[playersTurn];
     check_moves(map, currPlayer);
-    map.m_symbols = map.m_symbols;
+    // map.m_symbols = map.m_symbols;
     uint8_t nextPlayer = ((playersTurn + 1) % map.m_player_count);
 
     // check if current player has any influence on our player else skip his moves

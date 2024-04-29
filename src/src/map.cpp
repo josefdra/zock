@@ -74,7 +74,6 @@ uint16_t Map::get_transition(uint16_t c, uint8_t d)
 
 uint8_t Map::get_direction(uint16_t c, uint8_t d)
 {
-
     return m_transitions[(c - 1) * 8 + d] % 10;
 }
 
@@ -87,9 +86,9 @@ void Map::read_hash_map(std::stringstream &mapfile)
 {
     char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
-    m_num_of_fields = m_height * m_width;
+    m_num_of_fields = m_height * m_width + 1;
     // every coordinate gets a symbol and it's neighbours are being set
-    for (int c = 1; c < m_num_of_fields + 1; c++)
+    for (int c = 1; c < m_num_of_fields; c++)
     {
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
@@ -98,7 +97,7 @@ void Map::read_hash_map(std::stringstream &mapfile)
         mapfile >> temp;
         set_symbol(c, temp);
     }
-    for (int c = 1; c < m_num_of_fields + 1; c++)
+    for (int c = 1; c < m_num_of_fields; c++)
     {
         if (get_symbol(c) != '-')
         {
@@ -182,7 +181,7 @@ void Map::print_map_with_spectifications()
     std::cout << m_initial_overwrite_stones << std::endl;
     std::cout << m_initial_bombs << " " << m_strength << std::endl;
     std::cout << m_height << " " << m_width << std::endl;
-    for (uint16_t c = 1; c < m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         if (check_players(get_symbol(c)))
         {
@@ -205,7 +204,7 @@ void Map::print_map_with_spectifications()
  */
 void Map::print_map()
 {
-    for (uint16_t c = 1; c < m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         if (check_players(get_symbol(c)))
         {
