@@ -119,9 +119,9 @@ void execute_inversion(Map &m, char p)
 {
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
-        if (check_players(c))
+        if (check_players(m.get_symbol(c)))
         {
-            m.set_symbol(c, ((m.get_symbol(c) - '0') % m.m_player_count) + '0');
+            m.set_symbol(c, ((m.get_symbol(c) - '0') % m.m_player_count) + '0' + 1);
         }
     }
 }
