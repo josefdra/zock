@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
         char *ip_ptr = ip;
         if (argv[3] != "-p")
         {
-            Network network_handler(ip, atoi(argv[4]), group_number);
-            // Network network_handler("127.0.0.1", 7777, group_number);
+            // Network network_handler(ip, atoi(argv[4]), group_number);
+            Network network_handler("127.0.0.1", 7777, group_number);
         }
         else
         {

@@ -47,5 +47,7 @@ bool check_special(unsigned char);
 uint16_t check_frontier(Map &, uint16_t);
 void one_dimension_2_second_dimension(uint16_t &, uint8_t &, uint8_t &, Map &);
 void two_dimension_2_one_dimension(uint16_t &, uint8_t &, uint8_t &, Map &);
+uint8_t checkForSpecial(char &);
+bool affectsMyPlayer(Player &, Player &, Map &);
 
 #endif // HELPER_HPP

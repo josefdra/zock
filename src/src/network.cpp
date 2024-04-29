@@ -162,7 +162,7 @@ void Network::receive_move_prompt(uint32_t actual_message_length)
 {
     std::cout << "Received move prompt, calculating move" << std::endl;
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-    m_game.evaluate_board(m_game_phase);
+    // m_game.evaluate_board(m_game_phase);
     std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
     std::cout << "Evaluation-Time: " << duration.count() << "s" << std::endl;
@@ -175,7 +175,7 @@ void Network::receive_move_prompt(uint32_t actual_message_length)
     uint16_t turn;
     if (m_game_phase != 2)
     {
-        turn = m_game.get_turn(spec);
+        turn = m_game.get_turn(spec, m_search_depth, m_game_phase);
         std::cout << "Placing stone at: ";
     }
     else

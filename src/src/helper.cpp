@@ -150,3 +150,37 @@ void two_dimension_2_one_dimension(uint16_t &_1D_coord, uint8_t &x, uint8_t &y, 
 {
     _1D_coord = x + 1 + y * m.m_width;
 }
+
+// currently returning static value, evaluation of whats best, needs to be done
+uint8_t checkForSpecial(char &c)
+{
+    // add count of player stones to add functionality to switch stones automatically if enemy has more stones and maybe has more abilities to move
+    if (c == 'c')
+    {
+        return 1;
+    }
+    else if (c == 'b')
+    {
+        return 20;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+bool affectsMyPlayer(Player &enemy, Player &myPlayer, Map &map)
+{
+    for (auto possibleMove : enemy.m_valid_moves)
+    {
+        auto &coordsToChange = std::get<1>(possibleMove.second);
+        for (auto &coord : coordsToChange)
+        {
+            if (map.m_symbols.at(coord) == myPlayer.m_symbol)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}

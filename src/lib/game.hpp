@@ -16,16 +16,14 @@ public:
     ~Game();
     void init_map(std::stringstream &);
     void init_players();
-    uint16_t get_turn(uint8_t &);
+    uint16_t get_turn(uint8_t &, uint8_t &, uint8_t &);
     uint16_t get_bomb_throw();
-    void print_evaluation();
-    int evaluate_board(uint8_t);
+    void print_evaluation(Map &);
+    int evaluate_board(uint8_t, Player &, Map &);
     void get_frontier_score(Player &);
     void check_winner();
     // end coord          //special field(0-4)       //coords of the way
-    std::unordered_map<uint16_t, int16_t> m_moves_scores;
-    std::unordered_map<uint16_t, uint16_t> m_good_fields;
-    std::unordered_map<uint16_t, int16_t> m_bad_fields;
+
     Map m_map;
     std::vector<Player> m_players;
     uint8_t m_player_number;

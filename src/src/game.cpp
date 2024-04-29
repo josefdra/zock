@@ -45,7 +45,7 @@ void Game::init_players()
  *
  */
 
-uint16_t Game::get_turn(uint8_t &spec)
+uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
 {
     uint16_t coord = 0;
     char answer;
@@ -56,16 +56,13 @@ uint16_t Game::get_turn(uint8_t &spec)
         m_players[m_player_number].m_has_valid_moves = true;
         auto elem = m_players[m_player_number].m_valid_moves.begin();
         // bestpos = minimaxWithPruning(0, 10, -INFINITY, INFINITY, true, m_map, m_players.at(i));
-        coord = elem->first;
+        // depth = 3;
+        coord = getBestPosition(m_player_number, m_map, depth, game_phase, *this);
         if (m_map.get_symbol(coord) == 'c')
         {
-            do
-            {
-                std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
-                std::cin >> answer;
-                answer -= '0';
-            } while (!(0 < answer < (m_map.m_player_count + 1)));
-            spec = answer;
+            std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
+            std::cin >> spec;
+            spec -= '0';
         }
         else if (m_map.get_symbol(coord) == 'b')
         {
@@ -111,12 +108,11 @@ uint16_t Game::get_bomb_throw()
     return 0;
 }
 
-void Game::print_evaluation()
+void Game::print_evaluation(Map &m)
 {
-    /*
     for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        std::cout << std::setw(4) << m_good_fields[c] << " ";
+        std::cout << std::setw(4) << m.m_good_fields[c] << " ";
         if (c % m_map.m_width == 0)
         {
             std::cout << std::endl;
@@ -125,49 +121,46 @@ void Game::print_evaluation()
     std::cout << std::endl;
     for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        std::cout << std::setw(4) << m_bad_fields[c] << " ";
+        std::cout << std::setw(4) << m.m_bad_fields[c] << " ";
         if (c % m_map.m_width == 0)
         {
             std::cout << std::endl;
         }
     }
     std::cout << std::endl;
-    */
 }
 
-int Game::evaluate_board(uint8_t game_phase)
+int Game::evaluate_board(uint8_t game_phase, Player &pl, Map &map)
 {
-    for (auto &p : m_players)
-    {
-        p.m_board_value = 0;
-    }
+    pl.m_board_value = 0;
+
     uint8_t value = 10;
     uint8_t bonus_value = 30;
     uint8_t choice_value = 20 * (game_phase + 1);
     uint8_t inversion_value = 30;
     uint8_t before_special_value = 30;
     std::array<int, 9> wall_values{0, 1, 2, 3, 16, 12, 8, 4, 0};
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
     {
-        m_good_fields[c] = 0;
-        m_bad_fields[c] = 0;
+        map.m_good_fields[c] = 0;
+        map.m_bad_fields[c] = 0;
     }
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
     {
         bool special = false;
-        char s = m_map.get_symbol(c);
+        char s = map.get_symbol(c);
         switch (s)
         {
         case 'b':
-            m_good_fields[c] += bonus_value;
+            map.m_good_fields[c] += bonus_value;
             special = true;
             break;
         case 'c':
-            m_good_fields[c] += choice_value;
+            map.m_good_fields[c] += choice_value;
             special = true;
             break;
         case 'i':
-            m_bad_fields[c] -= inversion_value;
+            map.m_bad_fields[c] -= inversion_value;
             special = true;
             break;
         default:
@@ -177,41 +170,40 @@ int Game::evaluate_board(uint8_t game_phase)
         uint8_t walls = 0;
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            if (m_map.get_transition(c, d) == 0)
+            if (map.get_transition(c, d) == 0)
             {
                 walls++;
-                uint16_t trans = m_map.get_transition(c, (d + 4) % 8);
+                uint16_t trans = map.get_transition(c, (d + 4) % 8);
                 if (trans != 0)
                 {
-                    m_bad_fields[trans] -= 10;
+                    map.m_bad_fields[trans] -= 10;
                 }
             }
             if (special == true)
             {
-                uint16_t trans = m_map.get_transition(c, d);
+                uint16_t trans = map.get_transition(c, d);
                 if (trans != 0)
                 {
-                    m_bad_fields[trans] -= before_special_value;
+                    map.m_bad_fields[trans] -= before_special_value;
                 }
             }
         }
-        m_good_fields[c] += wall_values[walls] * value;
+        map.m_good_fields[c] += wall_values[walls] * value;
     }
     // print_evaluation();
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
     {
-        for (uint8_t p = 0; p < m_map.m_player_count; p++)
-        {
-            if (m_map.get_symbol(c) == m_players[p].m_symbol)
-            {
-                m_players[p].m_board_value += m_good_fields[c] + m_bad_fields[c];
-            }
-        }
+
+        // if (m_map.get_symbol(c) == m_players[p].m_symbol)
+        //{
+        get_frontier_score(pl);
+        pl.m_board_value += map.m_good_fields[c] + map.m_bad_fields[c];
+        // pl.m_board_value += pl.m_frontier_score;
+        // }
     }
-    for (auto &p : m_players)
-    {
-        std::cout << "Board value of Player " << p.m_symbol << " right now: " << p.m_board_value << std::endl;
-    }
+    // std::cout << "Board value of Player " << pl.m_symbol << " right now: " << pl.m_board_value << std::endl;
+
+    return pl.m_board_value;
 }
 
 void Game::get_frontier_score(Player &p)

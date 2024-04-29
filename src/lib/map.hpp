@@ -62,6 +62,9 @@ public:
     std::unordered_set<uint16_t> m_special_fields;
     std::unordered_set<uint16_t> m_before_special_fields;
     std::unordered_set<uint16_t> m_before_before_special_fields;
+    std::unordered_map<uint16_t, int16_t> m_moves_scores;
+    std::unordered_map<uint16_t, uint16_t> m_good_fields;
+    std::unordered_map<uint16_t, int16_t> m_bad_fields;
 };
 
 #endif // MAP_HPP
