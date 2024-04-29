@@ -1,8 +1,13 @@
 #include "algorithms.hpp"
 
+char get_symbol(std::vector<char> &m, uint16_t c)
+{
+    return m[c];
+}
+
 // this algorithm could be optimized by adding functionality to check if enemy has direct influence in our player and if he can "attack" us, else his
 // possible turns could be ignored
-int minimaxOrParanoiaWithPruning(uint16_t position, uint8_t depth, int alpha, int beta, bool maximizingPlayer, Map &map, Game &game, uint8_t &playersTurn, uint8_t &game_phase, Player &myPlayer, uint16_t &turns)
+int minimaxOrParanoidWithPruning(uint8_t depth, int alpha, int beta, bool maximizingPlayer, std::vector<char> &currMap, Map &map, uint8_t &playersTurn, uint8_t &game_phase, Player &myPlayer, uint16_t &turns)
 {
     int maxEval = std::numeric_limits<int>::min();
     int minEval = std::numeric_limits<int>::max();
@@ -24,7 +29,7 @@ int minimaxOrParanoiaWithPruning(uint16_t position, uint8_t depth, int alpha, in
     {
         if (currPlayer.m_symbol != myPlayer.m_symbol && !affectsMyPlayer(currPlayer, myPlayer, map))
         {
-            minimaxOrParanoiaWithPruning(position, depth, alpha, beta, maximizingPlayer, map, game, nextPlayer, game_phase, myPlayer, turns);
+            minimaxOrParanoidWithPruning(position, depth, alpha, beta, maximizingPlayer, map, game, nextPlayer, game_phase, myPlayer, turns);
         }
     }
     // if there are no moves left return the current value for it's position
@@ -35,15 +40,10 @@ int minimaxOrParanoiaWithPruning(uint16_t position, uint8_t depth, int alpha, in
 
     if (maximizingPlayer)
     {
-
         for (auto &child : currPlayer.m_valid_moves)
         {
-
-            Map mapcopy = map;
-            char curr_symbol = mapcopy.get_symbol(child.first);
-            uint8_t special = checkForSpecial(curr_symbol);
-            execute_move(child.first, special, currPlayer, mapcopy);
-            int eval = minimaxOrParanoiaWithPruning(child.first, depth - 1, alpha, beta, false, mapcopy, game, nextPlayer, game_phase, myPlayer, turns);
+            std::vector<char> mapcopy = child.second;
+            int eval = minimaxOrParanoidWithPruning(child.first, depth - 1, alpha, beta, false, mapcopy, game, nextPlayer, game_phase, myPlayer, turns);
             maxEval = std::max(maxEval, eval);
             alpha = std::max(alpha, eval);
             if (beta <= alpha)
@@ -57,7 +57,7 @@ int minimaxOrParanoiaWithPruning(uint16_t position, uint8_t depth, int alpha, in
     else
     {
 
-        for (auto child : currPlayer.m_valid_moves)
+        for (auto &child : currPlayer.m_valid_moves)
         {
 
             Map mapcopy = map;
@@ -68,11 +68,11 @@ int minimaxOrParanoiaWithPruning(uint16_t position, uint8_t depth, int alpha, in
             // initializes paranoia
             if (game.m_players[playersTurn].m_symbol == myPlayer.m_symbol)
             {
-                eval = minimaxOrParanoiaWithPruning(child.first, depth - 1, alpha, beta, true, mapcopy, game, nextPlayer, game_phase, myPlayer, turns);
+                eval = minimaxOrParanoidWithPruning(child.first, depth - 1, alpha, beta, true, mapcopy, game, nextPlayer, game_phase, myPlayer, turns);
             }
             else
             {
-                eval = minimaxOrParanoiaWithPruning(child.first, depth - 1, alpha, beta, false, mapcopy, game, nextPlayer, game_phase, myPlayer, turns);
+                eval = minimaxOrParanoidWithPruning(child.first, depth - 1, alpha, beta, false, mapcopy, game, nextPlayer, game_phase, myPlayer, turns);
             }
 
             minEval = std::min(minEval, eval);
@@ -84,33 +84,4 @@ int minimaxOrParanoiaWithPruning(uint16_t position, uint8_t depth, int alpha, in
         }
         return minEval;
     }
-}
-
-int getBestPosition(uint8_t &playernum, Map &map, uint8_t &depth, uint8_t &game_phase, Game &game)
-{
-    auto start = std::chrono::high_resolution_clock::now();
-    uint16_t bestEval = -INFINITY;
-    uint16_t bestCoord = 0;
-    Player p = game.m_players[playernum];
-    check_moves(map, p);
-    uint8_t nextPlayer = ((playernum + 1) % map.m_player_count);
-    uint16_t tried_turns = 0;
-    for (auto possibleMove : p.m_valid_moves)
-    {
-        Map mapcopy = map;
-        char curr_symbol = mapcopy.get_symbol(possibleMove.first);
-        uint8_t special = checkForSpecial(curr_symbol);
-        execute_move(possibleMove.first, special, p, mapcopy);
-        uint16_t currEval = minimaxOrParanoiaWithPruning(possibleMove.first, depth - 1, -INT32_MAX, INT32_MAX, true, mapcopy, game, nextPlayer, game_phase, p, tried_turns);
-        if (currEval > bestEval)
-        {
-            bestEval = currEval;
-            bestCoord = possibleMove.first;
-        }
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duration = end - start;
-    std::cout << "tried " << tried_turns << " turns"
-              << " and this took " << duration.count() << " seconds" << std::endl;
-    return bestCoord;
 }

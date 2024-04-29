@@ -27,7 +27,7 @@ public:
     ~Map();
     void check_neighbours(uint16_t);
     void set_symbol(uint16_t, unsigned char);
-    unsigned char get_symbol(uint16_t);
+    char get_symbol(uint16_t);
     void set_transition(uint16_t, uint8_t, uint16_t);
     uint16_t get_transition(uint16_t, uint8_t);
     uint8_t get_direction(uint16_t, uint8_t);
@@ -38,8 +38,8 @@ public:
     void print_map();
     void setFieldValue(Player &);
     void print_m_frontier_scores(std::vector<Player> &);
-    std::array<char, 2501> m_symbols;
-    std::array<uint16_t, 20001> m_transitions;
+    std::vector<char> m_symbols;
+    std::vector<uint16_t> m_transitions;
     uint16_t m_height;
     uint16_t m_width;
     uint16_t m_player_count;

@@ -13,8 +13,8 @@
 
 class Game;
 
-int minimaxOrParanoiaWithPruning(uint16_t, uint8_t, int, int, bool, Map &, Game &, uint8_t &, uint8_t &, Player &, uint16_t &);
-int getBestPosition(uint8_t &, Map &, uint8_t &, uint8_t &, Game &);
+char get_symbol(std::vector<char> &, uint16_t);
+int minimaxOrParanoidWithPruning(uint8_t, int, int, bool, std::vector<char> &, Map &, uint8_t &, uint8_t &, Player &, uint16_t &);
 uint8_t checkForSpecial(char &);
 
 #endif // ALGORITHMS_HPP

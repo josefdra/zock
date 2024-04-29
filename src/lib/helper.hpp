@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "map.hpp"
+#include "algorithms.hpp"
 
 enum Colors
 {

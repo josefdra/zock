@@ -57,7 +57,7 @@ void Map::set_symbol(uint16_t c, unsigned char s)
     m_symbols[c] = s;
 }
 
-unsigned char Map::get_symbol(uint16_t c)
+char Map::get_symbol(uint16_t c)
 {
     return m_symbols[c];
 }
@@ -90,8 +90,10 @@ void Map::read_hash_map(std::stringstream &mapfile)
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields; c++)
     {
+        m_symbols.push_back(0);
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
+            m_transitions.push_back(0);
             set_transition(c, d, 0);
         }
         mapfile >> temp;

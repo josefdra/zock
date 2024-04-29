@@ -5,7 +5,7 @@
  *
  */
 
-void check_coordinate(uint16_t c, Map &m, Player &p)
+void check_coordinate(uint16_t c, Map &m, Player &p, )
 {
     bool valid = false, playerFound = false, foundSelf = false;
     uint16_t pos, nextTransition, currentDirection, special_move, temp;
@@ -95,6 +95,10 @@ void check_coordinate(uint16_t c, Map &m, Player &p)
 
     if (valid)
     {
+        std::vector<char> mapcopy = 
+        for(auto &c : addSet){
+
+        }
         p.m_valid_moves[c] = std::make_tuple(special_move, addSet);
     }
 }
