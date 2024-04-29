@@ -70,7 +70,8 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
         if (m_map.get_symbol(coord) == 'c')
         {
             std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
-            std::cin >> spec;
+            //std::cin >> spec;
+            spec = '1';
             spec -= '0';
         }
         else if (m_map.get_symbol(coord) == 'b')
@@ -78,7 +79,8 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
             do
             {
                 std::cout << "Wollen Sie eine Bombe(b) oder einen Überschreibstein(u)?: ";
-                std::cin >> answer;
+                //std::cin >> answer;
+                answer = 'b';
                 if (answer == 'b')
                 {
                     spec = 20;
