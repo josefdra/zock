@@ -100,61 +100,65 @@ int evaluate_board(uint8_t game_phase, Player &p, Map &m, std::vector<char> &cur
 
 // this algorithm could be optimized by adding functionality to check if enemy has direct influence in our player and if he can "attack" us, else his
 // possible turns could be ignored
-int minimaxOrParanoidWithPruning(Game &g, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, Player &myPlayer, uint16_t &turns)
+int minimaxOrParanoidWithPruning(Game &g, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns)
 {
-    bool affectsMyPlayer = false;
-    int maxEval = std::numeric_limits<int>::min();
-    int minEval = std::numeric_limits<int>::max();
     turns++;
-
-    Player currPlayer = g.m_players[playersTurn];
-    calculate_valid_moves(g.m_map, currPlayer, currMap, affectsMyPlayer, myPlayer.m_symbol);
-    uint8_t nextPlayer = ((playersTurn + 1) % g.m_map.m_player_count);
 
     if (depth == 0)
     {
-        return evaluate_board(game_phase, myPlayer, g.m_map, currMap);
+        return evaluate_board(game_phase, g.m_players[g.m_player_number], g.m_map, currMap);
     }
+
+    Player currPlayer = g.m_players[playersTurn];
+    uint8_t nextPlayer = ((playersTurn + 1) % g.m_map.m_player_count);
+    calculate_valid_moves(g.m_map, currPlayer, currMap, g.m_players[g.m_player_number].m_symbol);
+
     uint8_t counter = g.m_map.m_player_count;
     while (currPlayer.m_valid_moves.size() < 1 && counter != 0)
     {
         currPlayer = g.m_players[(playersTurn + 1) % g.m_map.m_player_count];
-        calculate_valid_moves(g.m_map, currPlayer, currMap, affectsMyPlayer, myPlayer.m_symbol);
         nextPlayer = ((playersTurn + 1) % g.m_map.m_player_count);
+        calculate_valid_moves(g.m_map, currPlayer, currMap, g.m_players[g.m_player_number].m_symbol);
         counter--;
     }
     if (counter == 0)
     {
-        return evaluate_board(game_phase, myPlayer, g.m_map, currMap);
+        return evaluate_board(game_phase, g.m_players[g.m_player_number], g.m_map, currMap);
     }
 
-    for (auto &child : currPlayer.m_valid_moves)
+    int maxEval;
+    int minEval;
+    for (auto &move : currPlayer.m_valid_moves)
     {
-        std::vector<char> next_map = temp_color(child, currPlayer.m_symbol, g.m_map, currMap, affectsMyPlayer, myPlayer.m_symbol);
-        if (currPlayer.m_symbol == myPlayer.m_symbol)
+        std::vector<char> next_map = temp_color(move, currPlayer.m_symbol, g.m_map, currMap, g.m_players[g.m_player_number].m_symbol);
+        int eval = minimaxOrParanoidWithPruning(g, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);
+        if (currPlayer.m_symbol == g.m_players[g.m_player_number].m_symbol)
         {
-            int eval = minimaxOrParanoidWithPruning(g, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, myPlayer, turns);
+            maxEval = std::numeric_limits<int>::min();
             maxEval = std::max(maxEval, eval);
             alpha = std::max(alpha, eval);
             if (beta <= alpha)
             {
                 break;
             }
-            return maxEval;
         }
         else
         {
-            int eval;
-            // initializes paranoia
-            eval = minimaxOrParanoidWithPruning(g, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, myPlayer, turns);
-
+            minEval = std::numeric_limits<int>::max();
             minEval = std::min(minEval, eval);
             beta = std::min(beta, eval);
             if (beta <= alpha)
             {
                 break;
             }
-            return minEval;
         }
+    }
+    if (currPlayer.m_symbol == g.m_players[g.m_player_number].m_symbol)
+    {
+        return maxEval;
+    }
+    else
+    {
+        return minEval;
     }
 }

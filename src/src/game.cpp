@@ -53,13 +53,13 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     Player p = m_players[m_player_number];
     uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
     uint16_t tried_turns = 0;
-    bool affectsMyPlayer = false;
-    calculate_valid_moves(m_map, p, m_map.m_symbols, affectsMyPlayer, p.m_symbol);
+    calculate_valid_moves(m_map, p, m_map.m_symbols, p.m_symbol);
+    int test_depth = 5;
 
     for (auto &possibleMove : p.m_valid_moves)
     {
-        std::vector<char> next_map = temp_color(possibleMove, p.m_symbol, m_map, m_map.m_symbols, affectsMyPlayer, p.m_symbol);
-        int currEval = minimaxOrParanoidWithPruning(*this, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, p, tried_turns);
+        std::vector<char> next_map = temp_color(possibleMove, p.m_symbol, m_map, m_map.m_symbols, p.m_symbol);
+        int currEval = minimaxOrParanoidWithPruning(*this, test_depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
         if (currEval > bestEval)
         {
             bestEval = currEval;
@@ -91,8 +91,8 @@ uint16_t Game::get_bomb_throw()
 {
     std::vector<uint16_t> current_player_stones(m_map.m_player_count, 0);
     uint8_t best_player;
-    // searches for enemy player with most stones
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    // count player current player stones
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (check_players(m_map.get_symbol(c)))
         {
@@ -103,19 +103,26 @@ uint16_t Game::get_bomb_throw()
     // make a pair-vector out of the vector
     for (uint8_t i = 0; i < current_player_stones.size(); i++)
     {
-        if (current_player_stones[i] > stones)
-        {
-            stones = current_player_stones[i];
-            best_player = i;
-        }
+        player_stones_sorted.push_back(std::make_pair(i, current_player_stones[i]));
     }
-    // second half of map
-    for (uint16_t c = m_map.m_num_of_fields / 2; c < m_map.m_num_of_fields + 1; c++)
+    // sort players
+    std::sort(player_stones_sorted.begin(), player_stones_sorted.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
+              { return a.second > b.second; });
+    // find the next best player
+    uint8_t target_player = (m_player_number + 1) % m_map.m_player_count;
+    for (uint8_t i = 0; i < player_stones_sorted.size(); ++i)
     {
-        if (m_map.get_symbol(c) == m_players[best_player].m_symbol)
+        if (player_stones_sorted[i].first == m_player_number)
         {
-            execute_bomb(c, m_map, m_players[best_player]);
-            return c;
+            if (i > 0)
+            {
+                target_player = player_stones_sorted[i - 1].first;
+            }
+            else
+            {
+                target_player = player_stones_sorted[i + 1].first;
+            }
+            break;
         }
     }
     // @todo on which field of the target player to throw the bomb
@@ -124,15 +131,16 @@ uint16_t Game::get_bomb_throw()
     {
         if (m_map.get_symbol(c) == m_players[target_player].m_symbol)
         {
-            execute_bomb(c, m_map, m_players[best_player]);
+            execute_bomb(c, m_map, m_players[target_player]);
             return c;
         }
     }
-    // if for some reason no best player was found, this will throw a bomb at the first empty field
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    // if for some reason no player was found, this will throw a bomb at the first empty field
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (m_map.get_symbol(c) != '-')
         {
+            execute_bomb(c, m_map, m_players[c]);
             return c;
         }
     }

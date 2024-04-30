@@ -171,7 +171,7 @@ void execute_bomb(uint16_t c, Map &m, Player &p)
     }
 }
 
-std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &currMap, bool &affectsMyPlayer, char my_symbol)
+std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &currMap, char my_symbol)
 {
     std::unordered_set<uint16_t> to_color;
     std::vector<char> ret_map = currMap;
@@ -203,13 +203,6 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
     }
     for (auto &c : to_color)
     {
-        if (!affectsMyPlayer)
-        {
-            if (ret_map[c] == my_symbol)
-            {
-                affectsMyPlayer = true;
-            }
-        }
         ret_map[c] = s;
     }
     return ret_map;
@@ -218,7 +211,7 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
 /// @brief This function asks for a coordinate and checks if it's a valid move
 /// @param map current map layout
 /// @param player_number current player at turn
-void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, bool &affectsMyPlayer, char my_symbol)
+void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, char my_symbol)
 {
     bool overrides = false;
     if (p.has_overwrite_stones())
