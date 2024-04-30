@@ -212,12 +212,12 @@ void Map::print_map()
     {
         if (check_players(get_symbol(c)))
         {
-            std::cout << getColorString(Colors((get_symbol(c) - '0'))) << std::setw(3) << get_symbol(c) << " "
+            std::cout << getColorString(Colors((get_symbol(c) - '0'))) << get_symbol(c) << " "
                       << "\e[0m";
         }
         else
         {
-            std::cout << std::setw(3) << get_symbol(c) << " ";
+            std::cout << get_symbol(c) << " ";
         }
         if (c % m_width == 0)
         {

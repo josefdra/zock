@@ -92,15 +92,16 @@ uint16_t Game::get_bomb_throw()
     std::vector<uint16_t> current_player_stones(m_map.m_player_count, 0);
     uint8_t best_player;
     // searches for enemy player with most stones
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
         if (check_players(m_map.get_symbol(c)))
         {
             current_player_stones[m_map.get_symbol(c) - '0' - 1] += 1;
         }
     }
-    uint16_t stones = 0;
-    for (uint8_t i = 0; i < m_map.m_player_count; i++)
+    std::vector<std::pair<uint8_t, uint16_t>> player_stones_sorted;
+    // make a pair-vector out of the vector
+    for (uint8_t i = 0; i < current_player_stones.size(); i++)
     {
         if (current_player_stones[i] > stones)
         {
@@ -109,25 +110,28 @@ uint16_t Game::get_bomb_throw()
         }
     }
     // second half of map
-    for (uint16_t c = m_map.m_num_of_fields / 2; c < m_map.m_num_of_fields; c++)
+    for (uint16_t c = m_map.m_num_of_fields / 2; c < m_map.m_num_of_fields + 1; c++)
     {
         if (m_map.get_symbol(c) == m_players[best_player].m_symbol)
         {
+            execute_bomb(c, m_map, m_players[best_player]);
             return c;
         }
     }
-    // first half of map
-    for (uint16_t c = 1; c < m_map.m_num_of_fields / 2; c++)
+    // @todo on which field of the target player to throw the bomb
+    // for now: the first field
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
-        if (m_map.get_symbol(c) == m_players[best_player].m_symbol)
+        if (m_map.get_symbol(c) == m_players[target_player].m_symbol)
         {
+            execute_bomb(c, m_map, m_players[best_player]);
             return c;
         }
     }
     // if for some reason no best player was found, this will throw a bomb at the first empty field
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
     {
-        if (m_map.get_symbol(c) != m_players[m_player_number].m_symbol && m_map.get_symbol(c) != '-')
+        if (m_map.get_symbol(c) != '-')
         {
             return c;
         }
