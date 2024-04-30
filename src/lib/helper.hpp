@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <tuple>
 #include <vector>
+#include <algorithm>
 
 #include "map.hpp"
 
@@ -16,11 +17,11 @@ enum Colors
     red = 1,
     blue,
     green,
-    orange,
-    magenta,
     yellow,
-    dark_black,
     cyan,
+    magenta,
+    dark_black,
+    orange
 };
 
 enum EvalOfField

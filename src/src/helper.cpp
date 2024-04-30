@@ -176,7 +176,7 @@ bool affectsMyPlayer(Player &enemy, Player &myPlayer, Map &map)
         auto &coordsToChange = std::get<1>(possibleMove.second);
         for (auto &coord : coordsToChange)
         {
-            if (map.m_symbols.at(coord) == myPlayer.m_symbol)
+            if (map.m_symbols[coord] == myPlayer.m_symbol)
             {
                 return true;
             }

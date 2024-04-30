@@ -50,7 +50,16 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     uint16_t coord = 0;
     char answer;
 
+    h_res_clock::time_point start_time = h_res_clock::now();
+
     check_moves(m_map, m_players[m_player_number]);
+
+    h_res_clock::time_point end_time = h_res_clock::now();
+    std::chrono::duration<double, std::micro> elapsed_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    std::cout << "check_moves unordered_map: " << std::endl;
+    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+
     if (m_players[m_player_number].m_valid_moves.size() > 0)
     {
         m_players[m_player_number].m_has_valid_moves = true;
@@ -61,7 +70,8 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
         if (m_map.get_symbol(coord) == 'c')
         {
             std::cout << "Mit welchem Spieler wollen Sie tauschen?: ";
-            std::cin >> spec;
+            // std::cin >> spec;
+            spec = '1';
             spec -= '0';
         }
         else if (m_map.get_symbol(coord) == 'b')
@@ -69,7 +79,8 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
             do
             {
                 std::cout << "Wollen Sie eine Bombe(b) oder einen Überschreibstein(u)?: ";
-                std::cin >> answer;
+                // std::cin >> answer;
+                answer = 'b';
                 if (answer == 'b')
                 {
                     spec = 20;
@@ -87,20 +98,58 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
 
 uint16_t Game::get_bomb_throw()
 {
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    std::vector<uint16_t> current_player_stones(m_map.m_player_count, 0);
+    uint8_t best_player;
+    // count player current player stones
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
-        if (m_map.get_symbol(c) == m_players[(m_player_number + 1) % m_map.m_player_count].m_symbol)
+        if (check_players(m_map.get_symbol(c)))
         {
+            current_player_stones[m_map.get_symbol(c) - '0' - 1] += 1;
+        }
+    }
+    std::vector<std::pair<uint8_t, uint16_t>> player_stones_sorted;
+    // make a pair-vector out of the vector
+    for (uint8_t i = 0; i < current_player_stones.size(); i++)
+    {
+        player_stones_sorted.push_back(std::make_pair(i, current_player_stones[i]));
+    }
+    // sort players
+    std::sort(player_stones_sorted.begin(), player_stones_sorted.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
+              { return a.second > b.second; });
+    // find the next best player
+    uint8_t target_player = (m_player_number + 1) % m_map.m_player_count;
+    for (uint8_t i = 0; i < player_stones_sorted.size(); ++i)
+    {
+        if (player_stones_sorted[i].first == m_player_number)
+        {
+            if (i > 0)
+            {
+                target_player = player_stones_sorted[i - 1].first;
+            }
+            else
+            {
+                target_player = player_stones_sorted[i + 1].first;
+            }
+            break;
+        }
+    }
+    // @todo on which field of the target player to throw the bomb
+    // for now: the first field
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
+    {
+        if (m_map.get_symbol(c) == m_players[target_player].m_symbol)
+        {
+            execute_bomb(c, m_map, m_players[target_player]);
             return c;
         }
     }
-    // if the return doesn't happen, the next enemy has no more stones
-    // @todo change calculation of throw
-    // for now, this will throw a bomb at the first empty field
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    // if for some reason no player was found, this will throw a bomb at the first empty field
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
-        if (m_map.get_symbol(c) != m_players[m_player_number].m_symbol && m_map.get_symbol(c) != '-')
+        if (m_map.get_symbol(c) != '-')
         {
+            execute_bomb(c, m_map, m_players[c]);
             return c;
         }
     }
@@ -110,7 +159,7 @@ uint16_t Game::get_bomb_throw()
 
 void Game::print_evaluation(Map &m)
 {
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         std::cout << std::setw(4) << m.m_good_fields[c] << " ";
         if (c % m_map.m_width == 0)
@@ -119,7 +168,7 @@ void Game::print_evaluation(Map &m)
         }
     }
     std::cout << std::endl;
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         std::cout << std::setw(4) << m.m_bad_fields[c] << " ";
         if (c % m_map.m_width == 0)
@@ -140,12 +189,12 @@ int Game::evaluate_board(uint8_t game_phase, Player &pl, Map &map)
     uint8_t inversion_value = 30;
     uint8_t before_special_value = 30;
     std::array<int, 9> wall_values{0, 1, 2, 3, 16, 12, 8, 4, 0};
-    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
         map.m_good_fields[c] = 0;
         map.m_bad_fields[c] = 0;
     }
-    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
         bool special = false;
         char s = map.get_symbol(c);
@@ -191,7 +240,7 @@ int Game::evaluate_board(uint8_t game_phase, Player &pl, Map &map)
         map.m_good_fields[c] += wall_values[walls] * value;
     }
     // print_evaluation();
-    for (uint16_t c = 1; c < map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
 
         // if (m_map.get_symbol(c) == m_players[p].m_symbol)
@@ -208,7 +257,7 @@ int Game::evaluate_board(uint8_t game_phase, Player &pl, Map &map)
 
 void Game::get_frontier_score(Player &p)
 {
-    for (uint16_t c = 1; c < m_map.m_num_of_fields + 1; c++)
+    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (m_map.get_symbol(c) == p.m_symbol)
         {
