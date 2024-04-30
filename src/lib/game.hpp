@@ -8,6 +8,7 @@
 #include "player.hpp"
 #include "algorithms.hpp"
 #include "helper.hpp"
+#include "process_moves.hpp"
 
 class Game
 {
@@ -18,9 +19,7 @@ public:
     void init_players();
     uint16_t get_turn(uint8_t &, uint8_t &, uint8_t &);
     uint16_t get_bomb_throw();
-    void print_evaluation(Map &);
-    int evaluate_board(uint8_t, Player &, Map &);
-    void get_frontier_score(Player &);
+    void print_evaluation(Map &);        
     void check_winner();
     // end coord          //special field(0-4)       //coords of the way
 
