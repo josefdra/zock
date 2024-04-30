@@ -14,7 +14,7 @@ void get_frontier_score(Player &p, std::vector<char> &currMap, Map &m)
 int evaluate_board(uint8_t game_phase, Player &p, Map &m, std::vector<char> &currMap)
 {
     p.m_board_value = 0;
-
+    p.m_frontier_score = 0;
     uint8_t value = 10;
     uint8_t bonus_value = 30;
     uint8_t choice_value = 20 * (game_phase + 1);

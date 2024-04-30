@@ -229,7 +229,7 @@ void check_moves(Map &m, Player &p, std::vector<char> &currMap, bool &affectsMyP
     p.m_valid_moves.clear();
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
-        if (currMap[c] == 'x')
+        if (currMap[c] == 'x' && overrides)
         {
             possible_moves.insert(c);
         }
