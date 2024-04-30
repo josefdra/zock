@@ -85,7 +85,7 @@ h_res_clock::time_point start_time = h_res_clock::now();
 h_res_clock::time_point end_time = h_res_clock::now();
 std::chrono::duration<double, std::micro> elapsed_time =
     std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-std::cout << "check_moves unordered_map: " << std::endl;
+std::cout << "return_valid_moves unordered_map: " << std::endl;
 std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 */
 

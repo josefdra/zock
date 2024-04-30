@@ -218,9 +218,8 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
 /// @brief This function asks for a coordinate and checks if it's a valid move
 /// @param map current map layout
 /// @param player_number current player at turn
-void check_moves(Map &m, Player &p, std::vector<char> &currMap, bool &affectsMyPlayer, char my_symbol)
+void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, bool &affectsMyPlayer, char my_symbol)
 {
-    std::unordered_set<uint16_t> possible_moves;
     bool overrides = false;
     if (p.has_overwrite_stones())
     {
@@ -231,7 +230,7 @@ void check_moves(Map &m, Player &p, std::vector<char> &currMap, bool &affectsMyP
     {
         if (currMap[c] == 'x' && overrides)
         {
-            possible_moves.insert(c);
+            p.m_valid_moves.insert(c);
         }
         if (currMap[c] == p.m_symbol)
         {
@@ -246,17 +245,17 @@ void check_moves(Map &m, Player &p, std::vector<char> &currMap, bool &affectsMyP
                 {
                     if (currMap[next_field] == p.m_symbol && overrides && valid)
                     {
-                        possible_moves.insert(next_field);
+                        p.m_valid_moves.insert(next_field);
                         break;
                     }
                     else if ((check_empty_fields(currMap[next_field]) && valid))
                     {
-                        possible_moves.insert(next_field);
+                        p.m_valid_moves.insert(next_field);
                         break;
                     }
                     else if (valid && overrides)
                     {
-                        possible_moves.insert(next_field);
+                        p.m_valid_moves.insert(next_field);
                     }
                     else if (currMap[next_field] == p.m_symbol || next_field == c || check_empty_fields(currMap[next_field]))
                     {
@@ -274,9 +273,5 @@ void check_moves(Map &m, Player &p, std::vector<char> &currMap, bool &affectsMyP
                 }
             }
         }
-    }
-    for (auto &coord : possible_moves)
-    {
-        p.m_valid_moves[coord] = temp_color(coord, p.m_symbol, m, currMap, affectsMyPlayer, my_symbol);
     }
 }

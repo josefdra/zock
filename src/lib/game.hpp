@@ -8,6 +8,7 @@
 #include "player.hpp"
 #include "algorithms.hpp"
 #include "helper.hpp"
+#include "process_moves.hpp"
 
 class Game
 {

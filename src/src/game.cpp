@@ -48,21 +48,22 @@ void Game::init_players()
 uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
 {
     h_res_clock::time_point start_time = h_res_clock::now();
-    uint16_t bestEval = -INFINITY;
+    int bestEval = std::numeric_limits<int>::min();
     uint16_t bestCoord = 0;
     Player p = m_players[m_player_number];
     uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
     uint16_t tried_turns = 0;
     bool affectsMyPlayer = false;
-    check_moves(m_map, p, m_map.m_symbols, affectsMyPlayer, p.m_symbol);
+    calculate_valid_moves(m_map, p, m_map.m_symbols, affectsMyPlayer, p.m_symbol);
 
     for (auto &possibleMove : p.m_valid_moves)
     {
-        uint16_t currEval = minimaxOrParanoidWithPruning(*this, depth - 1, -INT32_MAX, INT32_MAX, true, possibleMove.second, nextPlayer, game_phase, p, tried_turns);
+        std::vector<char> next_map = temp_color(possibleMove, p.m_symbol, m_map, m_map.m_symbols, affectsMyPlayer, p.m_symbol);
+        int currEval = minimaxOrParanoidWithPruning(*this, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, p, tried_turns);
         if (currEval > bestEval)
         {
             bestEval = currEval;
-            bestCoord = possibleMove.first;
+            bestCoord = possibleMove;
         }
     }
     h_res_clock::time_point end_time = h_res_clock::now();
