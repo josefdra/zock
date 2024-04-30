@@ -78,40 +78,23 @@ bool check_special(unsigned char c)
     return var;
 }
 
-/**
- * @brief Measures how long it takes, to execute a function.
- * @brief Example Usage:
- * @brief auto func = [&map]() { map.read_hash_map("../../maps/boeseMap09.map"); };
- * @brief timer_function(func, "read_hash_map");
- * @brief for member functions the object must be referenzed in []
- * @param func
- * @param func_name
- */
-
 // Timer function removed, because it won't work. Just copy code
-
 /*
-template <typename F>
-void timer_function(F func, std::string func_name)
-{
-    h_res_clock::time_point start_time = h_res_clock::now();
-    func();
-    h_res_clock::time_point end_time = h_res_clock::now();
+h_res_clock::time_point start_time = h_res_clock::now();
 
-    std::chrono::duration<double, std::micro> elapsed_time =
-        std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-
-    std::cout << "Function: " << func_name << std::endl;
-    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
-}
+h_res_clock::time_point end_time = h_res_clock::now();
+std::chrono::duration<double, std::micro> elapsed_time =
+    std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+std::cout << "return_valid_moves unordered_map: " << std::endl;
+std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
 */
 
-uint16_t check_frontier(Map &m, uint16_t c)
+uint16_t check_frontier(Map &m, uint16_t c, std::vector<char> &currMap)
 {
     uint16_t score = 8;
     for (int d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
-        if (check_empty_fields(m.get_symbol(m.get_transition(c, d))))
+        if (check_empty_fields(currMap[m.get_transition(c, d)]))
         {
             score--;
         }
@@ -169,18 +152,3 @@ uint8_t checkForSpecial(char &c)
     }
 }
 
-bool affectsMyPlayer(Player &enemy, Player &myPlayer, Map &map)
-{
-    for (auto possibleMove : enemy.m_valid_moves)
-    {
-        auto &coordsToChange = std::get<1>(possibleMove.second);
-        for (auto &coord : coordsToChange)
-        {
-            if (map.m_symbols[coord] == myPlayer.m_symbol)
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
