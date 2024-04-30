@@ -162,9 +162,9 @@ void Game::check_winner()
 {
     for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
-        if (!check_empty_fields(c) && m_map.get_symbol(c) != 'x')
+        if (!check_empty_fields(m_map.m_symbols[c]) && m_map.m_symbols[c] != 'x')
         {
-            m_players[m_map.get_symbol(c) - '0' - 1].m_points += 1;
+            m_players[m_map.m_symbols[c] - '0' - 1].m_points += 1;
         }
     }
     uint16_t most_points = 0;

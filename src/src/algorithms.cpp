@@ -116,14 +116,14 @@ int minimaxOrParanoidWithPruning(Game &g, uint8_t depth, int alpha, int beta, st
         return evaluate_board(game_phase, myPlayer, g.m_map, currMap);
     }
     uint8_t counter = g.m_map.m_player_count;
-    while(currPlayer.m_valid_moves.size() < 1 && counter != 0)
+    while (currPlayer.m_valid_moves.size() < 1 && counter != 0)
     {
         currPlayer = g.m_players[(playersTurn + 1) % g.m_map.m_player_count];
         calculate_valid_moves(g.m_map, currPlayer, currMap, affectsMyPlayer, myPlayer.m_symbol);
         nextPlayer = ((playersTurn + 1) % g.m_map.m_player_count);
         counter--;
     }
-    if(counter == 0)
+    if (counter == 0)
     {
         return evaluate_board(game_phase, myPlayer, g.m_map, currMap);
     }
@@ -132,28 +132,28 @@ int minimaxOrParanoidWithPruning(Game &g, uint8_t depth, int alpha, int beta, st
     {
         std::vector<char> next_map = temp_color(child, currPlayer.m_symbol, g.m_map, currMap, affectsMyPlayer, myPlayer.m_symbol);
         if (currPlayer.m_symbol == myPlayer.m_symbol)
-        {        
+        {
             int eval = minimaxOrParanoidWithPruning(g, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, myPlayer, turns);
             maxEval = std::max(maxEval, eval);
             alpha = std::max(alpha, eval);
             if (beta <= alpha)
             {
                 break;
-            }        
+            }
             return maxEval;
         }
         else
-        {        
+        {
             int eval;
             // initializes paranoia
-            eval = minimaxOrParanoidWithPruning(g, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, myPlayer, turns);           
+            eval = minimaxOrParanoidWithPruning(g, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, myPlayer, turns);
 
             minEval = std::min(minEval, eval);
             beta = std::min(beta, eval);
             if (beta <= alpha)
             {
                 break;
-            }        
+            }
             return minEval;
         }
     }
