@@ -21,7 +21,7 @@ void change_players(Map &m, unsigned char p1, unsigned char p2)
     }
 }
 
-void execute_inversion(Map &m, char p)
+void execute_inversion(Map &m)
 {
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
@@ -85,7 +85,7 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
     else if (curr_symbol == 'i')
     {
         color(c, p.m_symbol, m);
-        execute_inversion(m, p.m_symbol);
+        execute_inversion(m);
     }
     // choice
     else if (curr_symbol == 'c')
@@ -171,7 +171,7 @@ void execute_bomb(uint16_t c, Map &m, Player &p)
     }
 }
 
-std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &currMap, char my_symbol)
+std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &currMap)
 {
     std::unordered_set<uint16_t> to_color;
     std::vector<char> ret_map = currMap;
