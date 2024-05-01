@@ -15,11 +15,6 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ga
 {
     p.m_board_value = 0;
     p.m_frontier_score = 0;
-    uint8_t value = 10;
-    uint8_t bonus_value = 30;
-    uint8_t choice_value = 20 * (game_phase + 1);
-    uint8_t inversion_value = 30;
-    uint8_t before_special_value = 30;
     for (auto &pl : g.m_players)
     {
         pl.m_points = 0;
@@ -46,11 +41,11 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ga
     }
     for (auto &pl : g.m_players)
     {
-        if(pl.m_points == 0){
+        if(pl.m_points == 0 && pl.m_symbol != p.m_symbol){
             p.m_points += 100000;
         }
     }
-    get_frontier_score(p, currMap, g.m_map);
+    // get_frontier_score(p, currMap, g.m_map);
     p.m_board_value += p.m_frontier_score;
     p.m_board_value += p.m_points;
     p.m_board_value += p.m_valid_moves.size() * 20;
@@ -80,7 +75,7 @@ int minimaxOrParanoidWithPruning(Game &g, uint8_t depth, int alpha, int beta, st
 
     if (depth == 0)
     {
-        return evaluate_board(game_phase, g.m_players[g.m_player_number], currMap, g);
+        return evaluate_board(game_phase, g.m_players[g.m_player_number], currMap, g); 
     }
 
     Player currPlayer = g.m_players[playersTurn];

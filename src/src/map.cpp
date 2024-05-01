@@ -198,7 +198,7 @@ void Map::calculate_board_values()
         }
         a--;
     }
-    std::array<int, 9> wall_values{0, 1, 2, 3, 8, 6, 4, 2, 0};
+    std::array<int, 9> wall_values{0, 1, 2, 3, 7, 5, 3, 1, 0};
     for (auto &c : board_values[0])
     {
         uint8_t counter = 0;
@@ -226,7 +226,7 @@ void Map::calculate_board_values()
             m_constant_board_values[c] *= wall_values[counter];
         }
     }
-    /*
+    
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         std::cout << std::setw(5) << m_constant_board_values[c] << " ";
@@ -237,7 +237,7 @@ void Map::calculate_board_values()
         }
     }
     std::cout << std::endl;
-    */
+    
 }
 
 /**
