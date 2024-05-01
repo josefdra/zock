@@ -7,7 +7,8 @@
  *
  */
 
-Map::Map(){
+Map::Map()
+{
     m_constant_board_values = std::vector<int>(m_num_of_fields);
     m_variable_board_values = std::vector<int>(m_num_of_fields);
 };
@@ -135,7 +136,7 @@ void Map::calculate_board_values()
         }
         board_values.push_back(temp);
         counter++;
-    } while (temp.size() > 0);
+    } while (temp.size() > 0 && counter < 25);
     print_map();
     uint8_t a = board_values.size() - 2;
     for (auto &set : board_values)
