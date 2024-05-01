@@ -54,12 +54,12 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
     uint16_t tried_turns = 0;
     calculate_valid_moves(m_map, p, m_map.m_symbols, p.m_symbol);
-    int test_depth = 5;
+    // int test_depth = 3;
 
     for (auto &possibleMove : p.m_valid_moves)
     {
         std::vector<char> next_map = temp_color(possibleMove, p.m_symbol, m_map, m_map.m_symbols, p.m_symbol);
-        int currEval = minimaxOrParanoidWithPruning(*this, test_depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
+        int currEval = minimaxOrParanoidWithPruning(*this, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
         if (currEval > bestEval)
         {
             bestEval = currEval;
@@ -146,28 +146,6 @@ uint16_t Game::get_bomb_throw()
     }
     std::cout << "something went wrong in bomb throw" << std::endl;
     return 0;
-}
-
-void Game::print_evaluation(Map &m)
-{
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
-    {
-        std::cout << std::setw(4) << m.m_good_fields[c] << " ";
-        if (c % m_map.m_width == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
-    std::cout << std::endl;
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
-    {
-        std::cout << std::setw(4) << m.m_bad_fields[c] << " ";
-        if (c % m_map.m_width == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
-    std::cout << std::endl;
 }
 
 void Game::check_winner()

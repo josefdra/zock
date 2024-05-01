@@ -7,7 +7,10 @@
  *
  */
 
-Map::Map(){};
+Map::Map(){
+    m_constant_board_values = std::vector<int>(m_num_of_fields);
+    m_variable_board_values = std::vector<int>(m_num_of_fields);
+};
 
 Map::~Map(){};
 
@@ -77,6 +80,110 @@ uint8_t Map::get_direction(uint16_t c, uint8_t d)
     return m_transitions[(c - 1) * 8 + d] % 10;
 }
 
+void Map::calculate_board_values()
+{
+    std::vector<std::unordered_set<uint16_t>> board_values;
+    std::unordered_set<uint16_t> temp;
+    uint8_t counter = 0;
+    do
+    {
+        temp.clear();
+        // Walls
+        if (counter == 0)
+        {
+            for (uint16_t c = 1; c < m_num_of_fields; c++)
+            {
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    if (get_transition(c, d) == 0 && m_symbols[c] != '-')
+                    {
+                        temp.insert(c);
+                        break;
+                    }
+                }
+            }
+        }
+        // One step inside from walls
+        else if (counter == 1)
+        {
+            for (auto &c : board_values[counter - 1])
+            {
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t trans = get_transition(c, (d + 4) % NUM_OF_DIRECTIONS);
+                    if (get_transition(c, d) == 0 && board_values[counter - 1].find(trans) == board_values[counter - 1].end() && trans != 0)
+                    {
+                        temp.insert(trans);
+                    }
+                }
+            }
+        }
+        // One more step from previous step
+        else
+        {
+            for (auto &c : board_values[counter - 1])
+            {
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t trans = get_transition(c, (d + 4) % NUM_OF_DIRECTIONS);
+                    if (board_values[counter - 2].find(get_transition(c, d)) != board_values[counter - 2].end() && board_values[counter - 1].find(trans) == board_values[counter - 1].end() && board_values[counter - 2].find(trans) == board_values[counter - 2].end())
+                    {
+                        temp.insert(trans);
+                    }
+                }
+            }
+        }
+        board_values.push_back(temp);
+        counter++;
+    } while (temp.size() > 0);
+    print_map();
+    uint8_t a = board_values.size() - 2;
+    for (auto &set : board_values)
+    {
+        for (auto &c : set)
+        {
+            if (a == board_values.size() - 2)
+            {
+                m_constant_board_values[c] = a * 10;
+            }
+            else if (a == board_values.size() - 3)
+            {
+                m_constant_board_values[c] = a * -10;
+            }
+            else
+            {
+                m_constant_board_values[c] = a * 10;
+            }
+        }
+        a--;
+    }
+    std::array<int, 9> wall_values{0, 1, 2, 3, 8, 6, 4, 2, 0};
+    for (auto &c : board_values[0])
+    {
+        uint8_t counter = 0;
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            if (get_transition(c, d) == 0)
+            {
+                counter++;
+            }
+        }
+        m_constant_board_values[c] *= wall_values[counter];
+    }
+    for (auto &c : board_values[1])
+    {
+        uint8_t counter = 0;
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            if (board_values[0].find(get_transition(c, d)) != board_values[0].end())
+            {
+                counter++;
+            }
+        }
+        m_constant_board_values[c] *= wall_values[counter];
+    }
+}
+
 /**
  * @brief reads the input and sets all the information required for the game map
  *
@@ -123,6 +230,7 @@ void Map::read_hash_map(std::stringstream &mapfile)
         set_transition(pos1, r1, pos2r);
         set_transition(pos2, r2, pos1r);
     }
+    calculate_board_values();
 }
 
 /**
