@@ -7,11 +7,7 @@
  *
  */
 
-Map::Map()
-{
-    m_constant_board_values = std::vector<int>(m_num_of_fields);
-    m_variable_board_values = std::vector<int>(m_num_of_fields);
-};
+Map::Map(){};
 
 Map::~Map(){};
 
@@ -162,26 +158,23 @@ void Map::calculate_board_values()
         }
         board_values.push_back(temp);
         counter++;
-        /*
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
             if (temp.find(c) != temp.end())
             {
-                std::cout << "\e[93m" << std::setw(5) << m_symbols[c] << " "
+                std::cout << "\e[93m" << std::setw(1) << m_symbols[c] << " "
                           << "\e[0m";
             }
             else
             {
-                std::cout << std::setw(5) << m_symbols[c] << " ";
+                std::cout << std::setw(1) << m_symbols[c] << " ";
             }
             if (c % m_width == 0)
             {
-                std::cout << std::endl
-                          << std::endl;
+                std::cout << std::endl;
             }
         }
         std::cout << std::endl;
-        */
     } while (temp.size() > 0);
     uint8_t a = board_values.size() - 2;
     for (auto &set : board_values)
@@ -216,19 +209,21 @@ void Map::calculate_board_values()
         }
         m_constant_board_values[c] *= wall_values[counter];
     }
-    for (auto &c : board_values[1])
+    if (board_values.size() > 1)
     {
-        uint8_t counter = 0;
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        for (auto &c : board_values[1])
         {
-            if (board_values[0].find(get_transition(c, d)) != board_values[0].end())
+            uint8_t counter = 0;
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
-                counter++;
+                if (board_values[0].find(get_transition(c, d)) != board_values[0].end())
+                {
+                    counter++;
+                }
             }
+            m_constant_board_values[c] *= wall_values[counter];
         }
-        m_constant_board_values[c] *= wall_values[counter];
     }
-    /*
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         std::cout << std::setw(5) << m_constant_board_values[c] << " ";
@@ -239,7 +234,6 @@ void Map::calculate_board_values()
         }
     }
     std::cout << std::endl;
-    */
 }
 
 /**
@@ -288,6 +282,10 @@ void Map::read_hash_map(std::stringstream &mapfile)
         set_transition(pos1, r1, pos2r);
         set_transition(pos2, r2, pos1r);
     }
+    m_constant_board_values = std::vector<int>(m_num_of_fields);
+    m_variable_board_values = std::vector<int>(m_num_of_fields);
+    std::fill(m_constant_board_values.begin(), m_constant_board_values.end(), 0);
+    std::fill(m_variable_board_values.begin(), m_variable_board_values.end(), 0);
     calculate_board_values();
 }
 
