@@ -20,7 +20,7 @@
 class Network
 {
 public:
-    Network(char *, uint16_t, uint8_t);
+    Network(const char *, uint16_t, uint8_t);
     ~Network();
 
     void init_socket();
@@ -42,7 +42,7 @@ public:
     void receive_data();
 
     uint16_t m_port;
-    char *m_ip;
+    const char *m_ip;
     uint8_t m_group_number;
     struct sockaddr_in m_server_addr;
     int m_csocket;

@@ -1,6 +1,6 @@
 #include "network.hpp"
 
-Network::Network(char *ip, uint16_t port, uint8_t g_n) : m_port(port), m_ip(ip), m_group_number(g_n)
+Network::Network(const char *ip, uint16_t port, uint8_t g_n) : m_port(port), m_ip(ip), m_group_number(g_n)
 {
     init_socket();
     init_server();

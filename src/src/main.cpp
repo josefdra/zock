@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[])
 {
-    char *ip = "127.0.0.1";
+    const char *ip = "127.0.0.1";
     int port = 7777;
     uint8_t group_number = 1;
     if (argc > 1)
