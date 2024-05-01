@@ -7,7 +7,10 @@
  *
  */
 
-Map::Map(){};
+Map::Map()
+{
+    m_transitions.fill(0);
+};
 
 Map::~Map(){};
 
@@ -247,7 +250,6 @@ void Map::calculate_board_values()
 void Map::read_hash_map(std::stringstream &mapfile)
 {
     m_symbols.push_back(0);
-    m_transitions.push_back(0);
     m_constant_board_values.push_back(0);
     m_variable_board_values.push_back(0);
     char temp;
@@ -260,7 +262,6 @@ void Map::read_hash_map(std::stringstream &mapfile)
         m_variable_board_values.push_back(0);
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            m_transitions.push_back(0);
             set_transition(c, d, 0);
         }
         mapfile >> temp;

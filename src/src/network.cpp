@@ -12,7 +12,7 @@ Network::Network(const char *ip, uint16_t port, uint8_t g_n) : m_port(port), m_i
 
 Network::~Network()
 {
-    // close_socket();
+    close_socket();
 }
 
 void Network::init_socket()

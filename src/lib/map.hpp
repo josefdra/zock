@@ -37,7 +37,7 @@ public:
     void print_map_with_spectifications();
     void print_map();
     std::vector<char> m_symbols;
-    std::vector<uint16_t> m_transitions;
+    std::array<uint16_t, 20001> m_transitions;
     uint8_t m_player_number;
     uint16_t m_height;
     uint16_t m_width;
