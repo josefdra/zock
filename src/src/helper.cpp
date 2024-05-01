@@ -151,4 +151,3 @@ uint8_t checkForSpecial(char &c)
         return 0;
     }
 }
-
