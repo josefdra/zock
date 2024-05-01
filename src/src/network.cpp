@@ -12,7 +12,7 @@ Network::Network(const char *ip, uint16_t port, uint8_t g_n) : m_port(port), m_i
 
 Network::~Network()
 {
-    close_socket();
+    // close_socket();
 }
 
 void Network::init_socket()
@@ -151,7 +151,7 @@ void Network::receive_player_number(uint32_t actual_message_length)
 {
     char message[actual_message_length];
     recv(m_csocket, &message, actual_message_length, 0);
-    m_game.m_player_number = message[0] - 1;
+    m_game.m_player_number = m_game.m_map.m_player_number = message[0] - 1;
     std::cout << "Received player_number, initializing players, we are player " << (int)(m_game.m_player_number + 1) << std::endl;
     m_game.init_players();
 }

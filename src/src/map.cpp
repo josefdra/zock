@@ -226,7 +226,7 @@ void Map::calculate_board_values()
             m_constant_board_values[c] *= wall_values[counter];
         }
     }
-    
+
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         std::cout << std::setw(5) << m_constant_board_values[c] << " ";
@@ -237,7 +237,6 @@ void Map::calculate_board_values()
         }
     }
     std::cout << std::endl;
-    
 }
 
 /**
@@ -249,12 +248,16 @@ void Map::read_hash_map(std::stringstream &mapfile)
 {
     m_symbols.push_back(0);
     m_transitions.push_back(0);
+    m_constant_board_values.push_back(0);
+    m_variable_board_values.push_back(0);
     char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     m_num_of_fields = m_height * m_width + 1;
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields; c++)
     {
+        m_constant_board_values.push_back(0);
+        m_variable_board_values.push_back(0);
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
             m_transitions.push_back(0);
@@ -286,10 +289,6 @@ void Map::read_hash_map(std::stringstream &mapfile)
         set_transition(pos1, r1, pos2r);
         set_transition(pos2, r2, pos1r);
     }
-    m_constant_board_values = std::vector<int>(m_num_of_fields);
-    m_variable_board_values = std::vector<int>(m_num_of_fields);
-    std::fill(m_constant_board_values.begin(), m_constant_board_values.end(), 0);
-    std::fill(m_variable_board_values.begin(), m_variable_board_values.end(), 0);
     calculate_board_values();
 }
 
@@ -394,17 +393,3 @@ void Map::print_map()
     }
     std::cout << std::endl;
 }
-
-/*
-void Map::print_m_frontier_scores(std::vector<Player> &p)
-{
-    std::cout << "Frontier_scores:" << std::endl
-              << std::endl;
-    for (auto &player : p)
-    {
-        player.get_frontier_score(*this);
-        std::cout << getColorString(Colors(player.m_symbol - '0')) << "Player " << player.m_symbol << ": " << player.m_frontier_score << "\e[0m" << std::endl;
-    }
-    std::cout << std::endl;
-}
-*/
