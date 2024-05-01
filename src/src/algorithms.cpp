@@ -81,12 +81,12 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
     uint8_t nextPlayer = ((playersTurn + 1) % m.m_player_count);
     calculate_valid_moves(m, players[playersTurn], currMap);
 
-    uint8_t counter = 1;
+    uint8_t counter = 0;
     while (players[playersTurn].m_valid_moves.size() < 1 && counter < m.m_player_count)
-    {
-        nextPlayer = ((playersTurn + 1) % m.m_player_count);
-        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap);
+    {            
         counter++;
+        nextPlayer = ((playersTurn + 1) % m.m_player_count);    
+        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap);
     }
     if (counter == m.m_player_count)
     {
