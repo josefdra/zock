@@ -150,6 +150,7 @@ endif
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
+	@$(RM) -r build
 
 # Debug build for gdb debugging
 .PHONY: debug
@@ -163,6 +164,7 @@ endif
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
+	@$(RM) -r build
 
 # Create the directories used in the build
 .PHONY: dirs
