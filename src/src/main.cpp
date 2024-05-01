@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
     }
     std::cout << "connecting to: ip(" << ip << "), port(" << port << ")" << std::endl;
     Network network_handler(ip, port, group_number);
+    network_handler.run_game();
     std::cout << "Game finished" << std::endl;
     return 0;
 }

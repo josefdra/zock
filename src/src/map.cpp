@@ -158,6 +158,7 @@ void Map::calculate_board_values()
         }
         board_values.push_back(temp);
         counter++;
+        /*
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
             if (temp.find(c) != temp.end())
@@ -175,6 +176,7 @@ void Map::calculate_board_values()
             }
         }
         std::cout << std::endl;
+        */
     } while (temp.size() > 0);
     uint8_t a = board_values.size() - 2;
     for (auto &set : board_values)
@@ -224,6 +226,7 @@ void Map::calculate_board_values()
             m_constant_board_values[c] *= wall_values[counter];
         }
     }
+    /*
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         std::cout << std::setw(5) << m_constant_board_values[c] << " ";
@@ -234,6 +237,7 @@ void Map::calculate_board_values()
         }
     }
     std::cout << std::endl;
+    */
 }
 
 /**

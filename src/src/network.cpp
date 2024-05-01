@@ -8,7 +8,6 @@ Network::Network(char *ip, uint16_t port, uint8_t g_n) : m_ip(ip), m_port(port),
     send_group_number(m_group_number);
     Game m_game;
     init_map_and_player();
-    run_game();
 }
 
 Network::~Network()
@@ -108,7 +107,7 @@ void Network::run_game()
     m_game.m_map.print_map();
     uint16_t counter = 0;
 
-    while (true)
+    while (m_game_phase < 3)
     {
         if (check_socket_acitivity())
         {
@@ -231,7 +230,7 @@ void Network::receive_end_of_game()
 {
     std::cout << "The game ended" << std::endl;
     m_game.check_winner();
-    return;
+    m_game_phase = 3;
 }
 
 void Network::receive_data()

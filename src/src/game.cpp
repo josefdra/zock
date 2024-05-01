@@ -53,8 +53,8 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     Player p = m_players[m_player_number];
     uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
     uint16_t tried_turns = 0;
-    calculate_valid_moves(m_map, p, m_map.m_symbols, p.m_symbol);
-    // int test_depth = 3;
+    calculate_valid_moves(m_map, p, m_map.m_symbols);
+    int test_depth = 4;
 
     for (auto &possibleMove : p.m_valid_moves)
     {
@@ -150,6 +150,10 @@ uint16_t Game::get_bomb_throw()
 
 void Game::check_winner()
 {
+    for (auto &p : m_players)
+    {
+        p.m_points = 0;
+    }
     for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
         if (!check_empty_fields(m_map.m_symbols[c]) && m_map.m_symbols[c] != 'x')
@@ -169,4 +173,5 @@ void Game::check_winner()
         }
     }
     std::cout << "\nThe Winner is: Player " << winner << "!" << std::endl;
+    return;
 }

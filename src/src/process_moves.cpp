@@ -211,7 +211,7 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
 /// @brief This function asks for a coordinate and checks if it's a valid move
 /// @param map current map layout
 /// @param player_number current player at turn
-void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, char my_symbol)
+void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap)
 {
     bool overrides = false;
     if (p.has_overwrite_stones())

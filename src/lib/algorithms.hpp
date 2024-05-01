@@ -14,7 +14,7 @@
 class Game;
 
 void get_frontier_score(Player &, std::vector<char> &, Map &);
-int evaluate_board(uint8_t, Player &, Map &, std::vector<char> &);
+int evaluate_board(uint8_t, Player &, std::vector<char> &, Game &);
 int minimaxOrParanoidWithPruning(Game &, uint8_t, int, int, std::vector<char> &, uint8_t &, uint8_t &, uint16_t &);
 std::vector<uint16_t> sort_moves(std::unordered_set<uint16_t> &);
 int iterativeDeepening(Game &, uint8_t, int, int, std::vector<char> &, uint8_t &, uint8_t &, uint16_t &);
