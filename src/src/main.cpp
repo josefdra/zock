@@ -84,3 +84,4 @@ int main(int argc, char *argv[])
     std::cout << "Game finished" << std::endl;
     return 0;
 }
+

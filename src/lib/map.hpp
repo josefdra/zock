@@ -32,6 +32,7 @@ public:
     uint16_t get_transition(uint16_t, uint8_t);
     uint8_t get_direction(uint16_t, uint8_t);
     void calculate_board_values();
+    void calculate_radius_size();
     void read_hash_map(std::stringstream &);
     void print_map_with_transitions();
     void print_map_with_spectifications();
@@ -43,6 +44,7 @@ public:
     uint16_t m_width;
     uint16_t m_player_count;
     uint16_t m_strength;
+    uint16_t m_radius_size;
     uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
     uint16_t m_num_of_fields;

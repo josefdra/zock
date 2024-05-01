@@ -117,56 +117,17 @@ void execute_bomb(uint16_t c, Map &m, Player &p)
 {
     if (m.m_strength == 0)
     {
-        m.set_symbol(c, '-');
+        m.m_symbols[c] = '-';
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
             uint16_t temp_transition = m.get_transition(c, d);
-            uint8_t temp_direction = m.get_direction(c, d);
-            m.set_transition(c, d, 0);
-            m.set_transition(temp_transition, (temp_direction + 4) % 8, 0);
-        }
-        p.m_bombs -= 1;
-    }
-    else
-    {
-        // bomb strength greater 0: destroy neighbour stones
-        std::unordered_set<uint16_t> bombed_stones;
-        bombed_stones.insert(c); // add stone in the center
-
-        for (uint8_t s = 1; s <= m.m_strength; ++s)
-        {
-            std::vector<uint16_t> next_bombed_stones;
-            for (auto stone : bombed_stones)
+            if (temp_transition != 0)
             {
-                // Destroy neigbour stones for each level of bomb strength
-                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                {
-                    uint16_t transition = m.get_transition(stone, d);
-                    if (transition != 0 && m.get_symbol(transition) != '-')
-                    {
-                        m.set_symbol(transition, '-');
-                        next_bombed_stones.push_back(transition);
-                    }
-                }
-            }
-            bombed_stones.insert(next_bombed_stones.begin(), next_bombed_stones.end());
-        }
-
-        // Update transitions for all destroyed stones
-        for (auto stone : bombed_stones)
-        {
-            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-            {
-                uint16_t transition = m.get_transition(stone, d);
-                if (transition != 0)
-                {
-                    uint16_t direction = m.get_direction(stone, d);
-                    m.set_transition(stone, d, 0);
-                    m.set_transition(transition, (direction + 4) % 8, 0);
-                }
+                uint8_t temp_direction = m.get_direction(c, d);
+                m.set_transition(c, d, 0);
+                m.set_transition(temp_transition, (temp_direction + 4) % 8, 0);
             }
         }
-        m.set_symbol(c, '-');
         p.m_bombs -= 1;
     }
 }
