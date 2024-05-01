@@ -88,44 +88,11 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
 
 uint16_t Game::get_bomb_throw()
 {
-    std::vector<char> bomb_radius(m_map.m_radius_size + 1, '0');
-    uint8_t x_b = m_map.m_strength * 2 + 1;
-    uint8_t counter = 0;
-    uint16_t best_pos = 0;
-    // if for some reason no player was found, this will throw a bomb at the first empty field
     for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
-        for (uint16_t b = 0; b < bomb_radius.size(); b++)
-        {
-            int16_t map_c = (b + c + counter * m_map.m_width - m_map.m_strength) - (m_map.m_strength * m_map.m_width);
-            uint16_t bomb_c = (b + c + counter * x_b);
-            if (0 < map_c && map_c < m_map.m_num_of_fields)
-            {
-                bomb_radius[bomb_c] = m_map.m_symbols[map_c];
-            }
-            if ((b + 1) % x_b == 0)
-            {
-                counter++;
-                if (counter == x_b)
-                {
-                    break;
-                }
-                else
-                {
-                    b = 0;
-                }
-            }
+        if(check_players(m_map.m_symbols[c]) && m_map.m_symbols[c] != m_map.m_player_number + 1 + '0'){
+            return c;
         }
-        m_map.print_map();
-        for (uint16_t c = 1; c < bomb_radius.size(); c++)
-        {
-            std::cout << std::setw(1) << bomb_radius[c] << " ";
-            if (c % x_b == 0)
-            {
-                std::cout << std::endl;
-            }
-        }
-        std::cout << std::endl;
     }
     std::cout << "something went wrong in bomb throw" << std::endl;
     return 0;
