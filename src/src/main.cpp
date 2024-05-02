@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[])
 {
-    std::string filename = "./logs/" + std::string(argv[1]) + ".txt";
+    std::string filename = "/home/josefdra/ZOCK/g01/automated_testing/client_binary/logs/" + std::string(argv[1]) + ".txt";
 
     freopen(filename.c_str(), "w", stdout);
 
