@@ -50,16 +50,15 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     h_res_clock::time_point start_time = h_res_clock::now();
     int bestEval = std::numeric_limits<int>::min();
     uint16_t bestCoord = 0;
-    Player p = m_players[m_player_number];
-    uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
     uint16_t tried_turns = 0;
-    calculate_valid_moves(m_map, p, m_map.m_symbols, p.m_symbol);
-    int test_depth = 5;
+    uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
+    calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols);
+    // int test_depth = 4;
 
-    for (auto &possibleMove : p.m_valid_moves)
+    for (auto &possibleMove : m_players[m_player_number].m_valid_moves)
     {
-        std::vector<char> next_map = temp_color(possibleMove, p.m_symbol, m_map, m_map.m_symbols, p.m_symbol);
-        int currEval = minimaxOrParanoidWithPruning(*this, test_depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
+        std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
+        int currEval = minimaxOrParanoidWithPruning(m_map, m_players, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
         if (currEval > bestEval)
         {
             bestEval = currEval;
@@ -89,58 +88,9 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
 
 uint16_t Game::get_bomb_throw()
 {
-    std::vector<uint16_t> current_player_stones(m_map.m_player_count, 0);
-    uint8_t best_player;
-    // count player current player stones
     for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
-        if (check_players(m_map.get_symbol(c)))
-        {
-            current_player_stones[m_map.get_symbol(c) - '0' - 1] += 1;
-        }
-    }
-    std::vector<std::pair<uint8_t, uint16_t>> player_stones_sorted;
-    // make a pair-vector out of the vector
-    for (uint8_t i = 0; i < current_player_stones.size(); i++)
-    {
-        player_stones_sorted.push_back(std::make_pair(i, current_player_stones[i]));
-    }
-    // sort players
-    std::sort(player_stones_sorted.begin(), player_stones_sorted.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
-              { return a.second > b.second; });
-    // find the next best player
-    uint8_t target_player = (m_player_number + 1) % m_map.m_player_count;
-    for (uint8_t i = 0; i < player_stones_sorted.size(); ++i)
-    {
-        if (player_stones_sorted[i].first == m_player_number)
-        {
-            if (i > 0)
-            {
-                target_player = player_stones_sorted[i - 1].first;
-            }
-            else
-            {
-                target_player = player_stones_sorted[i + 1].first;
-            }
-            break;
-        }
-    }
-    // @todo on which field of the target player to throw the bomb
-    // for now: the first field
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
-    {
-        if (m_map.get_symbol(c) == m_players[target_player].m_symbol)
-        {
-            execute_bomb(c, m_map, m_players[target_player]);
-            return c;
-        }
-    }
-    // if for some reason no player was found, this will throw a bomb at the first empty field
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
-    {
-        if (m_map.get_symbol(c) != '-')
-        {
-            execute_bomb(c, m_map, m_players[c]);
+        if(check_players(m_map.m_symbols[c]) && m_map.m_symbols[c] != m_map.m_player_number + 1 + '0'){
             return c;
         }
     }
@@ -148,33 +98,15 @@ uint16_t Game::get_bomb_throw()
     return 0;
 }
 
-void Game::print_evaluation(Map &m)
-{
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
-    {
-        std::cout << std::setw(4) << m.m_good_fields[c] << " ";
-        if (c % m_map.m_width == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
-    std::cout << std::endl;
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
-    {
-        std::cout << std::setw(4) << m.m_bad_fields[c] << " ";
-        if (c % m_map.m_width == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
-    std::cout << std::endl;
-}
-
 void Game::check_winner()
 {
+    for (auto &p : m_players)
+    {
+        p.m_points = 0;
+    }
     for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
-        if (!check_empty_fields(m_map.m_symbols[c]) && m_map.m_symbols[c] != 'x')
+        if (check_players(m_map.m_symbols[c]))
         {
             m_players[m_map.m_symbols[c] - '0' - 1].m_points += 1;
         }
@@ -191,4 +123,5 @@ void Game::check_winner()
         }
     }
     std::cout << "\nThe Winner is: Player " << winner << "!" << std::endl;
+    return;
 }

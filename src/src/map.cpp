@@ -77,6 +77,179 @@ uint8_t Map::get_direction(uint16_t c, uint8_t d)
     return m_transitions[(c - 1) * 8 + d] % 10;
 }
 
+void Map::calculate_board_values()
+{
+    std::vector<std::unordered_set<uint16_t>> board_values;
+    std::unordered_set<uint16_t> temp;
+    uint8_t counter = 0;
+    do
+    {
+        temp.clear();
+        // Walls
+        if (counter == 0)
+        {
+            for (uint16_t c = 1; c < m_num_of_fields; c++)
+            {
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    if (get_transition(c, d) == 0 && m_symbols[c] != '-')
+                    {
+                        temp.insert(c);
+                        break;
+                    }
+                }
+            }
+        }
+        // One step inside from walls
+        else if (counter == 1)
+        {
+            for (auto &c : board_values[counter - 1])
+            {
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t trans1 = get_transition(c, (d + 3) % NUM_OF_DIRECTIONS);
+                    uint16_t trans2 = get_transition(c, (d + 4) % NUM_OF_DIRECTIONS);
+                    uint16_t trans3 = get_transition(c, (d + 5) % NUM_OF_DIRECTIONS);
+                    if (get_transition(c, d) == 0)
+                    {
+                        if (board_values[counter - 1].find(trans1) == board_values[counter - 1].end() && trans1 != 0)
+                        {
+                            temp.insert(trans1);
+                        }
+                        if (board_values[counter - 1].find(trans2) == board_values[counter - 1].end() && trans2 != 0)
+                        {
+                            temp.insert(trans2);
+                        }
+                        if (board_values[counter - 1].find(trans3) == board_values[counter - 1].end() && trans3 != 0)
+                        {
+                            temp.insert(trans3);
+                        }
+                    }
+                }
+            }
+        }
+        // One more step from previous step
+        else if (1)
+        {
+            for (auto &c : board_values[counter - 1])
+            {
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t trans1 = get_transition(c, (d + 3) % NUM_OF_DIRECTIONS);
+                    uint16_t trans2 = get_transition(c, (d + 4) % NUM_OF_DIRECTIONS);
+                    uint16_t trans3 = get_transition(c, (d + 5) % NUM_OF_DIRECTIONS);
+                    if (board_values[counter - 2].find(get_transition(c, d)) != board_values[counter - 2].end())
+                    {
+                        if (board_values[counter - 1].find(trans1) == board_values[counter - 1].end() && board_values[counter - 2].find(trans1) == board_values[counter - 2].end())
+                        {
+                            temp.insert(trans1);
+                        }
+                        if (board_values[counter - 1].find(trans2) == board_values[counter - 1].end() && board_values[counter - 2].find(trans2) == board_values[counter - 2].end())
+                        {
+                            temp.insert(trans2);
+                        }
+                        if (board_values[counter - 1].find(trans3) == board_values[counter - 1].end() && board_values[counter - 2].find(trans3) == board_values[counter - 2].end())
+                        {
+                            temp.insert(trans3);
+                        }
+                    }
+                }
+            }
+        }
+        board_values.push_back(temp);
+        counter++;
+        /*
+        for (uint16_t c = 1; c < m_num_of_fields; c++)
+        {
+            if (temp.find(c) != temp.end())
+            {
+                std::cout << "\e[93m" << std::setw(1) << m_symbols[c] << " "
+                          << "\e[0m";
+            }
+            else
+            {
+                std::cout << std::setw(1) << m_symbols[c] << " ";
+            }
+            if (c % m_width == 0)
+            {
+                std::cout << std::endl;
+            }
+        }
+        std::cout << std::endl;
+        */
+    } while (temp.size() > 0);
+    uint8_t a = board_values.size() - 2;
+    for (auto &set : board_values)
+    {
+        for (auto &c : set)
+        {
+            if (a == board_values.size() - 2)
+            {
+                m_constant_board_values[c] = a * 10;
+            }
+            else if (a == board_values.size() - 3)
+            {
+                m_constant_board_values[c] = a * -10;
+            }
+            else
+            {
+                m_constant_board_values[c] = a * 10;
+            }
+        }
+        a--;
+    }
+    std::array<int, 9> wall_values{0, 1, 2, 3, 7, 5, 3, 1, 0};
+    for (auto &c : board_values[0])
+    {
+        uint8_t counter = 0;
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            if (get_transition(c, d) == 0)
+            {
+                counter++;
+            }
+        }
+        m_constant_board_values[c] *= wall_values[counter];
+    }
+    if (board_values.size() > 1)
+    {
+        for (auto &c : board_values[1])
+        {
+            uint8_t counter = 0;
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                if (board_values[0].find(get_transition(c, d)) != board_values[0].end())
+                {
+                    counter++;
+                }
+            }
+            m_constant_board_values[c] *= wall_values[counter];
+        }
+    }
+    /*
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        std::cout << std::setw(5) << m_constant_board_values[c] << " ";
+        if (c % m_width == 0)
+        {
+            std::cout << std::endl;
+        }
+    }
+    std::cout << std::endl;
+    */
+}
+
+void Map::calculate_radius_size()
+{
+    m_radius_size = 0;
+    for (uint8_t n = 1; n < m_strength + 1; n++)
+    {
+        m_radius_size += n;
+    }
+    m_radius_size *= 8;
+    m_radius_size += 1;
+}
+
 /**
  * @brief reads the input and sets all the information required for the game map
  *
@@ -84,21 +257,17 @@ uint8_t Map::get_direction(uint16_t c, uint8_t d)
  */
 void Map::read_hash_map(std::stringstream &mapfile)
 {
-    m_symbols.push_back(0);
-    m_transitions.push_back(0);
     char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     m_num_of_fields = m_height * m_width + 1;
+    m_transitions = std::vector<uint16_t>((m_num_of_fields - 1) * 8 + 1, 0);
+    m_symbols = std::vector<char>(m_num_of_fields, 0);
+    m_constant_board_values = std::vector<int>(m_num_of_fields, 0);
+    m_variable_board_values = std::vector<int>(m_num_of_fields, 0);
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields; c++)
     {
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-        {
-            m_transitions.push_back(0);
-            set_transition(c, d, 0);
-        }
         mapfile >> temp;
-        m_symbols.push_back(0);
         set_symbol(c, temp);
     }
     for (int c = 1; c < m_num_of_fields; c++)
@@ -123,6 +292,8 @@ void Map::read_hash_map(std::stringstream &mapfile)
         set_transition(pos1, r1, pos2r);
         set_transition(pos2, r2, pos1r);
     }
+    calculate_board_values();
+    calculate_radius_size();
 }
 
 /**
@@ -226,17 +397,3 @@ void Map::print_map()
     }
     std::cout << std::endl;
 }
-
-/*
-void Map::print_m_frontier_scores(std::vector<Player> &p)
-{
-    std::cout << "Frontier_scores:" << std::endl
-              << std::endl;
-    for (auto &player : p)
-    {
-        player.get_frontier_score(*this);
-        std::cout << getColorString(Colors(player.m_symbol - '0')) << "Player " << player.m_symbol << ": " << player.m_frontier_score << "\e[0m" << std::endl;
-    }
-    std::cout << std::endl;
-}
-*/

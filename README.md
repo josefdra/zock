@@ -1,6 +1,11 @@
-#FightClub:
+# FightClub:
 
 https://172.20.0.41:8091
+
+# MatchPoint
+
+http://172.20.0.41:8088/current
+
 
 # RevXT-SS24-g01
 

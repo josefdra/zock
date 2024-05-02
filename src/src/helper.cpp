@@ -52,7 +52,7 @@ bool check_empty_fields(unsigned char c)
 bool check_players(unsigned char c)
 {
     bool var = false;
-    for (int i = 0; i < players.size(); i++)
+    for (uint8_t i = 0; i < players.size(); i++)
     {
         if (c == players[i])
         {
@@ -68,7 +68,7 @@ bool check_players(unsigned char c)
 bool check_special(unsigned char c)
 {
     bool var = false;
-    for (int i = 0; i < special.size(); i++)
+    for (uint8_t i = 0; i < special.size(); i++)
     {
         if (c == special[i])
         {
@@ -116,7 +116,7 @@ EvalOfField evalFieldSymbol(unsigned char c)
     else
         // This return is wrong and has to be removed. Is just here to get rid of the warning.
         return EvalOfField::enemy;
-    for (int i = 0; i < players.size(); i++)
+    for (uint8_t i = 0; i < players.size(); i++)
     {
         if (c == players.at(i))
             return EvalOfField::enemy;
@@ -151,4 +151,3 @@ uint8_t checkForSpecial(char &c)
         return 0;
     }
 }
-

@@ -1,6 +1,6 @@
 #include "network.hpp"
 
-Network::Network(char *ip, uint16_t port, uint8_t g_n) : m_ip(ip), m_port(port), m_group_number(g_n)
+Network::Network(const char *ip, uint16_t port, uint8_t g_n) : m_port(port), m_ip(ip), m_group_number(g_n)
 {
     init_socket();
     init_server();
@@ -92,7 +92,7 @@ bool Network::check_socket_acitivity()
     fd_set read_fds;
     FD_ZERO(&read_fds);
     FD_SET(m_csocket, &read_fds);
-    int activity = select(m_csocket + 1, &read_fds, NULL, NULL, NULL);
+    select(m_csocket + 1, &read_fds, NULL, NULL, NULL);
     if (FD_ISSET(m_csocket, &read_fds))
     {
         return true;
@@ -108,7 +108,7 @@ void Network::run_game()
     m_game.m_map.print_map();
     uint16_t counter = 0;
 
-    while (true)
+    while (m_game_phase < 3)
     {
         if (check_socket_acitivity())
         {
@@ -141,7 +141,7 @@ void Network::send_move(uint8_t x, uint8_t y, uint8_t s)
 void Network::receive_map(uint32_t actual_message_length)
 {
     char message[actual_message_length + 1];
-    int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
+    recv(m_csocket, &message, actual_message_length, 0);
     message[actual_message_length] = '\0';
     std::stringstream ss(message);
     std::cout << "Received map, initializing map" << std::endl;
@@ -151,8 +151,8 @@ void Network::receive_map(uint32_t actual_message_length)
 void Network::receive_player_number(uint32_t actual_message_length)
 {
     char message[actual_message_length];
-    int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
-    m_game.m_player_number = message[0] - 1;
+    recv(m_csocket, &message, actual_message_length, 0);
+    m_game.m_player_number = m_game.m_map.m_player_number = message[0] - 1;
     std::cout << "Received player_number, initializing players, we are player " << (int)(m_game.m_player_number + 1) << std::endl;
     m_game.init_players();
 }
@@ -161,7 +161,7 @@ void Network::receive_move_prompt(uint32_t actual_message_length)
 {
     std::cout << "Received move prompt, calculating move" << std::endl;
     char message[actual_message_length];
-    int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
+    recv(m_csocket, &message, actual_message_length, 0);
     memcpy(&m_time, message, sizeof(m_time));
     m_search_depth = message[4];
     uint8_t spec = 0;
@@ -185,7 +185,7 @@ void Network::receive_move_prompt(uint32_t actual_message_length)
 void Network::receive_move(uint32_t actual_message_length)
 {
     char message[actual_message_length + 1];
-    int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
+    recv(m_csocket, &message, actual_message_length, 0);
     uint8_t x, y;
     uint8_t spec, player;
     x = message[1];
@@ -213,7 +213,7 @@ void Network::receive_move(uint32_t actual_message_length)
 void Network::receive_disqualification(uint32_t actual_message_length)
 {
     char message[actual_message_length];
-    int recv_msg = recv(m_csocket, &message, actual_message_length, 0);
+    recv(m_csocket, &message, actual_message_length, 0);
     std::cout << "Player " << (int)message[0] << " is disqulified" << std::endl;
     if (message[0] == m_game.m_player_number + 1)
     {
@@ -231,13 +231,13 @@ void Network::receive_end_of_game()
 {
     std::cout << "The game ended" << std::endl;
     m_game.check_winner();
-    return;
+    m_game_phase = 3;
 }
 
 void Network::receive_data()
 {
     uint8_t type = 0;
-    int recv_type = recv(m_csocket, &type, sizeof(type), 0);
+    recv(m_csocket, &type, sizeof(type), 0);
     uint32_t message_length = 0;
     int recv_msg_length = recv(m_csocket, &message_length, sizeof(message_length), 0);
     uint32_t actual_message_length;

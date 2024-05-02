@@ -10,7 +10,7 @@ SRC_PATH = ./src/src
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags
-COMPILE_FLAGS = -std=c++11 -Wall -g
+COMPILE_FLAGS = -std=c++11 -Wall -g -Wextra
 # Additional release-specific flags
 RCOMPILE_FLAGS = -D NDEBUG
 # Additional debug-specific flags
@@ -70,7 +70,7 @@ debug: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
 
 # Build and output paths
 release: export BUILD_PATH := build/release
-release: export BIN_PATH := bin/release
+release: export BIN_PATH := bin
 debug: export BUILD_PATH := build/debug
 debug: export BIN_PATH := bin/debug
 install: export BIN_PATH := bin/release
@@ -150,6 +150,7 @@ endif
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
+	@$(RM) -r build
 
 # Debug build for gdb debugging
 .PHONY: debug
@@ -163,6 +164,7 @@ endif
 	@$(MAKE) all --no-print-directory
 	@echo -n "Total build time: "
 	@$(END_TIME)
+	@$(RM) -r build
 
 # Create the directories used in the build
 .PHONY: dirs
