@@ -381,15 +381,7 @@ void Map::print_map()
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
-        if (check_players(get_symbol(c)))
-        {
-            std::cout << getColorString(Colors((get_symbol(c) - '0'))) << get_symbol(c) << " "
-                      << "\e[0m";
-        }
-        else
-        {
-            std::cout << get_symbol(c) << " ";
-        }
+        std::cout << get_symbol(c) << " ";
         if (c % m_width == 0)
         {
             std::cout << std::endl;
