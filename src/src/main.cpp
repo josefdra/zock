@@ -9,7 +9,8 @@ int main(int argc, char *argv[])
 
     Network network_handler("127.0.0.1", 7777, 1);
     std::cout << "Game finished" << std::endl;
-    if(network_handler.m_game.m_winner != 2){
+    if (network_handler.m_game.m_winner != 2)
+    {
         std::cout << std::string(argv[1]) << std::endl;
         std::string command = "rm " + filename;
         system(command.c_str());
