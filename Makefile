@@ -70,7 +70,7 @@ debug: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
 
 # Build and output paths
 release: export BUILD_PATH := build/release
-release: export BIN_PATH := bin
+release: export BIN_PATH := automated_testing/client_binary
 debug: export BUILD_PATH := build/debug
 debug: export BIN_PATH := bin/debug
 install: export BIN_PATH := bin/release

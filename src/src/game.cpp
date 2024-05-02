@@ -123,5 +123,8 @@ void Game::check_winner()
         }
     }
     std::cout << "\nThe Winner is: Player " << winner << "!" << std::endl;
+    if(winner == m_players[m_player_number].m_symbol){
+        m_winner = 1;
+    }
     return;
 }
