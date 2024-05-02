@@ -81,6 +81,7 @@ void Map::calculate_board_values()
 {
     std::vector<std::unordered_set<uint16_t>> board_values;
     std::unordered_set<uint16_t> temp;
+    std::unordered_set<uint16_t> checked;
     uint8_t counter = 0;
     do
     {
@@ -95,6 +96,7 @@ void Map::calculate_board_values()
                     if (get_transition(c, d) == 0 && m_symbols[c] != '-')
                     {
                         temp.insert(c);
+                        checked.insert(c);
                         break;
                     }
                 }
@@ -112,17 +114,20 @@ void Map::calculate_board_values()
                     uint16_t trans3 = get_transition(c, (d + 5) % NUM_OF_DIRECTIONS);
                     if (get_transition(c, d) == 0)
                     {
-                        if (board_values[counter - 1].find(trans1) == board_values[counter - 1].end() && trans1 != 0)
+                        if (board_values[counter - 1].find(trans1) == board_values[counter - 1].end() && trans1 != 0 && checked.find(trans1) == checked.end())
                         {
                             temp.insert(trans1);
+                            checked.insert(trans1);
                         }
-                        if (board_values[counter - 1].find(trans2) == board_values[counter - 1].end() && trans2 != 0)
+                        if (board_values[counter - 1].find(trans2) == board_values[counter - 1].end() && trans2 != 0 && checked.find(trans2) == checked.end())
                         {
                             temp.insert(trans2);
+                            checked.insert(trans2);
                         }
-                        if (board_values[counter - 1].find(trans3) == board_values[counter - 1].end() && trans3 != 0)
+                        if (board_values[counter - 1].find(trans3) == board_values[counter - 1].end() && trans3 != 0 && checked.find(trans3) == checked.end())
                         {
                             temp.insert(trans3);
+                            checked.insert(trans3);
                         }
                     }
                 }
@@ -140,17 +145,20 @@ void Map::calculate_board_values()
                     uint16_t trans3 = get_transition(c, (d + 5) % NUM_OF_DIRECTIONS);
                     if (board_values[counter - 2].find(get_transition(c, d)) != board_values[counter - 2].end())
                     {
-                        if (board_values[counter - 1].find(trans1) == board_values[counter - 1].end() && board_values[counter - 2].find(trans1) == board_values[counter - 2].end())
+                        if (board_values[counter - 1].find(trans1) == board_values[counter - 1].end() && board_values[counter - 2].find(trans1) == board_values[counter - 2].end() && trans1 != 0 && checked.find(trans1) == checked.end())
                         {
                             temp.insert(trans1);
+                            checked.insert(trans1);
                         }
-                        if (board_values[counter - 1].find(trans2) == board_values[counter - 1].end() && board_values[counter - 2].find(trans2) == board_values[counter - 2].end())
+                        if (board_values[counter - 1].find(trans2) == board_values[counter - 1].end() && board_values[counter - 2].find(trans2) == board_values[counter - 2].end() && trans2 != 0 && checked.find(trans2) == checked.end())
                         {
                             temp.insert(trans2);
+                            checked.insert(trans2);
                         }
-                        if (board_values[counter - 1].find(trans3) == board_values[counter - 1].end() && board_values[counter - 2].find(trans3) == board_values[counter - 2].end())
+                        if (board_values[counter - 1].find(trans3) == board_values[counter - 1].end() && board_values[counter - 2].find(trans3) == board_values[counter - 2].end() && trans3 != 0 && checked.find(trans3) == checked.end())
                         {
                             temp.insert(trans3);
+                            checked.insert(trans3);
                         }
                     }
                 }

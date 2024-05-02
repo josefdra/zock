@@ -1,0 +1,134 @@
+success at starting client 1 for game 0
+success at starting client 2 for game 0
+success at starting client 3 for game 0
+success at starting client 1 for game 1
+success at starting client 2 for game 1
+Game 0 finished
+success at starting client 1 for game 2
+success at starting client 2 for game 2
+Game 2 finished
+success at starting client 1 for game 3
+success at starting client 2 for game 3
+Game 3 finished
+success at starting client 1 for game 4
+success at starting client 2 for game 4
+success at starting client 1 for game 5
+success at starting client 2 for game 5
+success at starting client 3 for game 5
+success at starting client 4 for game 5
+Game 4 finished
+success at starting client 1 for game 6
+success at starting client 2 for game 6
+success at starting client 1 for game 7
+success at starting client 2 for game 7
+success at starting client 3 for game 7
+success at starting client 4 for game 7
+success at starting client 1 for game 8
+success at starting client 2 for game 8
+success at starting client 3 for game 8
+success at starting client 4 for game 8
+success at starting client 5 for game 8
+success at starting client 6 for game 8
+success at starting client 7 for game 8
+success at starting client 8 for game 8
+Game 5 finished
+success at starting client 1 for game 9
+success at starting client 2 for game 9
+success at starting client 3 for game 9
+success at starting client 4 for game 9
+success at starting client 1 for game 10
+success at starting client 2 for game 10
+Game 10 finished
+success at starting client 1 for game 11
+success at starting client 2 for game 11
+Game 8 finished
+success at starting client 3 for game 11
+success at starting client 4 for game 11
+Game 9 finished
+success at starting client 1 for game 12
+success at starting client 2 for game 12
+success at starting client 3 for game 12
+success at starting client 4 for game 12
+success at starting client 1 for game 13
+success at starting client 2 for game 13
+success at starting client 3 for game 13
+success at starting client 1 for game 14
+success at starting client 2 for game 14
+success at starting client 3 for game 14
+Game 11 finished
+success at starting client 4 for game 14
+success at starting client 1 for game 15
+success at starting client 2 for game 15
+success at starting client 3 for game 15
+Game 12 finished
+success at starting client 4 for game 15
+success at starting client 5 for game 15
+success at starting client 6 for game 15
+success at starting client 7 for game 15
+success at starting client 8 for game 15
+success at starting client 1 for game 16
+success at starting client 2 for game 16
+Game 16 finished
+Game 6 finished
+success at starting client 1 for game 17
+success at starting client 2 for game 17
+success at starting client 3 for game 17
+Game 17 finished
+success at starting client 1 for game 18
+success at starting client 2 for game 18
+success at starting client 3 for game 18
+success at starting client 4 for game 18
+success at starting client 1 for game 19
+success at starting client 2 for game 19
+success at starting client 3 for game 19
+success at starting client 4 for game 19
+success at starting client 5 for game 19
+success at starting client 6 for game 19
+success at starting client 7 for game 19
+success at starting client 8 for game 19
+Game 18 finished
+success at starting client 1 for game 20
+success at starting client 2 for game 20
+success at starting client 3 for game 20
+success at starting client 4 for game 20
+Game 7 finished
+Game 13 finished
+Game 1 finished
+Game 14 finished
+Game 15 finished
+Game 19 finished
+Game 20 finished
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690566.322527.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690556.323109.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690546.321392.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690536.321081.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690526.320173.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690516.319622.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690506.318947.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690496.322667.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690486.320006.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690476.316742.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690466.319338.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690456.316425.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690446.314596.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690436.314191.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690426.317410.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690416.317040.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690406.315729.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690396.311610.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690386.313171.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690376.312884.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714690366.307236.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689298.168775.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689268.159567.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689258.156561.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689238.149920.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689228.151542.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689208.138935.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689198.127054.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689138.092616.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689128.081309.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/log_game_1714689118.076932.txt
+/home/josefdra/ZOCK/g01/automated_testing/src/main.cpp
+Played 21 games
+Elapsed time: 451 seconds
