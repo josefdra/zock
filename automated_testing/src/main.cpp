@@ -7,30 +7,38 @@
 #include <array>
 #include <tuple>
 #include <cstdlib>
+#include <thread>
+#include <filesystem>
+#include <chrono>
+
+namespace fs = std::filesystem;
+
+
+std::string root_directory = "/home/josefdra/ZOCK/g01";
 
 std::array<std::tuple<std::string, uint8_t>, 22> maps{
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2012_Map_fuenf.map", 3),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2013_comp_1_2p.map", 2),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2013_comp_4_2p.map", 2),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2013_comp_5_2p.map", 2),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2013_comp_9_2.map", 2),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2014_comp_1_2p.map", 2),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2014_comp_1_4p.map", 4),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2014_comp_2_2p.map", 2),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2014_comp_2_4p.map", 4),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2014_comp_3_8p.map", 8),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2019_comp_03_4p.map", 4),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2019_comp_05_2p.map", 2),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2019_comp_07_4p_0.map", 4),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/2019_comp_07_4p.map", 4),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/comp2017_02_3p.map", 3),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/comp2019_01_4p.map", 4),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/comp2020_01_8p.map", 8),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/comp2020_02_2p.map", 2),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/comp2020_02_3p.map", 3),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/comp2020_02_4p.map", 4),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/comp2020_02_8p.map", 8),
-    std::tuple<std::string, uint8_t>("/home/josefdra/ZOCK/g01/automated_testing/maps/evenMoreTransitions.map", 4)};
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2012_Map_fuenf.map", 3),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2013_comp_1_2p.map", 2),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2013_comp_4_2p.map", 2),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2013_comp_5_2p.map", 2),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2013_comp_9_2.map", 2),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2014_comp_1_2p.map", 2),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2014_comp_1_4p.map", 4),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2014_comp_2_2p.map", 2),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2014_comp_2_4p.map", 4),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2014_comp_3_8p.map", 8),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2019_comp_03_4p.map", 4),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2019_comp_05_2p.map", 2),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2019_comp_07_4p_0.map", 4),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2019_comp_07_4p.map", 4),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2017_02_3p.map", 3),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2019_01_4p.map", 4),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_01_8p.map", 8),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_2p.map", 2),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_3p.map", 3),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_4p.map", 4),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_8p.map", 8),
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/evenMoreTransitions.map", 4)};
 
 pid_t start_binary(const char *path, const std::vector<const char *> &args)
 {
@@ -65,19 +73,20 @@ pid_t start_binary(const char *path, const std::vector<const char *> &args)
     return pid;
 }
 
-void run_map()
+void run_map(std::tuple<std::string, uint8_t> &map, int game_number)
 {
-    uint8_t player_count = 2;
-    int game_number = 2;
+    std::string map_path;
+    uint8_t player_count;
+    std::tie(map_path, player_count) = map;
     std::string string_game_number = std::to_string(game_number);
 
     // Path to the binaries
-    const char *server = "/home/josefdra/ZOCK/g01/automated_testing/server_binary/server_nogl";
-    const char *client = "/home/josefdra/ZOCK/g01/automated_testing/client_binary/client01";
+    std::string server = root_directory + "/automated_testing/server_binary/server_nogl";
+    std::string client = root_directory + "/automated_testing/client_binary/client01";
 
     // Arguments for the server
-    std::vector<const char *> arguments_server = {"/home/josefdra/ZOCK/g01/automated_testing/maps/2019_comp_05_2p.map", nullptr};
-    start_binary(server, arguments_server);
+    std::vector<const char *> arguments_server = {map_path.c_str(), nullptr};
+    start_binary(server.c_str(), arguments_server);
 
     // Vector to store child PIDs
     std::vector<pid_t> client_pids;
@@ -90,9 +99,10 @@ void run_map()
         std::string player_num_str = std::to_string(static_cast<int>(p + 1));
         const char *player_num_cstr = player_num_str.c_str();
         std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), nullptr};
-        pid_t client_pid = start_binary(client, arguments_clients);
+        pid_t client_pid = start_binary(client.c_str(), arguments_clients);
         if (client_pid > 0)
         {
+            std::cout << "success at starting client " << p + 1 << " for game " << game_number << std::endl;
             client_pids.push_back(client_pid);
         }
     }
@@ -126,19 +136,31 @@ void run_map()
         }
         counter++;
     }
-    if (counter != 0)
+    // counter != 0
+    if (false)
     {
-        system("rm /home/josefdra/ZOCK/g01/automated_testing/src/*.txt");
+        system(("rm " + root_directory + "/automated_testing/src/*.txt").c_str());
     }
     else
     {
-        std::string command = "mv /home/josefdra/ZOCK/g01/automated_testing/src/*.txt /home/josefdra/ZOCK/g01/automated_testing/server_binary/logs/game_" + string_game_number + ".txt";
+        std::string command = ("mv " + root_directory + "/automated_testing/src/*.txt " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + ".txt").c_str();
         system(command.c_str());
     }
 }
 
 int main()
 {
-    run_map();
+    int game_number = 0;
+    std::vector<std::thread> threads;
+    for(auto &map : maps){
+        threads.push_back(std::thread(run_map, std::ref(map), game_number));
+        sleep(10);
+        game_number++;
+    }
+    for(auto &t : threads){
+        if(t.joinable()){
+            t.join();
+        }
+    }
     return 0;
 }
