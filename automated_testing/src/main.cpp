@@ -7,12 +7,11 @@
 #include <array>
 #include <tuple>
 #include <cstdlib>
+#include <cstdio>
 #include <thread>
-#include <filesystem>
 #include <chrono>
-
-namespace fs = std::filesystem;
-
+#include <memory>
+#include <ifstream>
 
 std::string root_directory = "/home/josefdra/ZOCK/g01";
 
@@ -39,6 +38,40 @@ std::array<std::tuple<std::string, uint8_t>, 22> maps{
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_4p.map", 4),
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_8p.map", 8),
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/evenMoreTransitions.map", 4)};
+
+std::string find_newest_log_file(const std::string &directory)
+{
+    std::string cmd = "ls -t " + directory + "/*.txt | head - 1";
+    std::array<char, 128> buffer;
+    std::string result;
+    std::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
+    if (!pipe)
+        throw std::runtime_error("popen() failed!");
+    while (!eof(pipe.get()))
+    {
+        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+            result += buffer.data;
+    }
+    result.pop_back();
+    return result;
+}
+
+void rename_log_file(const std::string &directory, const std::string &new_name)
+{
+    std::string old_log_file = find_newest_log_file(directory);
+    if (!old_log_file.empty())
+    {
+        std::string new_log_file = directory + "/" + new_name;
+        if (std::rename(old_log_file.c_str(), new_log_file.c_str()) != 0)
+        {
+            perror("Error renaming file");
+        }
+    }
+    else
+    {
+        std::cerr << "No log file found to rename" << std::endl;
+    }
+}
 
 pid_t start_binary(const char *path, const std::vector<const char *> &args)
 {
@@ -143,7 +176,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, int game_number)
     }
     else
     {
-        std::string command = ("mv " + root_directory + "/automated_testing/src/*.txt " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + ".txt").c_str();
+        std::string command = ("mv " + root_directory + "/automated_testing/src/game_" + string_game_number + ".txt " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + ".txt").c_str();
         system(command.c_str());
     }
 }
@@ -152,13 +185,19 @@ int main()
 {
     int game_number = 0;
     std::vector<std::thread> threads;
-    for(auto &map : maps){
+    for (auto &map : maps)
+    {
         threads.push_back(std::thread(run_map, std::ref(map), game_number));
         sleep(10);
+        std::string log_directory = root_directory + "/automated_testing/src";
+        std::string new_log_name = log_directory + "/game_" + game_number;
+        rename_log_file(log_directory, new_log_name);
         game_number++;
     }
-    for(auto &t : threads){
-        if(t.joinable()){
+    for (auto &t : threads)
+    {
+        if (t.joinable())
+        {
             t.join();
         }
     }
