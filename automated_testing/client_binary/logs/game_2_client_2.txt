@@ -1,0 +1,55 @@
+Received map, initializing map
+Received player_number, initializing players, we are player 2
+Player 1 has 0 overrides and 0 bombs
+Received move at: 12, 14, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 11 turns
+Elapsed time: 1700 microseconds
+Placing stone at: 7, 14, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 7, 14, Special value: 0 from player 2
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 14, 12, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 9 turns
+Elapsed time: 1405 microseconds
+Placing stone at: 12, 5, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 12, 5, Special value: 0 from player 2
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 5, 7, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 7 turns
+Elapsed time: 1093 microseconds
+Placing stone at: 5, 12, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 5, 12, Special value: 0 from player 2
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 7, 5, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 5 turns
+Elapsed time: 781 microseconds
+Placing stone at: 14, 7, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 14, 7, Special value: 0 from player 2
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 8, 10, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 3 turns
+Elapsed time: 517 microseconds
+Placing stone at: 8, 9, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 8, 9, Special value: 0 from player 2
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 8, 8, Special value: 0 from player 1
+

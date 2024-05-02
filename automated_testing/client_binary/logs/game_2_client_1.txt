@@ -1,0 +1,59 @@
+Received map, initializing map
+Received player_number, initializing players, we are player 1
+Received move prompt, calculating move
+minimax/paranoid: tried 12 turns
+Elapsed time: 490 microseconds
+Placing stone at: 12, 14, Special value: 0
+Player 1 has 0 overrides and 0 bombs
+Received move at: 12, 14, Special value: 0 from player 1
+
+Player 2 has 0 overrides and 0 bombs
+Received move at: 7, 14, Special value: 0 from player 2
+
+Received move prompt, calculating move
+minimax/paranoid: tried 10 turns
+Elapsed time: 1112 microseconds
+Placing stone at: 14, 12, Special value: 0
+Player 1 has 0 overrides and 0 bombs
+Received move at: 14, 12, Special value: 0 from player 1
+
+Player 2 has 0 overrides and 0 bombs
+Received move at: 12, 5, Special value: 0 from player 2
+
+Received move prompt, calculating move
+minimax/paranoid: tried 8 turns
+Elapsed time: 1225 microseconds
+Placing stone at: 5, 7, Special value: 0
+Player 1 has 0 overrides and 0 bombs
+Received move at: 5, 7, Special value: 0 from player 1
+
+Player 2 has 0 overrides and 0 bombs
+Received move at: 5, 12, Special value: 0 from player 2
+
+Received move prompt, calculating move
+minimax/paranoid: tried 6 turns
+Elapsed time: 934 microseconds
+Placing stone at: 7, 5, Special value: 0
+Player 1 has 0 overrides and 0 bombs
+Received move at: 7, 5, Special value: 0 from player 1
+
+Player 2 has 0 overrides and 0 bombs
+Received move at: 14, 7, Special value: 0 from player 2
+
+Received move prompt, calculating move
+minimax/paranoid: tried 4 turns
+Elapsed time: 279 microseconds
+Placing stone at: 8, 10, Special value: 0
+Player 1 has 0 overrides and 0 bombs
+Received move at: 8, 10, Special value: 0 from player 1
+
+Player 2 has 0 overrides and 0 bombs
+Received move at: 8, 9, Special value: 0 from player 2
+
+Received move prompt, calculating move
+minimax/paranoid: tried 5 turns
+Elapsed time: 1255 microseconds
+Placing stone at: 8, 8, Special value: 0
+Player 1 has 0 overrides and 0 bombs
+Received move at: 8, 8, Special value: 0 from player 1
+

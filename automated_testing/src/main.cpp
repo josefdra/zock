@@ -145,7 +145,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
         counter++;
     }
     std::cout << "Game " << string_game_number << " finished" << std::endl;
-    if (counter != 0)
+    if (counter == 0)
     {
         disqualified[atoi(string_game_number.c_str())] = true;
     }
@@ -205,11 +205,12 @@ int main()
     {
         log_files.push_back(elem.path);
     }
-    for (uint8_t i = 0; i < log_files.size(); i++)
+    for (uint8_t i = 0; i < log_files.size() - 1; i++)
     {
         std::string command = "mv " + log_files[i] + " " + root_directory + "/automated_testing/server_binary/logs/game_" + std::to_string(i) + ".txt";
         system(command.c_str());
-        if (disqualified[i] == false)
+        // change to false
+        if (disqualified[i] == true)
         {
             std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + std::to_string(i) + ".txt";
             system(command.c_str());

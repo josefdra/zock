@@ -1,0 +1,690 @@
+Received map, initializing map
+Received player_number, initializing players, we are player 2
+Player 1 has 2 overrides and 0 bombs
+Received move at: 9, 6, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 14 turns
+Elapsed time: 541 microseconds
+Placing stone at: 8, 5, Special value: 0
+Player 2 has 2 overrides and 0 bombs
+Received move at: 8, 5, Special value: 0 from player 2
+
+Player 3 has 2 overrides and 0 bombs
+Received move at: 9, 8, Special value: 0 from player 3
+
+Player 1 has 2 overrides and 0 bombs
+Received move at: 6, 9, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 15 turns
+Elapsed time: 2572 microseconds
+Placing stone at: 8, 9, Special value: 0
+Player 2 has 2 overrides and 0 bombs
+Received move at: 8, 9, Special value: 0 from player 2
+
+Player 3 has 2 overrides and 0 bombs
+Received move at: 5, 8, Special value: 0 from player 3
+
+Player 1 has 2 overrides and 0 bombs
+Received move at: 9, 6, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 13 turns
+Elapsed time: 2498 microseconds
+Placing stone at: 5, 6, Special value: 0
+Player 2 has 2 overrides and 0 bombs
+Received move at: 5, 6, Special value: 0 from player 2
+
+Player 3 has 2 overrides and 0 bombs
+Received move at: 8, 5, Special value: 0 from player 3
+
+Player 1 has 1 overrides and 0 bombs
+Received move at: 6, 6, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 20 turns
+Elapsed time: 870 microseconds
+Placing stone at: 9, 6, Special value: 0
+Player 2 has 2 overrides and 0 bombs
+Received move at: 9, 6, Special value: 0 from player 2
+
+Player 3 has 1 overrides and 0 bombs
+Received move at: 8, 5, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 6, 5, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 20 turns
+Elapsed time: 3100 microseconds
+Placing stone at: 8, 6, Special value: 0
+Player 2 has 1 overrides and 0 bombs
+Received move at: 8, 6, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 8, 10, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 9, 5, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 12 turns
+Elapsed time: 1998 microseconds
+Placing stone at: 9, 9, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 9, 9, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 5, 7, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 8, 11, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 15 turns
+Elapsed time: 2691 microseconds
+Placing stone at: 5, 9, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 5, 9, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 9, 10, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 4, 7, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 14 turns
+Elapsed time: 786 microseconds
+Placing stone at: 5, 5, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 5, 5, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 4, 4, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 10, 8, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 15 turns
+Elapsed time: 3157 microseconds
+Placing stone at: 11, 8, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 11, 8, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 9, 7, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 9, 11, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 22 turns
+Elapsed time: 4517 microseconds
+Placing stone at: 7, 5, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 7, 5, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 5, 10, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 8, 4, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 19 turns
+Elapsed time: 4133 microseconds
+Placing stone at: 3, 7, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 3, 7, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 10, 5, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 4, 8, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 19 turns
+Elapsed time: 4483 microseconds
+Placing stone at: 3, 8, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 3, 8, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 3, 6, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 4, 5, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 18 turns
+Elapsed time: 3909 microseconds
+Placing stone at: 3, 5, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 3, 5, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 5, 4, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 9, 4, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 18 turns
+Elapsed time: 2214 microseconds
+Placing stone at: 11, 5, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 11, 5, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 8, 3, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 11, 6, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 19 turns
+Elapsed time: 4615 microseconds
+Placing stone at: 11, 7, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 11, 7, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 10, 10, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 6, 4, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 13 turns
+Elapsed time: 3612 microseconds
+Placing stone at: 6, 3, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 6, 3, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 9, 3, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 10, 2, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 19 turns
+Elapsed time: 5009 microseconds
+Placing stone at: 5, 11, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 5, 11, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 5, 3, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 7, 3, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 19 turns
+Elapsed time: 4682 microseconds
+Placing stone at: 10, 3, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 10, 3, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 11, 3, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 3, 9, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 19 turns
+Elapsed time: 5164 microseconds
+Placing stone at: 4, 2, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 4, 2, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 10, 1, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 3, 4, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 18 turns
+Elapsed time: 5159 microseconds
+Placing stone at: 12, 3, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 12, 3, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 2, 10, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 10, 7, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 14 turns
+Elapsed time: 4194 microseconds
+Placing stone at: 10, 0, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 10, 0, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 4, 3, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 4, 1, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 17 turns
+Elapsed time: 5314 microseconds
+Placing stone at: 3, 3, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 3, 3, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 3, 2, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 7, 4, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 18 turns
+Elapsed time: 4931 microseconds
+Placing stone at: 4, 0, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 4, 0, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 13, 3, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 1, 11, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 17 turns
+Elapsed time: 5882 microseconds
+Placing stone at: 0, 12, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 0, 12, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 7, 9, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 3, 1, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 22 turns
+Elapsed time: 5677 microseconds
+Placing stone at: 3, 0, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 3, 0, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 10, 12, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 14, 3, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 16 turns
+Elapsed time: 5113 microseconds
+Placing stone at: 10, 9, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 10, 9, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 7, 11, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 7, 10, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 13 turns
+Elapsed time: 4119 microseconds
+Placing stone at: 6, 11, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 6, 11, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 4, 11, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 11, 9, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 14 turns
+Elapsed time: 4880 microseconds
+Placing stone at: 10, 11, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 10, 11, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 4, 10, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 11, 4, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 16 turns
+Elapsed time: 1247 microseconds
+Placing stone at: 10, 4, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 10, 4, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 4, 6, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 6, 10, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 11 turns
+Elapsed time: 3765 microseconds
+Placing stone at: 11, 13, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 11, 13, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 11, 11, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 2, 12, Special value: 1 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 13 turns
+Elapsed time: 1782 microseconds
+Placing stone at: 10, 6, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 10, 6, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 0, 11, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 12, 14, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 14 turns
+Elapsed time: 5770 microseconds
+Placing stone at: 0, 10, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 0, 10, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 11, 1, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 2, 4, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 20 turns
+Elapsed time: 9070 microseconds
+Placing stone at: 2, 3, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 2, 3, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 12, 4, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 4, 12, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 17 turns
+Elapsed time: 1918 microseconds
+Placing stone at: 12, 11, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 12, 11, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 11, 10, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 1, 3, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 19 turns
+Elapsed time: 2019 microseconds
+Placing stone at: 11, 2, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 11, 2, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 11, 12, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 11, 0, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 19 turns
+Elapsed time: 8150 microseconds
+Placing stone at: 12, 0, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 12, 0, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 1, 13, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 0, 14, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 21 turns
+Elapsed time: 8284 microseconds
+Placing stone at: 11, 14, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 11, 14, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 10, 13, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 13, 11, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 21 turns
+Elapsed time: 8382 microseconds
+Placing stone at: 14, 0, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 14, 0, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 0, 2, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 3, 10, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 17 turns
+Elapsed time: 7417 microseconds
+Placing stone at: 3, 13, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 3, 13, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 13, 1, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 10, 14, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 15 turns
+Elapsed time: 5695 microseconds
+Placing stone at: 12, 2, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 12, 2, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 14, 11, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 4, 9, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 16 turns
+Elapsed time: 3597 microseconds
+Placing stone at: 2, 14, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 2, 14, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 4, 13, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 4, 14, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 14 turns
+Elapsed time: 3396 microseconds
+Placing stone at: 1, 10, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 1, 10, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 13, 4, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 14, 2, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 16 turns
+Elapsed time: 8274 microseconds
+Placing stone at: 14, 4, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 14, 4, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 1, 4, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 2, 0, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 15 turns
+Elapsed time: 8633 microseconds
+Placing stone at: 0, 4, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 0, 4, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 1, 0, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 3, 14, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 14 turns
+Elapsed time: 7955 microseconds
+Placing stone at: 14, 1, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 14, 1, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 0, 3, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 1, 14, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 13 turns
+Elapsed time: 7499 microseconds
+Placing stone at: 0, 1, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 0, 1, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 2, 2, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 12, 1, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 10 turns
+Elapsed time: 3436 microseconds
+Placing stone at: 13, 12, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 13, 12, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 13, 0, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 14, 13, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 9 turns
+Elapsed time: 5427 microseconds
+Placing stone at: 13, 10, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 13, 10, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 12, 10, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 14, 10, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 7 turns
+Elapsed time: 4319 microseconds
+Placing stone at: 2, 1, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 2, 1, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 2, 13, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 14, 12, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 5 turns
+Elapsed time: 3177 microseconds
+Placing stone at: 12, 12, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 12, 12, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 12, 13, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 13, 2, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 4 turns
+Elapsed time: 2464 microseconds
+Placing stone at: 13, 14, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 13, 14, Special value: 0 from player 2
+
+Player 3 has 0 overrides and 0 bombs
+Received move at: 1, 2, Special value: 0 from player 3
+
+Player 1 has 0 overrides and 0 bombs
+Received move at: 0, 13, Special value: 0 from player 1
+
+Received move prompt, calculating move
+minimax/paranoid: tried 2 turns
+Elapsed time: 1301 microseconds
+Placing stone at: 1, 12, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 1, 12, Special value: 0 from player 2
+
+Received move prompt, calculating move
+minimax/paranoid: tried 1 turns
+Elapsed time: 804 microseconds
+Placing stone at: 1, 1, Special value: 0
+Player 2 has 0 overrides and 0 bombs
+Received move at: 1, 1, Special value: 0 from player 2
+
+Entering phase 2
+The game ended
+Player 1 has 52 Points
+Player 2 has 68 Points
+Player 3 has 42 Points
+
+The Winner is: Player 2!
+Game finished
