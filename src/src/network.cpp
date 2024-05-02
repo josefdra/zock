@@ -8,6 +8,7 @@ Network::Network(const char *ip, uint16_t port, uint8_t g_n) : m_port(port), m_i
     send_group_number(m_group_number);
     Game m_game;
     init_map_and_player();
+    run_game();
 }
 
 Network::~Network()
@@ -107,7 +108,7 @@ void Network::run_game()
     m_game.m_map.print_map();
     uint16_t counter = 0;
 
-    while (m_game_phase < 3)
+    while (m_game_phase < 3 && m_game.m_winner != 2)
     {
         if (check_socket_acitivity())
         {
@@ -216,6 +217,7 @@ void Network::receive_disqualification(uint32_t actual_message_length)
     std::cout << "Player " << (int)message[0] << " is disqulified" << std::endl;
     if (message[0] == m_game.m_player_number + 1)
     {
+        m_game.m_winner = 2;
         return;
     }
 }

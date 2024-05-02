@@ -1,0 +1,17 @@
+Received map, initializing map
+Received player_number, initializing players, we are player 1
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 
+0 0 0 1 2 0 0 0 
+0 0 0 2 1 0 0 0 
+0 1 1 2 0 0 0 0 
+0 0 0 2 0 0 0 0 
+0 0 0 2 1 0 0 0 
+
+Received move prompt, calculating move
+minimax/paranoid: tried 7 turns
+Elapsed time: 144 microseconds
+Placing stone at: 2, 7, Special value: 0
+Player 1 is disqulified
+Game finished

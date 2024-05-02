@@ -51,7 +51,7 @@ public:
     uint8_t m_game_phase = 0;
     Game m_game;
     uint32_t m_time = 0;
-    uint8_t m_search_depth = 0;
+    uint8_t m_search_depth = 0;    
 };
 
 #endif // CLIENT_CONNECTION_H
