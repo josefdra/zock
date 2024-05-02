@@ -8,6 +8,7 @@ Network::Network(const char *ip, uint16_t port, uint8_t g_n) : m_port(port), m_i
     send_group_number(m_group_number);
     Game m_game;
     init_map_and_player();
+    run_game();
 }
 
 Network::~Network()
