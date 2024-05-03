@@ -93,7 +93,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     std::string client = root_directory + "/automated_testing/client_binary/client01";
 
     // Arguments for the server
-    std::vector<const char *> arguments_server = {map_path.c_str(), nullptr};
+    std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "3", nullptr};
     start_binary(server.c_str(), arguments_server);
 
     // Vector to store child PIDs

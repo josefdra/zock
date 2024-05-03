@@ -52,10 +52,11 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     uint16_t bestCoord = 0;
     uint16_t tried_turns = 0;
     uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
-    calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols);
+    std::unordered_set<uint16_t> valid_moves;
+    calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols, valid_moves);
     // int test_depth = 4;
 
-    for (auto &possibleMove : m_players[m_player_number].m_valid_moves)
+    for (auto &possibleMove : valid_moves)
     {
         std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
         int currEval = minimaxOrParanoidWithPruning(m_map, m_players, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);

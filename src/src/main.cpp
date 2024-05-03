@@ -1,6 +1,6 @@
 #include "network.hpp"
 #include <cstdlib>
-
+/*
 int main(int argc, char *argv[])
 {
     const char *ip = "127.0.0.1";
@@ -82,8 +82,8 @@ int main(int argc, char *argv[])
     std::cout << "Game finished" << std::endl;
     return 0;
 }
+*/
 
-/*
 int main(int argc, char *argv[])
 {
     if (argc > 1)
@@ -122,4 +122,3 @@ int main(int argc, char *argv[])
         return 3;
     }
 }
-*/

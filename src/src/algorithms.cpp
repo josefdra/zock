@@ -13,6 +13,7 @@ void get_frontier_score(Player &p, std::vector<char> &currMap, Map &m)
 
 int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Map &m, std::vector<Player> &players)
 {
+    std::unordered_set<uint16_t> valid_moves;
     p.m_board_value = 0;
     p.m_frontier_score = 0;
     for (auto &pl : players)
@@ -58,9 +59,9 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     {
         if (pl.m_symbol != m.m_player_number + 1 + '0')
         {
-            calculate_valid_moves(m, pl, currMap);
+            calculate_valid_moves(m, pl, currMap, valid_moves);
         }
-        if (pl.m_valid_moves.size() < 1)
+        if (valid_moves.size() < 1)
         {
             p.m_board_value += 5000;
         }
@@ -80,14 +81,16 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
     }
 
     uint8_t nextPlayer = ((playersTurn + 1) % m.m_player_count);
-    calculate_valid_moves(m, players[playersTurn], currMap);
+    std::unordered_set<uint16_t> valid_moves;
+    calculate_valid_moves(m, players[playersTurn], currMap, valid_moves);
 
     uint8_t counter = 0;
-    while (players[playersTurn].m_valid_moves.size() < 1 && counter < m.m_player_count)
+    while (valid_moves.size() < 1 && counter < m.m_player_count)
     {
         counter++;
         nextPlayer = ((playersTurn + 1) % m.m_player_count);
-        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap);
+        valid_moves.clear();
+        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap, valid_moves);
     }
     if (counter == m.m_player_count)
     {
@@ -96,7 +99,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
 
     int maxEval;
     int minEval;
-    for (auto &move : players[(playersTurn + counter) % m.m_player_count].m_valid_moves)
+    for (auto &move : valid_moves)
     {
         std::vector<char> next_map = temp_color(move, players[(playersTurn + counter) % m.m_player_count].m_symbol, m, currMap);
         int eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);

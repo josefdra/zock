@@ -11,6 +11,6 @@ void color(uint16_t c, char s, Map &);
 void execute_move(uint16_t, uint8_t, Player &, Map &);
 void execute_bomb(uint16_t, Map &, Player &);
 std::vector<char> temp_color(uint16_t, char, Map &, std::vector<char> &);
-void calculate_valid_moves(Map &, Player &, std::vector<char> &);
+void calculate_valid_moves(Map &, Player &, std::vector<char> &, std::unordered_set<uint16_t> &);
 
 #endif // PROCESS_MOVES_HPP
