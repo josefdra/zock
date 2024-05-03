@@ -92,3 +92,11 @@ success at starting client 2 for game 20
 success at starting client 3 for game 20
 success at starting client 4 for game 20
 Game 7 finished
+Game 13 finished
+Game 1 finished
+Game 14 finished
+Game 15 finished
+Game 19 finished
+Game 20 finished
+Played 21 games
+Elapsed time: 453 seconds
