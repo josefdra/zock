@@ -91,6 +91,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     // Path to the binaries
     std::string server = root_directory + "/automated_testing/server_binary/server_nogl";
     std::string client = root_directory + "/automated_testing/client_binary/client01";
+    std::string trivial_ai = "/home/josefdra/ZOCK/ges/reversi-binaries/trivialai/ai_trivial";
 
     // Arguments for the server
     std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "3", nullptr};
@@ -99,18 +100,27 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     // Vector to store child PIDs
     std::vector<pid_t> client_pids;
 
-    for (uint8_t p = 0; p < player_count; p++)
+    usleep(500000);
+    // Arguments for the clients
+    // Convert player number to std::string and then to const char*
+    std::string player_num_str = std::to_string(static_cast<int>(1));
+    const char *player_num_cstr = player_num_str.c_str();
+    std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), nullptr};
+    pid_t client_pid = start_binary(client.c_str(), arguments_clients);
+    if (client_pid > 0)
+    {
+        std::cout << "success at starting client " << 1 << " for game " << string_game_number << std::endl;
+        client_pids.push_back(client_pid);
+    }
+
+    for (uint8_t p = 1; p < player_count; p++)
     {
         usleep(500000);
-        // Arguments for the clients
-        // Convert player number to std::string and then to const char*
-        std::string player_num_str = std::to_string(static_cast<int>(p + 1));
-        const char *player_num_cstr = player_num_str.c_str();
-        std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), nullptr};
-        pid_t client_pid = start_binary(client.c_str(), arguments_clients);
+        std::vector<const char *> arguments_trivial_ai = {nullptr};
+        pid_t client_pid = start_binary(trivial_ai.c_str(), arguments_trivial_ai);
         if (client_pid > 0)
         {
-            std::cout << "success at starting client " << p + 1 << " for game " << string_game_number << std::endl;
+            std::cout << "success at starting trivial_ai " << p << " for game " << string_game_number << std::endl;
             client_pids.push_back(client_pid);
         }
     }
