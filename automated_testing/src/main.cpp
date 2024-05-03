@@ -94,8 +94,9 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     std::string trivial_ai = "/home/josefdra/ZOCK/ges/reversi-binaries/trivialai/ai_trivial";
 
     // Arguments for the server
-    std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "3", nullptr};
+    std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "1", nullptr};
     start_binary(server.c_str(), arguments_server);
+    std::cout << "success at starting server for game " << string_game_number << std::endl;
 
     // Vector to store child PIDs
     std::vector<pid_t> client_pids;
@@ -113,14 +114,14 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
         client_pids.push_back(client_pid);
     }
 
-    for (uint8_t p = 1; p < player_count; p++)
+    for (uint16_t p = 1; p < player_count; p++)
     {
         usleep(500000);
         std::vector<const char *> arguments_trivial_ai = {nullptr};
         pid_t client_pid = start_binary(trivial_ai.c_str(), arguments_trivial_ai);
         if (client_pid > 0)
         {
-            std::cout << "success at starting trivial_ai " << p + '0' << " for game " << string_game_number << std::endl;
+            std::cout << "success at starting trivial_ai " << p << " for game " << string_game_number << std::endl;
             client_pids.push_back(client_pid);
         }
     }
@@ -165,7 +166,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
 int main()
 {
     std::string filename = root_directory + +"/automated_testing/values/ges_log.txt";
-    freopen(filename.c_str(), "w", stdout);
+    // freopen(filename.c_str(), "w", stdout);
 
     auto start_time = std::chrono::steady_clock::now();
     char cwd[PATH_MAX];
@@ -230,6 +231,6 @@ int main()
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
     std::cout << "Played " << game_number << " games" << std::endl;
     std::cout << "Elapsed time: " << seconds.count() << " seconds" << std::endl;
-    fclose(stdout);
+    // fclose(stdout);
     return 0;
 }
