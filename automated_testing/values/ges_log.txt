@@ -1,3 +1,94 @@
 success at starting client 1 for game 0
 success at starting client 2 for game 0
 success at starting client 3 for game 0
+success at starting client 1 for game 1
+success at starting client 2 for game 1
+Game 0 finished
+success at starting client 1 for game 2
+success at starting client 2 for game 2
+Game 2 finished
+success at starting client 1 for game 3
+success at starting client 2 for game 3
+Game 3 finished
+success at starting client 1 for game 4
+success at starting client 2 for game 4
+success at starting client 1 for game 5
+success at starting client 2 for game 5
+success at starting client 3 for game 5
+success at starting client 4 for game 5
+Game 4 finished
+success at starting client 1 for game 6
+success at starting client 2 for game 6
+success at starting client 1 for game 7
+success at starting client 2 for game 7
+success at starting client 3 for game 7
+success at starting client 4 for game 7
+success at starting client 1 for game 8
+success at starting client 2 for game 8
+success at starting client 3 for game 8
+success at starting client 4 for game 8
+success at starting client 5 for game 8
+success at starting client 6 for game 8
+success at starting client 7 for game 8
+success at starting client 8 for game 8
+Game 5 finished
+success at starting client 1 for game 9
+success at starting client 2 for game 9
+success at starting client 3 for game 9
+success at starting client 4 for game 9
+success at starting client 1 for game 10
+success at starting client 2 for game 10
+Game 10 finished
+success at starting client 1 for game 11
+Game 8 finished
+success at starting client 2 for game 11
+success at starting client 3 for game 11
+success at starting client 4 for game 11
+Game 9 finished
+success at starting client 1 for game 12
+success at starting client 2 for game 12
+success at starting client 3 for game 12
+success at starting client 4 for game 12
+success at starting client 1 for game 13
+success at starting client 2 for game 13
+success at starting client 3 for game 13
+success at starting client 1 for game 14
+success at starting client 2 for game 14
+success at starting client 3 for game 14
+Game 11 finished
+success at starting client 4 for game 14
+success at starting client 1 for game 15
+success at starting client 2 for game 15
+success at starting client 3 for game 15
+Game 12 finished
+success at starting client 4 for game 15
+success at starting client 5 for game 15
+success at starting client 6 for game 15
+success at starting client 7 for game 15
+success at starting client 8 for game 15
+success at starting client 1 for game 16
+success at starting client 2 for game 16
+Game 6 finished
+Game 16 finished
+success at starting client 1 for game 17
+success at starting client 2 for game 17
+success at starting client 3 for game 17
+Game 17 finished
+success at starting client 1 for game 18
+success at starting client 2 for game 18
+success at starting client 3 for game 18
+success at starting client 4 for game 18
+success at starting client 1 for game 19
+success at starting client 2 for game 19
+success at starting client 3 for game 19
+success at starting client 4 for game 19
+success at starting client 5 for game 19
+success at starting client 6 for game 19
+success at starting client 7 for game 19
+success at starting client 8 for game 19
+Game 18 finished
+success at starting client 1 for game 20
+success at starting client 2 for game 20
+success at starting client 3 for game 20
+success at starting client 4 for game 20
+Game 7 finished
