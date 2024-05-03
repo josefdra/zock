@@ -120,7 +120,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
         pid_t client_pid = start_binary(trivial_ai.c_str(), arguments_trivial_ai);
         if (client_pid > 0)
         {
-            std::cout << "success at starting trivial_ai " << p << " for game " << string_game_number << std::endl;
+            std::cout << "success at starting trivial_ai " << p + '0' << " for game " << string_game_number << std::endl;
             client_pids.push_back(client_pid);
         }
     }

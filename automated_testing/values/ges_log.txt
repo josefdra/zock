@@ -8,11 +8,5 @@ success at starting client 1 for game 2
 success at starting trivial_ai  for game 2
 success at starting client 1 for game 3
 success at starting trivial_ai  for game 3
+won game 2
 Game 2 finished
-success at starting client 1 for game 4
-success at starting trivial_ai  for game 4
-Game 0 finished
-success at starting client 1 for game 5
-success at starting trivial_ai  for game 5
-success at starting trivial_ai  for game 5
-success at starting trivial_ai  for game 5
