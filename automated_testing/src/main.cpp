@@ -137,6 +137,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
                 int exit_status = WEXITSTATUS(status);
                 if (exit_status == 1)
                 {
+                    std::cout << "won game " << string_game_number << std::endl;
                     winner += counter;
                 }
                 else if (exit_status == 2)
