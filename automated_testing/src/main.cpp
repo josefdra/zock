@@ -205,12 +205,11 @@ int main()
     {
         log_files.push_back(elem.path);
     }
-    for (uint8_t i = 0; i < log_files.size() - 1; i++)
+    for (uint8_t i = 0; i < maps.size(); i++)
     {
-        std::string command = "mv " + log_files[i] + " " + root_directory + "/automated_testing/server_binary/logs/game_" + std::to_string(i) + ".txt";
+        std::string command = "mv " + log_files[maps.size() - 1 - i] + " " + root_directory + "/automated_testing/server_binary/logs/game_" + std::to_string(i) + ".txt";
         system(command.c_str());
-        // change to false
-        if (disqualified[i] == true)
+        if (disqualified[i] == false)
         {
             std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + std::to_string(i) + ".txt";
             system(command.c_str());

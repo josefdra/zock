@@ -106,7 +106,7 @@ bool Network::check_socket_acitivity()
 void Network::run_game()
 {
     uint16_t counter = 0;
-
+    m_game.m_map.print_map();
     while (m_game_phase < 3 && m_game.m_winner != 2)
     {
         if (check_socket_acitivity())
@@ -206,6 +206,7 @@ void Network::receive_move(uint32_t actual_message_length)
     }
     std::cout << (int)x << ", " << (int)y << ", Special value: " << (int)spec << " from player " << (int)player << std::endl;
     std::cout << std::endl;
+    m_game.m_map.print_map();
 }
 
 void Network::receive_disqualification(uint32_t actual_message_length)
