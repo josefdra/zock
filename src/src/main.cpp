@@ -55,21 +55,18 @@ int main(int argc, char *argv[])
                 if (std::strcmp(argv[2], "localhost") != 0 && std::strcmp(argv[2], "127.0.0.1") != 0)
                 {
                     ip = argv[2];
-                }
-                if (argc > 3)
-                {
-                    if (std::strcmp(argv[3], "-p") == 0)
+                    if (argc > 3)
                     {
-                        if (argc > 4)
+                        if (std::strcmp(argv[3], "-p") == 0)
                         {
-                            if (std::strcmp(argv[4], "7777") != 0)
+                            if (argc > 4)
                             {
                                 port = atoi(argv[4]);
                             }
-                        }
-                        else
-                        {
-                            std::cout << "-p argument missing" << std::endl;
+                            else
+                            {
+                                std::cout << "-p argument missing" << std::endl;
+                            }
                         }
                     }
                 }
@@ -79,20 +76,18 @@ int main(int argc, char *argv[])
                 std::cout << "-i argument missing" << std::endl;
             }
         }
+        else if (std::strcmp(argv[1], "-p") == 0)
         {
             if (argc > 2)
             {
-                if (std::strcmp(argv[2], "7777") != 0)
-                {
-                    port = atoi(argv[2]);
-                }
+                port = atoi(argv[2]);
                 if (argc > 3)
                 {
                     if (std::strcmp(argv[3], "-i") == 0)
                     {
                         if (argc > 4)
                         {
-                            if (std::strcmp(argv[4], "localhost") != 0 && std::strcmp(argv[4], "127.0.0.1") != 0)
+                            if (std::strcmp(argv[2], "localhost") != 0 && std::strcmp(argv[2], "127.0.0.1") != 0)
                             {
                                 ip = argv[4];
                             }
@@ -108,9 +103,6 @@ int main(int argc, char *argv[])
             {
                 std::cout << "-p argument missing" << std::endl;
             }
-        }
-        {
-            std::cout << "No valid input. Starting with standard configuration" << std::endl;
         }
     }
     else
