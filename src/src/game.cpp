@@ -54,28 +54,51 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
     std::unordered_set<uint16_t> valid_moves;
     calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols, valid_moves);
-    // int test_depth = 4;
 
     for (auto &possibleMove : valid_moves)
     {
-        std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
-        int currEval = minimaxOrParanoidWithPruning(m_map, m_players, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
-        if (currEval > bestEval)
+        if (m_map.m_symbols[possibleMove] == 'c')
         {
-            bestEval = currEval;
-            bestCoord = possibleMove;
+            for (auto &p : m_players)
+            {
+                if (p.m_symbol != m_players[m_player_number].m_symbol)
+                {
+                    std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
+                    change_players(next_map, m_players[m_player_number].m_symbol, p.m_symbol);
+                    int currEval = minimaxOrParanoidWithPruning(m_map, m_players, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
+                    if (currEval > bestEval)
+                    {
+                        m_choice_value = p.m_symbol - '0';
+                        bestEval = currEval;
+                        bestCoord = possibleMove;
+                    }
+                }
+            }
+        }
+        else
+        {
+            std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
+            int currEval = minimaxOrParanoidWithPruning(m_map, m_players, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
+            if (currEval > bestEval)
+            {
+                m_choice_value = 0;
+                bestEval = currEval;
+                bestCoord = possibleMove;
+            }
         }
     }
     h_res_clock::time_point end_time = h_res_clock::now();
     std::chrono::duration<double, std::micro> elapsed_time =
         std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+#ifdef RELEASING
     std::cout << "minimax/paranoid: tried " << tried_turns << " turns" << std::endl;
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+#endif
     // @todo add special evaluation
     switch (m_map.m_symbols[bestCoord])
     {
     case 'c':
-        spec = m_player_number + 1;
+        spec = m_choice_value;
         break;
     case 'b':
         spec = 20;
@@ -91,7 +114,8 @@ uint16_t Game::get_bomb_throw()
 {
     for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
     {
-        if(check_players(m_map.m_symbols[c]) && m_map.m_symbols[c] != m_map.m_player_number + 1 + '0'){
+        if (check_players(m_map.m_symbols[c]) && m_map.m_symbols[c] != m_map.m_player_number + 1 + '0')
+        {
             return c;
         }
     }
@@ -124,7 +148,8 @@ void Game::check_winner()
         }
     }
     std::cout << "\nThe Winner is: Player " << winner << "!" << std::endl;
-    if(winner == m_players[m_player_number].m_symbol){
+    if (winner == m_players[m_player_number].m_symbol)
+    {
         m_winner = 1;
     }
     return;

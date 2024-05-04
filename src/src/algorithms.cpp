@@ -58,7 +58,7 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     for (auto &pl : players)
     {
         if (pl.m_symbol != m.m_player_number + 1 + '0')
-        {            
+        {
             calculate_valid_moves(m, pl, currMap, valid_moves);
         }
         if (valid_moves.size() < 1)
@@ -100,8 +100,29 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
     int minEval;
     for (auto &move : valid_moves)
     {
-        std::vector<char> next_map = temp_color(move, players[(playersTurn + counter) % m.m_player_count].m_symbol, m, currMap);
-        int eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);
+        int eval = -INT32_MAX, currEval;
+        if (m.m_symbols[move] == 'c')
+        {
+            for (auto &p : players)
+            {
+                if (p.m_symbol != players[m.m_player_number].m_symbol)
+                {
+                    std::vector<char> next_map = temp_color(move, players[m.m_player_number].m_symbol, m, currMap);
+                    change_players(next_map, players[m.m_player_number].m_symbol, p.m_symbol);
+                    currEval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);
+                    if (currEval > eval)
+                    {
+                        eval = currEval;
+                    }
+                }
+            }
+        }
+        else
+        {
+            std::vector<char> next_map = temp_color(move, players[(playersTurn + counter) % m.m_player_count].m_symbol, m, currMap);
+            eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);
+        }
+
         if (players[(playersTurn + counter) % m.m_player_count].m_symbol == players[m.m_player_number].m_symbol)
         {
             maxEval = std::numeric_limits<int>::min();

@@ -158,7 +158,9 @@ void Network::receive_player_number(uint32_t actual_message_length)
 
 void Network::receive_move_prompt(uint32_t actual_message_length)
 {
+#ifdef RELEASING
     std::cout << "Received move prompt, calculating move" << std::endl;
+#endif
     char message[actual_message_length];
     recv(m_csocket, &message, actual_message_length, 0);
     memcpy(&m_time, message, sizeof(m_time));
@@ -168,16 +170,22 @@ void Network::receive_move_prompt(uint32_t actual_message_length)
     if (m_game_phase != 2)
     {
         turn = m_game.get_turn(spec, m_search_depth, m_game_phase);
+#ifdef RELEASING
         std::cout << "Placing stone at: ";
+#endif
     }
     else
     {
         turn = m_game.get_bomb_throw();
+#ifdef RELEASING
         std::cout << "Throwing bomb at: ";
+#endif
     }
     uint8_t x = 0, y = 0;
     one_dimension_2_second_dimension(turn, x, y, m_game.m_map);
+#ifdef RELEASING
     std::cout << (int)x << ", " << (int)y << ", Special value: " << (int)spec << std::endl;
+#endif
     send_move(x, y, spec);
 }
 
@@ -205,8 +213,10 @@ void Network::receive_move(uint32_t actual_message_length)
         execute_bomb(coord, m_game.m_map, m_game.m_players[player - 1]);
     }
     std::cout << (int)x << ", " << (int)y << ", Special value: " << (int)spec << " from player " << (int)player << std::endl;
+#ifdef RELEASING
     std::cout << std::endl;
     m_game.m_map.print_map();
+#endif
 }
 
 void Network::receive_disqualification(uint32_t actual_message_length)

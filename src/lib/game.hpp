@@ -26,6 +26,7 @@ public:
     std::vector<Player> m_players;
     uint8_t m_player_number;
     uint8_t m_winner = 0;
+    uint8_t m_choice_value = 0;
 };
 
 #endif // GAME_HPP

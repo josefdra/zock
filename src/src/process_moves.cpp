@@ -5,29 +5,28 @@
  *
  */
 
-void change_players(Map &m, unsigned char p1, unsigned char p2)
+void change_players(std::vector<char> &m, char p1, char p2)
 {
-    for (uint16_t c = 1; c < m.m_num_of_fields; c++)
+    for (uint16_t c = 1; c < m.size(); c++)
     {
-        unsigned char s = m.get_symbol(c);
-        if (s == p1)
+        if (m[c] == p1)
         {
-            m.set_symbol(c, p2);
+            m[c] = p2;
         }
-        else if (s == p2)
+        else if (m[c] == p2)
         {
-            m.set_symbol(c, p1);
+            m[c] = p1;
         }
     }
 }
 
-void execute_inversion(Map &m)
+void execute_inversion(std::vector<char> &currMap, Map &map)
 {
-    for (uint16_t c = 1; c < m.m_num_of_fields; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
-        if (check_players(m.get_symbol(c)))
+        if (check_players(currMap[c]))
         {
-            m.set_symbol(c, ((m.get_symbol(c) - '0') % m.m_player_count) + '0' + 1);
+            currMap[c] = (currMap[c] - '0') % map.m_player_count + '0' + 1;
         }
     }
 }
@@ -85,13 +84,13 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
     else if (curr_symbol == 'i')
     {
         color(c, p.m_symbol, m);
-        execute_inversion(m);
+        execute_inversion(m.m_symbols, m);
     }
     // choice
     else if (curr_symbol == 'c')
     {
         color(c, p.m_symbol, m);
-        change_players(m, p.m_symbol, ('0' + special));
+        change_players(m.m_symbols, p.m_symbol, ('0' + special));
     }
     // bonus
     else if (curr_symbol == 'b')
@@ -166,6 +165,10 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
     {
         ret_map[c] = s;
     }
+    if (currMap[c] == 'i')
+    {
+        execute_inversion(currMap, m);
+    }
     return ret_map;
 }
 
@@ -179,7 +182,7 @@ void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, std::u
     if (p.has_overwrite_stones())
     {
         overrides = true;
-    }    
+    }
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
         if (currMap[c] == 'x' && overrides)

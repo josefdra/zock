@@ -25,6 +25,8 @@ RLINK_FLAGS =
 DLINK_FLAGS =
 
 TESTING = 0
+RELEASING = 1
+
 #### END PROJECT SETTINGS ####
 
 # Optionally you may move the section above to a separate config.mk file, and
@@ -79,6 +81,7 @@ install: export BIN_PATH := bin/release
 
 ifeq ($(MAKECMDGOALS), testing)
 	TESTING = 1
+	RELEASING = 0
 endif
 
 # Find all source files in the source directory, sorted by most

@@ -5,8 +5,8 @@
 #include "player.hpp"
 #include "helper.hpp"
 
-void change_players(Map &, unsigned char, unsigned char);
-void execute_inversion(Map &m);
+void change_players(std::vector<char> &, char, char);
+void execute_inversion(std::vector<char> &, Map &);
 void color(uint16_t c, char s, Map &);
 void execute_move(uint16_t, uint8_t, Player &, Map &);
 void execute_bomb(uint16_t, Map &, Player &);
