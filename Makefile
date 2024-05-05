@@ -12,9 +12,9 @@ LIBS =
 # General compiler flags
 COMPILE_FLAGS = -std=c++11 -Wall -g -Wextra
 # Additional release-specific flags
-RCOMPILE_FLAGS = -D NDEBUG
-# Additional debug-specific flags
-DCOMPILE_FLAGS = -D DEBUG
+RCOMPILE_FLAGS = -D NDEBUG -DESTING -DRELEASING
+# Additional testing-specific flags
+DCOMPILE_FLAGS = -D DEBUG -DESTING -DTESTING
 # Add additional include paths
 INCLUDES = -I ./src/lib
 # General linker settings
@@ -23,6 +23,10 @@ LINK_FLAGS =
 RLINK_FLAGS =
 # Additional debug-specific linker settings
 DLINK_FLAGS =
+
+TESTING =
+RELEASING =
+
 #### END PROJECT SETTINGS ####
 
 # Optionally you may move the section above to a separate config.mk file, and
@@ -65,14 +69,14 @@ endif
 # Combine compiler and linker flags
 release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
 release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
-debug: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
-debug: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
+testing: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
+testing: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
 
 # Build and output paths
 release: export BUILD_PATH := build/release
 release: export BIN_PATH := bin
-debug: export BUILD_PATH := build/debug
-debug: export BIN_PATH := bin/debug
+testing: export BUILD_PATH := build/testing
+testing: export BIN_PATH := automated_testing/client_binary
 install: export BIN_PATH := bin/release
 
 # Find all source files in the source directory, sorted by most
@@ -153,12 +157,12 @@ endif
 	@$(RM) -r build
 
 # Debug build for gdb debugging
-.PHONY: debug
-debug: dirs
+.PHONY: testing
+testing: dirs
 ifeq ($(USE_VERSION), true)
-	@echo "Beginning debug build v$(VERSION_STRING)"
+	@echo "Beginning testing build v$(VERSION_STRING)"
 else
-	@echo "Beginning debug build"
+	@echo "Beginning testing build"
 endif
 	@$(START_TIME)
 	@$(MAKE) all --no-print-directory

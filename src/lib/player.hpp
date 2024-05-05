@@ -24,7 +24,6 @@ public:
     uint16_t m_overwrite_stones = 0;
     uint16_t m_bombs = 0;
     uint16_t m_points = 0;
-    bool m_has_valid_moves = false;
     uint16_t m_frontier_score = 0;
     int m_board_value;
     std::unordered_set<uint16_t> m_valid_moves;

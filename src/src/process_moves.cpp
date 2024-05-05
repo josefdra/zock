@@ -5,29 +5,28 @@
  *
  */
 
-void change_players(Map &m, unsigned char p1, unsigned char p2)
+void change_players(std::vector<char> &m, char p1, char p2)
 {
-    for (uint16_t c = 1; c < m.m_num_of_fields; c++)
+    for (uint16_t c = 1; c < m.size(); c++)
     {
-        unsigned char s = m.get_symbol(c);
-        if (s == p1)
+        if (m[c] == p1)
         {
-            m.set_symbol(c, p2);
+            m[c] = p2;
         }
-        else if (s == p2)
+        else if (m[c] == p2)
         {
-            m.set_symbol(c, p1);
+            m[c] = p1;
         }
     }
 }
 
-void execute_inversion(Map &m)
+void execute_inversion(std::vector<char> &currMap, std::vector<char> &nextMap, Map &map)
 {
-    for (uint16_t c = 1; c < m.m_num_of_fields; c++)
+    for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
-        if (check_players(m.get_symbol(c)))
+        if (check_players(currMap[c]))
         {
-            m.set_symbol(c, ((m.get_symbol(c) - '0') % m.m_player_count) + '0' + 1);
+            nextMap[c] = (currMap[c] - '0') % map.m_player_count + '0' + 1;
         }
     }
 }
@@ -85,13 +84,13 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
     else if (curr_symbol == 'i')
     {
         color(c, p.m_symbol, m);
-        execute_inversion(m);
+        execute_inversion(m.m_symbols, m.m_symbols, m);
     }
     // choice
     else if (curr_symbol == 'c')
     {
         color(c, p.m_symbol, m);
-        change_players(m, p.m_symbol, ('0' + special));
+        change_players(m.m_symbols, p.m_symbol, ('0' + special));
     }
     // bonus
     else if (curr_symbol == 'b')
@@ -166,25 +165,29 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
     {
         ret_map[c] = s;
     }
+    if (currMap[c] == 'i')
+    {
+        execute_inversion(currMap, ret_map, m);
+    }
     return ret_map;
 }
 
 /// @brief This function asks for a coordinate and checks if it's a valid move
 /// @param map current map layout
 /// @param player_number current player at turn
-void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap)
+void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, std::unordered_set<uint16_t> &valid_moves)
 {
+    valid_moves.clear();
     bool overrides = false;
     if (p.has_overwrite_stones())
     {
         overrides = true;
     }
-    p.m_valid_moves.clear();
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
         if (currMap[c] == 'x' && overrides)
         {
-            p.m_valid_moves.insert(c);
+            valid_moves.insert(c);
         }
         if (currMap[c] == p.m_symbol)
         {
@@ -199,17 +202,17 @@ void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap)
                 {
                     if (currMap[next_field] == p.m_symbol && overrides && valid)
                     {
-                        p.m_valid_moves.insert(next_field);
+                        valid_moves.insert(next_field);
                         break;
                     }
                     else if ((check_empty_fields(currMap[next_field]) && valid))
                     {
-                        p.m_valid_moves.insert(next_field);
+                        valid_moves.insert(next_field);
                         break;
                     }
                     else if (valid && overrides)
                     {
-                        p.m_valid_moves.insert(next_field);
+                        valid_moves.insert(next_field);
                     }
                     else if (currMap[next_field] == p.m_symbol || next_field == c || check_empty_fields(currMap[next_field]))
                     {
