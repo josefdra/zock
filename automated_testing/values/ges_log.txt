@@ -1,3 +1,362 @@
+success at starting server for game 0
 success at starting client 1 for game 0
 success at starting trivial_ai 1 for game 0
 success at starting trivial_ai 2 for game 0
+success at starting server for game 1
+success at starting client 1 for game 1
+success at starting trivial_ai 1 for game 1
+won game 1
+Game 1 finished
+success at starting server for game 2
+success at starting client 1 for game 2
+success at starting trivial_ai 1 for game 2
+won game 0
+Game 0 finished
+success at starting server for game 3
+success at starting client 1 for game 3
+success at starting trivial_ai 1 for game 3
+Game 2 finished
+success at starting server for game 4
+success at starting client 1 for game 4
+success at starting trivial_ai 1 for game 4
+success at starting server for game 5
+success at starting client 1 for game 5
+success at starting trivial_ai 1 for game 5
+success at starting trivial_ai 2 for game 5
+success at starting trivial_ai 3 for game 5
+success at starting server for game 6
+success at starting client 1 for game 6
+success at starting trivial_ai 1 for game 6
+won game 4
+Game 4 finished
+success at starting server for game 7
+success at starting client 1 for game 7
+success at starting trivial_ai 1 for game 7
+success at starting trivial_ai 2 for game 7
+success at starting trivial_ai 3 for game 7
+success at starting server for game 8
+success at starting client 1 for game 8
+success at starting trivial_ai 1 for game 8
+success at starting trivial_ai 2 for game 8
+success at starting trivial_ai 3 for game 8
+success at starting trivial_ai 4 for game 8
+success at starting trivial_ai 5 for game 8
+success at starting trivial_ai 6 for game 8
+success at starting trivial_ai 7 for game 8
+success at starting server for game 9
+success at starting client 1 for game 9
+success at starting trivial_ai 1 for game 9
+success at starting trivial_ai 2 for game 9
+success at starting trivial_ai 3 for game 9
+Game 5 finished
+Game 3 finished
+success at starting server for game 10
+success at starting client 1 for game 10
+success at starting trivial_ai 1 for game 10
+Game 10 finished
+success at starting server for game 11
+success at starting client 1 for game 11
+success at starting trivial_ai 1 for game 11
+success at starting trivial_ai 2 for game 11
+success at starting trivial_ai 3 for game 11
+success at starting server for game 12
+success at starting client 1 for game 12
+success at starting trivial_ai 1 for game 12
+success at starting trivial_ai 2 for game 12
+success at starting trivial_ai 3 for game 12
+Game 8 finished
+Game 11 finished
+success at starting server for game 13
+success at starting client 1 for game 13
+success at starting trivial_ai 1 for game 13
+success at starting trivial_ai 2 for game 13
+Game 12 finished
+success at starting server for game 14
+success at starting client 1 for game 14
+success at starting trivial_ai 1 for game 14
+success at starting trivial_ai 2 for game 14
+success at starting trivial_ai 3 for game 14
+Game 9 finished
+success at starting server for game 15
+success at starting client 1 for game 15
+success at starting trivial_ai 1 for game 15
+success at starting trivial_ai 2 for game 15
+success at starting trivial_ai 3 for game 15
+success at starting trivial_ai 4 for game 15
+success at starting trivial_ai 5 for game 15
+success at starting trivial_ai 6 for game 15
+success at starting trivial_ai 7 for game 15
+success at starting server for game 16
+success at starting client 1 for game 16
+success at starting trivial_ai 1 for game 16
+Game 16 finished
+success at starting server for game 17
+success at starting client 1 for game 17
+success at starting trivial_ai 1 for game 17
+success at starting trivial_ai 2 for game 17
+Game 17 finished
+success at starting server for game 18
+success at starting client 1 for game 18
+success at starting trivial_ai 1 for game 18
+success at starting trivial_ai 2 for game 18
+success at starting trivial_ai 3 for game 18
+success at starting server for game 19
+success at starting client 1 for game 19
+success at starting trivial_ai 1 for game 19
+success at starting trivial_ai 2 for game 19
+success at starting trivial_ai 3 for game 19
+success at starting trivial_ai 4 for game 19
+success at starting trivial_ai 5 for game 19
+success at starting trivial_ai 6 for game 19
+success at starting trivial_ai 7 for game 19
+Game 18 finished
+success at starting server for game 20
+success at starting client 1 for game 20
+success at starting trivial_ai 1 for game 20
+success at starting trivial_ai 2 for game 20
+success at starting server for game 21
+success at starting client 1 for game 21
+success at starting trivial_ai 1 for game 21
+won game 21
+Game 21 finished
+success at starting server for game 22
+success at starting client 1 for game 22
+success at starting trivial_ai 1 for game 22
+won game 20
+Game 20 finished
+success at starting server for game 23
+success at starting client 1 for game 23
+success at starting trivial_ai 1 for game 23
+Game 22 finished
+success at starting server for game 24
+success at starting client 1 for game 24
+success at starting trivial_ai 1 for game 24
+Game 14 finished
+success at starting server for game 25
+success at starting client 1 for game 25
+success at starting trivial_ai 1 for game 25
+success at starting trivial_ai 2 for game 25
+success at starting trivial_ai 3 for game 25
+success at starting server for game 26
+success at starting client 1 for game 26
+success at starting trivial_ai 1 for game 26
+won game 24
+Game 24 finished
+success at starting server for game 27
+success at starting client 1 for game 27
+success at starting trivial_ai 1 for game 27
+success at starting trivial_ai 2 for game 27
+success at starting trivial_ai 3 for game 27
+success at starting server for game 28
+success at starting client 1 for game 28
+success at starting trivial_ai 1 for game 28
+success at starting trivial_ai 2 for game 28
+success at starting trivial_ai 3 for game 28
+success at starting trivial_ai 4 for game 28
+success at starting trivial_ai 5 for game 28
+success at starting trivial_ai 6 for game 28
+success at starting trivial_ai 7 for game 28
+success at starting server for game 29
+success at starting client 1 for game 29
+success at starting trivial_ai 1 for game 29
+success at starting trivial_ai 2 for game 29
+success at starting trivial_ai 3 for game 29
+Game 25 finished
+Game 23 finished
+success at starting server for game 30
+success at starting client 1 for game 30
+success at starting trivial_ai 1 for game 30
+Game 30 finished
+success at starting server for game 31
+success at starting client 1 for game 31
+success at starting trivial_ai 1 for game 31
+success at starting trivial_ai 2 for game 31
+success at starting trivial_ai 3 for game 31
+success at starting server for game 32
+success at starting client 1 for game 32
+success at starting trivial_ai 1 for game 32
+success at starting trivial_ai 2 for game 32
+success at starting trivial_ai 3 for game 32
+Game 28 finished
+Game 31 finished
+success at starting server for game 33
+success at starting client 1 for game 33
+success at starting trivial_ai 1 for game 33
+success at starting trivial_ai 2 for game 33
+Game 32 finished
+success at starting server for game 34
+success at starting client 1 for game 34
+success at starting trivial_ai 1 for game 34
+success at starting trivial_ai 2 for game 34
+success at starting trivial_ai 3 for game 34
+Game 29 finished
+success at starting server for game 35
+success at starting client 1 for game 35
+success at starting trivial_ai 1 for game 35
+success at starting trivial_ai 2 for game 35
+success at starting trivial_ai 3 for game 35
+success at starting trivial_ai 4 for game 35
+success at starting trivial_ai 5 for game 35
+success at starting trivial_ai 6 for game 35
+success at starting trivial_ai 7 for game 35
+success at starting server for game 36
+success at starting client 1 for game 36
+success at starting trivial_ai 1 for game 36
+Game 36 finished
+success at starting server for game 37
+success at starting client 1 for game 37
+success at starting trivial_ai 1 for game 37
+success at starting trivial_ai 2 for game 37
+Game 37 finished
+success at starting server for game 38
+success at starting client 1 for game 38
+success at starting trivial_ai 1 for game 38
+success at starting trivial_ai 2 for game 38
+success at starting trivial_ai 3 for game 38
+success at starting server for game 39
+success at starting client 1 for game 39
+success at starting trivial_ai 1 for game 39
+success at starting trivial_ai 2 for game 39
+success at starting trivial_ai 3 for game 39
+success at starting trivial_ai 4 for game 39
+success at starting trivial_ai 5 for game 39
+success at starting trivial_ai 6 for game 39
+success at starting trivial_ai 7 for game 39
+Game 38 finished
+success at starting server for game 40
+success at starting client 1 for game 40
+success at starting trivial_ai 1 for game 40
+success at starting trivial_ai 2 for game 40
+success at starting server for game 41
+success at starting client 1 for game 41
+success at starting trivial_ai 1 for game 41
+won game 41
+Game 41 finished
+won game 40
+Game 40 finished
+success at starting server for game 42
+success at starting client 1 for game 42
+success at starting trivial_ai 1 for game 42
+Game 42 finished
+success at starting server for game 43
+success at starting client 1 for game 43
+success at starting trivial_ai 1 for game 43
+Game 34 finished
+success at starting server for game 44
+success at starting client 1 for game 44
+success at starting trivial_ai 1 for game 44
+success at starting server for game 45
+success at starting client 1 for game 45
+success at starting trivial_ai 1 for game 45
+success at starting trivial_ai 2 for game 45
+Game 6 finished
+success at starting trivial_ai 3 for game 45
+won game 44
+Game 44 finished
+success at starting server for game 46
+success at starting client 1 for game 46
+success at starting trivial_ai 1 for game 46
+success at starting server for game 47
+success at starting client 1 for game 47
+success at starting trivial_ai 1 for game 47
+success at starting trivial_ai 2 for game 47
+success at starting trivial_ai 3 for game 47
+Game 45 finished
+Game 43 finished
+success at starting server for game 48
+success at starting client 1 for game 48
+success at starting trivial_ai 1 for game 48
+success at starting trivial_ai 2 for game 48
+success at starting trivial_ai 3 for game 48
+success at starting trivial_ai 4 for game 48
+success at starting trivial_ai 5 for game 48
+success at starting trivial_ai 6 for game 48
+success at starting trivial_ai 7 for game 48
+success at starting server for game 49
+success at starting client 1 for game 49
+success at starting trivial_ai 1 for game 49
+success at starting trivial_ai 2 for game 49
+success at starting trivial_ai 3 for game 49
+success at starting server for game 50
+success at starting client 1 for game 50
+success at starting trivial_ai 1 for game 50
+won game 15
+Game 15 finished
+Game 50 finished
+success at starting server for game 51
+Game 48 finished
+success at starting client 1 for game 51
+success at starting trivial_ai 1 for game 51
+success at starting trivial_ai 2 for game 51
+success at starting trivial_ai 3 for game 51
+success at starting server for game 52
+success at starting client 1 for game 52
+success at starting trivial_ai 1 for game 52
+success at starting trivial_ai 2 for game 52
+success at starting trivial_ai 3 for game 52
+Game 51 finished
+success at starting server for game 53
+success at starting client 1 for game 53
+success at starting trivial_ai 1 for game 53
+success at starting trivial_ai 2 for game 53
+won game 19
+Game 19 finished
+Game 52 finished
+Game 49 finished
+success at starting server for game 54
+success at starting client 1 for game 54
+success at starting trivial_ai 1 for game 54
+success at starting trivial_ai 2 for game 54
+success at starting trivial_ai 3 for game 54
+Game 13 finished
+success at starting server for game 55
+success at starting client 1 for game 55
+success at starting trivial_ai 1 for game 55
+success at starting trivial_ai 2 for game 55
+success at starting trivial_ai 3 for game 55
+success at starting trivial_ai 4 for game 55
+success at starting trivial_ai 5 for game 55
+success at starting trivial_ai 6 for game 55
+success at starting trivial_ai 7 for game 55
+Game 7 finished
+success at starting server for game 56
+success at starting client 1 for game 56
+success at starting trivial_ai 1 for game 56
+Game 56 finished
+success at starting server for game 57
+success at starting client 1 for game 57
+success at starting trivial_ai 1 for game 57
+success at starting trivial_ai 2 for game 57
+Game 57 finished
+success at starting server for game 58
+success at starting client 1 for game 58
+success at starting trivial_ai 1 for game 58
+success at starting trivial_ai 2 for game 58
+success at starting trivial_ai 3 for game 58
+success at starting server for game 59
+success at starting client 1 for game 59
+success at starting trivial_ai 1 for game 59
+success at starting trivial_ai 2 for game 59
+success at starting trivial_ai 3 for game 59
+success at starting trivial_ai 4 for game 59
+success at starting trivial_ai 5 for game 59
+success at starting trivial_ai 6 for game 59
+success at starting trivial_ai 7 for game 59
+Game 58 finished
+Game 54 finished
+Game 26 finished
+won game 35
+Game 35 finished
+won game 39
+Game 39 finished
+Game 33 finished
+Game 27 finished
+Game 46 finished
+won game 55
+Game 55 finished
+won game 59
+Game 59 finished
+Game 47 finished
+Game 53 finished
+Played 60 games
+Elapsed time: 1044 seconds

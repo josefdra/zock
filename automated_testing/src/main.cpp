@@ -15,6 +15,10 @@
 #include <limits.h>
 #include <algorithm>
 #include <sstream>
+#include <string>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
 
 std::string root_directory = "/home/josefdra/ZOCK/g01";
 std::string log_directory;
@@ -26,7 +30,7 @@ struct FileInfo
     time_t creation_time;
 };
 
-std::array<std::tuple<std::string, uint8_t>, 21> maps{
+std::array<std::tuple<std::string, uint8_t>, 20> maps{
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2012_Map_fuenf.map", 3),
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2013_comp_1_2p.map", 2),
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2013_comp_4_2p.map", 2),
@@ -46,18 +50,80 @@ std::array<std::tuple<std::string, uint8_t>, 21> maps{
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_2p.map", 2),
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_3p.map", 3),
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_4p.map", 4),
-    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_8p.map", 8),
-    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/evenMoreTransitions.map", 4)};
+    std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_8p.map", 8)};
 
-pid_t start_binary(const char *path, const std::vector<const char *> &args)
+double get_cpu_usage()
+{
+    static long prevIdleTime = 0, prevTotalTime = 0;
+    long idleTime, totalTime;
+    std::string line, value;
+    std::vector<long> times;
+
+    std::ifstream procStat("/proc/stat");
+    std::getline(procStat, line);
+
+    std::istringstream iss(line);
+
+    // skip first word ("cpu")
+    iss >> value;
+
+    // read remaining values
+    while (iss >> value)
+    {
+        times.push_back(std::stol(value));
+    }
+
+    // calculate idle time and total time
+    idleTime = times[3];
+    totalTime = 0;
+    for (long time : times)
+    {
+        totalTime += time;
+    }
+
+    // calculate difference
+    long diffIdleTime = idleTime - prevIdleTime;
+    long diffTotalTime = totalTime - prevTotalTime;
+
+    // save current values for next call
+    prevIdleTime = idleTime;
+    prevTotalTime = totalTime;
+
+    // calculate CPU usage
+    double cpuUsage = 100.0 * (1.0 - (double)diffIdleTime / (double)diffTotalTime);
+
+    return cpuUsage;
+}
+
+void wait_for_cpu_availability(double threshold)
+{
+    double cpuUsage = get_cpu_usage();
+    while (cpuUsage > threshold)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        cpuUsage = get_cpu_usage();
+    }
+}
+
+pid_t start_binary(const char *path, const std::vector<const char *> &args, std::string &game_number)
 {
     pid_t pid = fork();
     if (pid == 0)
     {
         // Child process
-        //  Open /dev/null for writing
-        int fd = open("/dev/null", O_WRONLY);
-        // Redirect stdout and stderr to /dev/null
+        int fd;
+        if (args[0] != nullptr && std::strcmp(args[0], "-m") == 0)
+        {
+            std::string filename = root_directory + +"/automated_testing/server_binary/logs/game_" + game_number + "_server.txt";
+            // Open /dev/null for throwing console outputs away
+            fd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        }
+        else
+        {
+            // Open /dev/null for throwing console outputs away
+            fd = open("/dev/null", O_WRONLY);
+        }
+        // Redirect stdout and stderr
         dup2(fd, STDOUT_FILENO);
         dup2(fd, STDERR_FILENO);
         // Close the opened file descriptor as it's no longer needed
@@ -94,8 +160,8 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     std::string trivial_ai = "/home/josefdra/ZOCK/ges/reversi-binaries/trivialai/ai_trivial";
 
     // Arguments for the server
-    std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "1", nullptr};
-    start_binary(server.c_str(), arguments_server);
+    std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "2", nullptr};
+    start_binary(server.c_str(), arguments_server, string_game_number);
     std::cout << "success at starting server for game " << string_game_number << std::endl;
 
     // Vector to store child PIDs
@@ -107,7 +173,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     std::string player_num_str = std::to_string(static_cast<int>(1));
     const char *player_num_cstr = player_num_str.c_str();
     std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), nullptr};
-    pid_t client_pid = start_binary(client.c_str(), arguments_clients);
+    pid_t client_pid = start_binary(client.c_str(), arguments_clients, string_game_number);
     if (client_pid > 0)
     {
         std::cout << "success at starting client " << 1 << " for game " << string_game_number << std::endl;
@@ -118,7 +184,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     {
         usleep(500000);
         std::vector<const char *> arguments_trivial_ai = {nullptr};
-        pid_t client_pid = start_binary(trivial_ai.c_str(), arguments_trivial_ai);
+        pid_t client_pid = start_binary(trivial_ai.c_str(), arguments_trivial_ai, string_game_number);
         if (client_pid > 0)
         {
             std::cout << "success at starting trivial_ai " << p << " for game " << string_game_number << std::endl;
@@ -157,16 +223,19 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
         counter++;
     }
     std::cout << "Game " << string_game_number << " finished" << std::endl;
-    if (counter == 0)
+    if (counter != 0)
     {
-        disqualified[atoi(string_game_number.c_str())] = true;
+        std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + ".txt";
+        system(command.c_str());
     }
+    std::string command = "rm " + log_directory + "/*.txt";
+    system(command.c_str());
 }
 
 int main()
 {
     std::string filename = root_directory + +"/automated_testing/values/ges_log.txt";
-    // freopen(filename.c_str(), "w", stdout);
+    freopen(filename.c_str(), "w", stdout);
 
     auto start_time = std::chrono::steady_clock::now();
     char cwd[PATH_MAX];
@@ -175,14 +244,17 @@ int main()
     int game_number = 0;
     std::string string_game_number = std::to_string(game_number);
     std::vector<std::thread> threads;
-    std::vector<std::string> log_files;
-    for (auto &map : maps)
+    for (uint8_t i = 0; i < 3; i++)
     {
-        threads.push_back(std::thread(run_map, std::ref(map), string_game_number));
-        sleep(10);
-        disqualified.push_back(false);
-        game_number++;
-        string_game_number = std::to_string(game_number);
+        for (auto &map : maps)
+        {
+            wait_for_cpu_availability(85.0);
+            threads.push_back(std::thread(run_map, std::ref(map), string_game_number));
+            sleep(10);
+            disqualified.push_back(false);
+            game_number++;
+            string_game_number = std::to_string(game_number);
+        }
     }
     for (auto &t : threads)
     {
@@ -191,46 +263,10 @@ int main()
             t.join();
         }
     }
-    std::vector<FileInfo> fileInfos;
-    std::string command = "find " + std::string(log_directory) + " -type f -exec stat --format '%W %n' {} +";
-    FILE *pipe = popen(command.c_str(), "r");
-    if (!pipe)
-    {
-        std::cerr << "Pipe could not be opened" << std::endl;
-        return 1;
-    }
-    char buffer[256];
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr)
-    {
-        std::istringstream iss(buffer);
-        FileInfo fileInfo;
-        iss >> fileInfo.creation_time >> fileInfo.path;
-        if (fileInfo.creation_time > 0)
-        {
-            fileInfos.push_back(fileInfo);
-        }
-    }
-    pclose(pipe);
-    std::sort(fileInfos.begin(), fileInfos.end(), [](const FileInfo &a, const FileInfo &b)
-              { return a.creation_time > b.creation_time; });
-    for (auto &elem : fileInfos)
-    {
-        log_files.push_back(elem.path);
-    }
-    for (uint8_t i = 0; i < maps.size(); i++)
-    {
-        std::string command = "mv " + log_files[maps.size() - 1 - i] + " " + root_directory + "/automated_testing/server_binary/logs/game_" + std::to_string(i) + ".txt";
-        system(command.c_str());
-        if (disqualified[i] == false)
-        {
-            std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + std::to_string(i) + ".txt";
-            system(command.c_str());
-        }
-    }
     auto end_time = std::chrono::steady_clock::now();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
     std::cout << "Played " << game_number << " games" << std::endl;
     std::cout << "Elapsed time: " << seconds.count() << " seconds" << std::endl;
-    // fclose(stdout);
+    fclose(stdout);
     return 0;
 }

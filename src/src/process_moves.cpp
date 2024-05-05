@@ -20,13 +20,13 @@ void change_players(std::vector<char> &m, char p1, char p2)
     }
 }
 
-void execute_inversion(std::vector<char> &currMap, Map &map)
+void execute_inversion(std::vector<char> &currMap, std::vector<char> &nextMap, Map &map)
 {
     for (uint16_t c = 1; c < map.m_num_of_fields; c++)
     {
         if (check_players(currMap[c]))
         {
-            currMap[c] = (currMap[c] - '0') % map.m_player_count + '0' + 1;
+            nextMap[c] = (currMap[c] - '0') % map.m_player_count + '0' + 1;
         }
     }
 }
@@ -84,7 +84,7 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
     else if (curr_symbol == 'i')
     {
         color(c, p.m_symbol, m);
-        execute_inversion(m.m_symbols, m);
+        execute_inversion(m.m_symbols, m.m_symbols, m);
     }
     // choice
     else if (curr_symbol == 'c')
@@ -167,7 +167,7 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
     }
     if (currMap[c] == 'i')
     {
-        execute_inversion(currMap, m);
+        execute_inversion(currMap, ret_map, m);
     }
     return ret_map;
 }

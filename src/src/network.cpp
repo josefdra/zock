@@ -213,10 +213,8 @@ void Network::receive_move(uint32_t actual_message_length)
         execute_bomb(coord, m_game.m_map, m_game.m_players[player - 1]);
     }
     std::cout << (int)x << ", " << (int)y << ", Special value: " << (int)spec << " from player " << (int)player << std::endl;
-#ifdef RELEASING
     std::cout << std::endl;
     m_game.m_map.print_map();
-#endif
 }
 
 void Network::receive_disqualification(uint32_t actual_message_length)
