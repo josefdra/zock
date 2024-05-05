@@ -12,9 +12,9 @@ LIBS =
 # General compiler flags
 COMPILE_FLAGS = -std=c++11 -Wall -g -Wextra
 # Additional release-specific flags
-RCOMPILE_FLAGS = -D NDEBUG -DESTING -DRELEASING -DTESTING
+RCOMPILE_FLAGS = -D NDEBUG -DESTING -DRELEASING
 # Additional testing-specific flags
-DCOMPILE_FLAGS = -D DEBUG -DESTING -DRELEASING -DTESTING
+DCOMPILE_FLAGS = -D DEBUG -DESTING -DTESTING
 # Add additional include paths
 INCLUDES = -I ./src/lib
 # General linker settings
