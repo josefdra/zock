@@ -101,7 +101,7 @@ void wait_for_cpu_availability(double threshold)
     }
 }
 
-pid_t start_binary(const char *path, const std::vector<const char *> &args, std::string &game_number)
+pid_t start_binary(const char *path, const std::vector<const char *> &args, std::string &game_number, uint8_t client_position)
 {
     pid_t pid = fork();
     if (pid == 0)
@@ -110,7 +110,7 @@ pid_t start_binary(const char *path, const std::vector<const char *> &args, std:
         int fd;
         if (args[0] != nullptr && std::strcmp(args[0], "-m") == 0)
         {
-            std::string filename = root_directory + +"/automated_testing/server_binary/logs/game_" + game_number + "_server.txt";
+            std::string filename = root_directory + +"/automated_testing/server_binary/logs/game_" + game_number + "_server_client_position_" + std::to_string(client_position) + ".txt";
             // Open /dev/null for throwing console outputs away
             fd = open(filename.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
         }
@@ -144,20 +144,16 @@ pid_t start_binary(const char *path, const std::vector<const char *> &args, std:
     return pid;
 }
 
-void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_number)
+void run_map(std::string &map_path, uint8_t player_count, std::string string_game_number, uint8_t client_position)
 {
-    std::string map_path;
-    uint8_t player_count;
-    std::tie(map_path, player_count) = map;
-
     // Path to the binaries
     std::string server = root_directory + "/automated_testing/server_binary/server_nogl";
     std::string client = root_directory + "/automated_testing/client_binary/client01";
     std::string trivial_ai = "/home/josefdra/ZOCK/ges/reversi-binaries/trivialai/ai_trivial";
 
     // Arguments for the server
-    std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "2", nullptr};
-    start_binary(server.c_str(), arguments_server, string_game_number);
+    std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "1", nullptr};
+    start_binary(server.c_str(), arguments_server, string_game_number, client_position);
     std::cout << "success at starting server for game " << string_game_number << std::endl;
 
     // Vector to store child PIDs
@@ -168,22 +164,31 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     // Convert player number to std::string and then to const char*
     std::string player_num_str = std::to_string(static_cast<int>(1));
     const char *player_num_cstr = player_num_str.c_str();
-    std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), nullptr};
-    pid_t client_pid = start_binary(client.c_str(), arguments_clients, string_game_number);
-    if (client_pid > 0)
-    {
-        std::cout << "success at starting client " << 1 << " for game " << string_game_number << std::endl;
-        client_pids.push_back(client_pid);
-    }
+    std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), (std::to_string(client_position)).c_str(), nullptr};
+    std::vector<const char *> arguments_trivial_ai = {nullptr};
 
-    for (uint16_t p = 1; p < player_count; p++)
+    for (uint16_t p = 0; p < player_count; p++)
     {
         usleep(500000);
-        std::vector<const char *> arguments_trivial_ai = {nullptr};
-        pid_t client_pid = start_binary(trivial_ai.c_str(), arguments_trivial_ai, string_game_number);
+        pid_t client_pid;
+        if (p == client_position)
+        {
+            client_pid = start_binary(client.c_str(), arguments_clients, string_game_number, client_position);
+        }
+        else
+        {
+            client_pid = start_binary(trivial_ai.c_str(), arguments_trivial_ai, string_game_number, client_position);
+        }
         if (client_pid > 0)
         {
-            std::cout << "success at starting trivial_ai " << p << " for game " << string_game_number << std::endl;
+            if (p == client_position)
+            {
+                std::cout << "success at starting client for game " << string_game_number << std::endl;
+            }
+            else
+            {
+                std::cout << "success at starting trivial_ai " << p << " for game " << string_game_number << std::endl;
+            }
             client_pids.push_back(client_pid);
         }
     }
@@ -223,7 +228,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     std::cout << "Game " << string_game_number << " finished" << std::endl;
     if (counter != 0)
     {
-        std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + "_server.txt";
+        std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + "_server_client_position_" + std::to_string(client_position) + ".txt";
         system(command.c_str());
     }
     std::string command = "rm " + log_directory + "/*.txt";
@@ -239,16 +244,25 @@ int main()
     char cwd[PATH_MAX];
     getcwd(cwd, sizeof(cwd));
     log_directory = std::string(cwd);
-    int game_number = 0;    
+    int game_number = 0;
     std::string string_game_number = std::to_string(game_number);
     std::vector<std::thread> threads;
+
+    // plays in total 75 games --> client once as every player of every map
     for (auto &map : maps)
     {
-        wait_for_cpu_availability(85.0);
-        threads.push_back(std::thread(run_map, std::ref(map), string_game_number));
-        sleep(10);
-        game_number++;
-        string_game_number = std::to_string(game_number);
+        std::string map_path;
+        uint8_t player_count;
+        std::tie(map_path, player_count) = map;
+
+        for (uint8_t p = 0; p < player_count; p++)
+        {
+            wait_for_cpu_availability(85.0);
+            threads.push_back(std::thread(run_map, std::ref(map_path), player_count, string_game_number, p));
+            sleep(10);
+            game_number++;
+            string_game_number = std::to_string(game_number);
+        }
     }
     for (auto &t : threads)
     {
@@ -259,7 +273,7 @@ int main()
     }
     auto end_time = std::chrono::steady_clock::now();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-    std::cout << "Played " << game_number << " games and won " << won_games << std::endl;
+    std::cout << "Played " << game_number << " games and won " << game_number + 1 << std::endl;
     std::cout << "Elapsed time: " << seconds.count() << " seconds" << std::endl;
     fclose(stdout);
     return 0;

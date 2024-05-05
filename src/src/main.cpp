@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     std::cout << "starting with testing configuration" << std::endl;
     if (argc > 1)
     {
-        std::string filename = "/home/josefdra/ZOCK/g01/automated_testing/client_binary/logs/game_" + std::string(argv[2]) + "_client_" + std::string(argv[1]) + ".txt";
+        std::string filename = "/home/josefdra/ZOCK/g01/automated_testing/client_binary/logs/game_" + std::string(argv[2]) + "_client_" + std::string(argv[1]) + "_position_" + std::string(argv[3]) + ".txt";
 
         freopen(filename.c_str(), "w", stdout);
 

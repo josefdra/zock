@@ -24,8 +24,8 @@ RLINK_FLAGS =
 # Additional debug-specific linker settings
 DLINK_FLAGS =
 
-TESTING = 0
-RELEASING = 1
+TESTING =
+RELEASING =
 
 #### END PROJECT SETTINGS ####
 
@@ -78,11 +78,6 @@ release: export BIN_PATH := bin
 testing: export BUILD_PATH := build/testing
 testing: export BIN_PATH := automated_testing/client_binary
 install: export BIN_PATH := bin/release
-
-ifeq ($(MAKECMDGOALS), testing)
-	TESTING = 1
-	RELEASING = 0
-endif
 
 # Find all source files in the source directory, sorted by most
 # recently modified
