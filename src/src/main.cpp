@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 
         freopen(filename.c_str(), "w", stdout);
 
-        Network network_handler("127.0.0.1", 7777, 1);
+        Network network_handler("127.0.0.1", 7777, 1, atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
         std::cout << "Game finished" << std::endl;
         fclose(stdout);
         if (network_handler.m_game.m_winner != 2)
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
         std::cout << "No valid input. Starting with standard configuration" << std::endl;
     }
     std::cout << "connecting to: ip(" << ip << "), port(" << port << ")" << std::endl;
-    Network network_handler(ip, port, group_number);
+    Network network_handler(ip, port, group_number, 1, 1, 1);
     std::cout << "Game finished" << std::endl;
     return 0;
 }

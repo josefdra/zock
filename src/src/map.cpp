@@ -11,6 +11,13 @@ Map::Map(){};
 
 Map::~Map(){};
 
+void Map::init_map(uint8_t mult1, uint8_t mult2, uint8_t mult3)
+{
+    m_mobility_multiplicator = mult1;
+    m_corners_and_special_multiplicator = mult2;
+    m_stone_multiplicator = mult3;
+}
+
 /**
  * @brief Calculation of all possible transitions and their coordinates depending on their direction
  *
@@ -405,4 +412,3 @@ void Map::print_map()
     }
     std::cout << std::endl;
 }
-

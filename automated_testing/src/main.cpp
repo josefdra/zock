@@ -19,6 +19,34 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <future>
+#include <functional>
+#include <stdexcept>
+#include <iomanip>
+
+class ThreadPool
+{
+public:
+    ThreadPool(size_t);
+    template <class F, class... Args>
+    auto enqueue(F &&f, Args &&...args)
+        -> std::future<typename std::result_of<F(Args...)>::type>;
+    ~ThreadPool();
+
+private:
+    // running threads
+    std::vector<std::thread> workers;
+    // task queue
+    std::queue<std::function<void()>> tasks;
+
+    // synchronisation
+    std::mutex queue_mutex;
+    std::condition_variable condition;
+    bool stop;
+};
 
 std::string root_directory = "/home/josefdra/ZOCK/g01";
 
@@ -46,58 +74,67 @@ std::array<std::tuple<std::string, uint8_t>, 20> maps{
 
 std::string log_directory;
 int won_games = 0;
-int total_games = maps.size();
+int total_games = maps.size() * 25 * 25 * 25;
 
-double get_cpu_usage()
+inline ThreadPool::ThreadPool(size_t threads) : stop(false)
 {
-    static long prevIdleTime = 0, prevTotalTime = 0;
-    long idleTime, totalTime;
-    std::string line, value;
-    std::vector<long> times;
-
-    std::ifstream procStat("/proc/stat");
-    std::getline(procStat, line);
-
-    std::istringstream iss(line);
-
-    // skip first word ("cpu")
-    iss >> value;
-
-    // read remaining values
-    while (iss >> value)
+    for (size_t i = 0; i < threads; ++i)
     {
-        times.push_back(std::stol(value));
+        workers.emplace_back(
+            [this]
+            {
+                for (;;)
+                {
+                    std::function<void()> task;
+                    {
+                        std::unique_lock<std::mutex> lock(this->queue_mutex);
+                        this->condition.wait(lock,
+                                             [this]
+                                             { return this->stop || !this->tasks.empty(); });
+                        if (this->stop && this->tasks.empty())
+                            return;
+                        task = std::move(this->tasks.front());
+                        this->tasks.pop();
+                    }
+                    task();
+                }
+            });
     }
-
-    // calculate idle time and total time
-    idleTime = times[3];
-    totalTime = 0;
-    for (long time : times)
-    {
-        totalTime += time;
-    }
-
-    // calculate difference
-    long diffIdleTime = idleTime - prevIdleTime;
-    long diffTotalTime = totalTime - prevTotalTime;
-
-    // save current values for next call
-    prevIdleTime = idleTime;
-    prevTotalTime = totalTime;
-
-    // calculate CPU usage
-    double cpuUsage = 100.0 * (1.0 - (double)diffIdleTime / (double)diffTotalTime);
-
-    return cpuUsage;
 }
 
-void wait_for_cpu_availability(double threshold)
+template <class F, class... Args>
+auto ThreadPool::enqueue(F &&f, Args &&...args)
+    -> std::future<typename std::result_of<F(Args...)>::type>
 {
-    double cpuUsage = get_cpu_usage();
-    while (cpuUsage > threshold)
+    using return_type = typename std::result_of<F(Args...)>::type;
+
+    auto task = std::make_shared<std::packaged_task<return_type()>>(
+        std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+
+    std::future<return_type> res = task->get_future();
     {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        cpuUsage = get_cpu_usage();
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        if (stop)
+        {
+            throw std::runtime_error("enqueue on stopped ThreadPool");
+        }
+        tasks.emplace([task]()
+                      { (*task)(); });
+    }
+    condition.notify_one();
+    return res;
+}
+
+inline ThreadPool::~ThreadPool()
+{
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        stop = true;
+    }
+    condition.notify_all();
+    for (std::thread &worker : workers)
+    {
+        worker.join();
     }
 }
 
@@ -144,7 +181,7 @@ pid_t start_binary(const char *path, const std::vector<const char *> &args, std:
     return pid;
 }
 
-void run_map(std::string &map_path, uint8_t player_count, std::string string_game_number, uint8_t client_position)
+void run_map(std::string &map_path, uint8_t player_count, std::string string_game_number, uint8_t client_position, uint8_t mult1, uint8_t mult2, uint8_t mult3)
 {
     // Path to the binaries
     std::string server = root_directory + "/automated_testing/server_binary/server_nogl";
@@ -154,7 +191,7 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
     // Arguments for the server
     std::vector<const char *> arguments_server = {"-m", map_path.c_str(), "-d", "1", nullptr};
     start_binary(server.c_str(), arguments_server, string_game_number, client_position);
-    std::cout << "success at starting server for game " << string_game_number << std::endl;
+    // std::cout << "success at starting server for game " << string_game_number << std::endl;
 
     // Vector to store child PIDs
     std::vector<pid_t> client_pids;
@@ -164,7 +201,7 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
     // Convert player number to std::string and then to const char*
     std::string player_num_str = std::to_string(static_cast<int>(1));
     const char *player_num_cstr = player_num_str.c_str();
-    std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), (std::to_string(client_position)).c_str(), nullptr};
+    std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), (std::to_string(client_position)).c_str(), (std::to_string(mult1)).c_str(), (std::to_string(mult2)).c_str(), (std::to_string(mult3)).c_str(), nullptr};
     std::vector<const char *> arguments_trivial_ai = {nullptr};
 
     for (uint16_t p = 0; p < player_count; p++)
@@ -183,11 +220,11 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
         {
             if (p == client_position)
             {
-                std::cout << "success at starting client for game " << string_game_number << std::endl;
+                // std::cout << "success at starting client for game " << string_game_number << std::endl;
             }
             else
             {
-                std::cout << "success at starting trivial_ai " << p << " for game " << string_game_number << std::endl;
+                // std::cout << "success at starting trivial_ai " << p << " for game " << string_game_number << std::endl;
             }
             client_pids.push_back(client_pid);
         }
@@ -205,9 +242,9 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
                 int exit_status = WEXITSTATUS(status);
                 if (exit_status == 1)
                 {
-                    std::cout << "won game " << string_game_number << std::endl;
+                    // std::cout << "won game " << string_game_number << std::endl;
                     won_games++;
-                    std::cout << "won " << won_games << "/" << total_games << " games" << std::endl;
+                    // std::cout << "won " << won_games << "/" << total_games << " games" << std::endl;
                     winner += counter;
                 }
                 else if (exit_status == 2)
@@ -225,7 +262,7 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
         }
         counter++;
     }
-    std::cout << "Game " << string_game_number << " finished" << std::endl;
+    // std::cout << "Game " << string_game_number << " finished" << std::endl;
     if (counter != 0)
     {
         std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + "_server_client_position_" + std::to_string(client_position) + ".txt";
@@ -235,20 +272,10 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
     system(command.c_str());
 }
 
-int main()
+void run_games(int &game_number, uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
 {
-    std::string filename = root_directory + +"/automated_testing/values/ges_log.txt";
-    freopen(filename.c_str(), "w", stdout);
-
-    auto start_time = std::chrono::steady_clock::now();
-    char cwd[PATH_MAX];
-    getcwd(cwd, sizeof(cwd));
-    log_directory = std::string(cwd);
-    int game_number = 0;
-    std::string string_game_number = std::to_string(game_number);
     std::vector<std::thread> threads;
-
-    // plays in total 75 games --> client once as every player of every map
+    std::string string_game_number = std::to_string(game_number);
     for (auto &map : maps)
     {
         std::string map_path;
@@ -257,23 +284,58 @@ int main()
 
         for (uint8_t p = 0; p < player_count; p++)
         {
-            wait_for_cpu_availability(85.0);
-            threads.push_back(std::thread(run_map, std::ref(map_path), player_count, string_game_number, p));
+            pool.enqueue(run_map, std::ref(map_path), player_count, string_game_number, p, mult1, mult2, mult3);
             sleep(10);
+            float status = game_number / total_games;
+            std::cout << std::setprecision(10) << status * 100 << "% done" << std::endl;
             game_number++;
             string_game_number = std::to_string(game_number);
         }
     }
-    for (auto &t : threads)
+}
+
+int main()
+{
+    std::string filename = root_directory + +"/automated_testing/values/ges_log.txt";
+    freopen(filename.c_str(), "w", stdout);
+    auto start_time = std::chrono::steady_clock::now();
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    log_directory = std::string(cwd);
+    ThreadPool pool(std::thread::hardware_concurrency());
+    int game_number = 0;
+    int total_won_games = 0;
+    uint8_t most_won_games = 0;
+    uint8_t best_mult1 = 0;
+    uint8_t best_mult2 = 0;
+    uint8_t best_mult3 = 0;
+    uint8_t variations = 2;
+
+    for (uint8_t mult1 = 1; mult1 < variations; mult1++)
     {
-        if (t.joinable())
+        for (uint8_t mult2 = 1; mult2 < variations; mult2++)
         {
-            t.join();
+            for (uint8_t mult3 = 1; mult3 < variations; mult3++)
+            {
+                run_games(game_number, mult1, mult2, mult3, pool);
+                std::cout << "won " << won_games << "/75 with configuration: " << mult1 << " " << mult2 << " " << mult3 << std::endl;
+                if (most_won_games < won_games)
+                {
+                    most_won_games = won_games;
+                    best_mult1 = mult1;
+                    best_mult2 = mult2;
+                    best_mult3 = mult3;
+                }
+                total_won_games += won_games;
+                won_games = 0;
+            }
         }
     }
+
     auto end_time = std::chrono::steady_clock::now();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-    std::cout << "Played " << game_number << " games and won " << game_number + 1 << std::endl;
+    std::cout << "Played " << total_games << " games and won " << total_won_games << std::endl;
+    std::cout << "The best configuration was: " << best_mult1 << " " << best_mult2 << " " << best_mult3 << ", winning " << most_won_games << "/75 games";
     std::cout << "Elapsed time: " << seconds.count() << " seconds" << std::endl;
     fclose(stdout);
     return 0;

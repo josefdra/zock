@@ -13,8 +13,8 @@ void get_frontier_score(Player &p, std::vector<char> &currMap, Map &m)
 
 int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Map &m, std::vector<Player> &players)
 {
-    std::unordered_set<uint16_t> valid_moves;
-    m.m_variable_board_values = m.m_constant_board_values;
+    int corners_and_special_value = 0;
+    int mobility = 0;
     p.m_board_value = 0;
     p.m_frontier_score = 0;
     for (auto &pl : players)
@@ -23,8 +23,10 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     }
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
-        if (currMap[c] == 'i' || currMap[c] == 'c' || currMap[c] == 'b')
+        // Bonus Fields
+        if (currMap[c] == 'c' || currMap[c] == 'b')
         {
+            m.m_variable_board_values[c] = 200;
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 if (uint16_t trans = m.get_transition(c, d) != 0)
@@ -33,24 +35,17 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
                 }
             }
         }
+        // Corners and Borders
         if (currMap[c] == p.m_symbol)
         {
-            p.m_board_value += m.m_constant_board_values[c];
-            p.m_board_value += m.m_variable_board_values[c];
-            p.m_points++;
+            corners_and_special_value += m.m_constant_board_values[c];
+            corners_and_special_value += m.m_variable_board_values[c];
         }
+        // Stone counter
         else if (check_players(currMap[c]))
         {
             players[currMap[c] - 1 - '0'].m_points += 1;
         }
-    }
-    if (game_phase == 0)
-    {
-        p.m_points *= 30;
-    }
-    else if (game_phase == 1)
-    {
-        p.m_points *= 60;
     }
     for (auto &pl : players)
     {
@@ -64,28 +59,36 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
         }
         if (pl.m_points < p.m_points)
         {
-            p.m_points += p.m_points;
+            if (game_phase == 0)
+            {
+                p.m_points -= pl.m_points;
+            }
+            else if (game_phase == 1)
+            {
+                p.m_points += pl.m_points;
+            }
         }
+        calculate_valid_moves(m, pl, currMap, p.m_valid_moves);
     }
-    // get_frontier_score(p, currMap, g.m_map);
-    p.m_board_value += p.m_frontier_score;
-    p.m_board_value += p.m_points * 10;
-    p.m_board_value += valid_moves.size() * 50;
-    if (valid_moves.size() < 1)
+    if (p.m_valid_moves.size() < 1)
     {
         p.m_board_value -= 100000;
     }
     for (auto &pl : players)
     {
-        if (pl.m_symbol != m.m_player_number + 1 + '0')
+        if (p.m_valid_moves.size() < pl.m_valid_moves.size())
         {
-            calculate_valid_moves(m, pl, currMap, valid_moves);
-            if (valid_moves.size() < 1)
-            {
-                p.m_board_value += 5000;
-            }
+            mobility -= 5000;
+        }
+        else
+        {
+            mobility += 5000;
         }
     }
+    mobility *= m.m_mobility_multiplicator;
+    corners_and_special_value *= m.m_corners_and_special_multiplicator;
+    p.m_points *= 10 * m.m_stone_multiplicator;
+    p.m_board_value += mobility + corners_and_special_value + p.m_points;
     return p.m_board_value;
 }
 
@@ -94,14 +97,13 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
 int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns)
 {
     turns++;
-
+    std::unordered_set<uint16_t> valid_moves;
     if (depth == 0)
     {
         return evaluate_board(game_phase, players[m.m_player_number], currMap, m, players);
     }
 
     uint8_t nextPlayer = ((playersTurn + 1) % m.m_player_count);
-    std::unordered_set<uint16_t> valid_moves;
     calculate_valid_moves(m, players[playersTurn], currMap, valid_moves);
 
     uint8_t counter = 0;

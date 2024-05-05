@@ -20,7 +20,7 @@
 class Network
 {
 public:
-    Network(const char *, uint16_t, uint8_t);
+    Network(const char *, uint16_t, uint8_t, uint8_t, uint8_t, uint8_t);
     ~Network();
 
     void init_socket();

@@ -1,12 +1,13 @@
 #include "network.hpp"
 
-Network::Network(const char *ip, uint16_t port, uint8_t g_n) : m_port(port), m_ip(ip), m_group_number(g_n)
+Network::Network(const char *ip, uint16_t port, uint8_t g_n, uint8_t mult1, uint8_t mult2, uint8_t mult3) : m_port(port), m_ip(ip), m_group_number(g_n)
 {
     init_socket();
     init_server();
     connect_to_server();
     send_group_number(m_group_number);
     Game m_game;
+    m_game.m_map.init_map(mult1, mult2, mult3);
     init_map_and_player();
     run_game();
 }

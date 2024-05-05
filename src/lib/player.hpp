@@ -26,6 +26,7 @@ public:
     uint16_t m_points = 0;
     uint16_t m_frontier_score = 0;
     int m_board_value;
+    std::unordered_set<uint16_t> m_valid_moves;
 
 private:
 };
