@@ -21,14 +21,6 @@
 #include <fstream>
 
 std::string root_directory = "/home/josefdra/ZOCK/g01";
-std::string log_directory;
-std::vector<bool> disqualified;
-
-struct FileInfo
-{
-    std::string path;
-    time_t creation_time;
-};
 
 std::array<std::tuple<std::string, uint8_t>, 20> maps{
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/2012_Map_fuenf.map", 3),
@@ -51,6 +43,10 @@ std::array<std::tuple<std::string, uint8_t>, 20> maps{
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_3p.map", 3),
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_4p.map", 4),
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_8p.map", 8)};
+
+std::string log_directory;
+int won_games = 0;
+int total_games = maps.size();
 
 double get_cpu_usage()
 {
@@ -205,6 +201,8 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
                 if (exit_status == 1)
                 {
                     std::cout << "won game " << string_game_number << std::endl;
+                    won_games++;
+                    std::cout << "won " << won_games << "/" << total_games << " games" << std::endl;
                     winner += counter;
                 }
                 else if (exit_status == 2)
@@ -225,7 +223,7 @@ void run_map(std::tuple<std::string, uint8_t> &map, std::string string_game_numb
     std::cout << "Game " << string_game_number << " finished" << std::endl;
     if (counter != 0)
     {
-        std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + ".txt";
+        std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + "_server.txt";
         system(command.c_str());
     }
     std::string command = "rm " + log_directory + "/*.txt";
@@ -241,20 +239,16 @@ int main()
     char cwd[PATH_MAX];
     getcwd(cwd, sizeof(cwd));
     log_directory = std::string(cwd);
-    int game_number = 0;
+    int game_number = 0;    
     std::string string_game_number = std::to_string(game_number);
     std::vector<std::thread> threads;
-    for (uint8_t i = 0; i < 3; i++)
+    for (auto &map : maps)
     {
-        for (auto &map : maps)
-        {
-            wait_for_cpu_availability(85.0);
-            threads.push_back(std::thread(run_map, std::ref(map), string_game_number));
-            sleep(10);
-            disqualified.push_back(false);
-            game_number++;
-            string_game_number = std::to_string(game_number);
-        }
+        wait_for_cpu_availability(85.0);
+        threads.push_back(std::thread(run_map, std::ref(map), string_game_number));
+        sleep(10);
+        game_number++;
+        string_game_number = std::to_string(game_number);
     }
     for (auto &t : threads)
     {
@@ -265,7 +259,7 @@ int main()
     }
     auto end_time = std::chrono::steady_clock::now();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-    std::cout << "Played " << game_number << " games" << std::endl;
+    std::cout << "Played " << game_number << " games and won " << won_games << std::endl;
     std::cout << "Elapsed time: " << seconds.count() << " seconds" << std::endl;
     fclose(stdout);
     return 0;

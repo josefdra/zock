@@ -9,11 +9,11 @@ int main(int argc, char *argv[])
     {
         std::string filename = "/home/josefdra/ZOCK/g01/automated_testing/client_binary/logs/game_" + std::string(argv[2]) + "_client_" + std::string(argv[1]) + ".txt";
 
-        // freopen(filename.c_str(), "w", stdout);
+        freopen(filename.c_str(), "w", stdout);
 
         Network network_handler("127.0.0.1", 7777, 1);
         std::cout << "Game finished" << std::endl;
-        // fclose(stdout);
+        fclose(stdout);
         if (network_handler.m_game.m_winner != 2)
         {
             std::string command = "rm " + filename;

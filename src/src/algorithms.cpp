@@ -14,6 +14,7 @@ void get_frontier_score(Player &p, std::vector<char> &currMap, Map &m)
 int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Map &m, std::vector<Player> &players)
 {
     std::unordered_set<uint16_t> valid_moves;
+    m.m_variable_board_values = m.m_constant_board_values;
     p.m_board_value = 0;
     p.m_frontier_score = 0;
     for (auto &pl : players)
@@ -22,9 +23,20 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     }
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
+        if (currMap[c] == 'i' || currMap[c] == 'c' || currMap[c] == 'b')
+        {
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                if (uint16_t trans = m.get_transition(c, d) != 0)
+                {
+                    m.m_variable_board_values[trans] = -200;
+                }
+            }
+        }
         if (currMap[c] == p.m_symbol)
         {
             p.m_board_value += m.m_constant_board_values[c];
+            p.m_board_value += m.m_variable_board_values[c];
             p.m_points++;
         }
         else if (check_players(currMap[c]))
@@ -46,6 +58,10 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
         {
             p.m_points += 100000;
         }
+        else if (pl.m_points == 0 && pl.m_symbol == p.m_symbol)
+        {
+            p.m_points -= 1000000;
+        }
         if (pl.m_points < p.m_points)
         {
             p.m_points += p.m_points;
@@ -64,10 +80,10 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
         if (pl.m_symbol != m.m_player_number + 1 + '0')
         {
             calculate_valid_moves(m, pl, currMap, valid_moves);
-        }
-        if (valid_moves.size() < 1)
-        {
-            p.m_board_value += 5000;
+            if (valid_moves.size() < 1)
+            {
+                p.m_board_value += 5000;
+            }
         }
     }
     return p.m_board_value;
