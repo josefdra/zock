@@ -68,7 +68,10 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
                 p.m_points += pl.m_points;
             }
         }
-        calculate_valid_moves(m, pl, currMap, p.m_valid_moves);
+        if (pl.m_symbol != p.m_symbol)
+        {
+            calculate_valid_moves(m, pl, currMap, p.m_valid_moves);
+        }
     }
     if (p.m_valid_moves.size() < 1)
     {
@@ -100,6 +103,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
     std::unordered_set<uint16_t> valid_moves;
     if (depth == 0)
     {
+        players[m.m_player_number].m_valid_moves = valid_moves;
         return evaluate_board(game_phase, players[m.m_player_number], currMap, m, players);
     }
 
@@ -115,6 +119,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
     }
     if (counter == m.m_player_count)
     {
+        players[m.m_player_number].m_valid_moves = valid_moves;
         return evaluate_board(game_phase, players[m.m_player_number], currMap, m, players);
     }
 

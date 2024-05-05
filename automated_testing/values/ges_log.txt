@@ -47,3 +47,32 @@
 0% done
 0% done
 0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+0% done
+won 11/75 with configuration:   
+Played 312500 games and won 11
+The best configuration was:   , winning /75 gamesElapsed time: 750 seconds

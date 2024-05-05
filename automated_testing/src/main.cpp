@@ -285,9 +285,9 @@ void run_games(int &game_number, uint8_t mult1, uint8_t mult2, uint8_t mult3, Th
         for (uint8_t p = 0; p < player_count; p++)
         {
             pool.enqueue(run_map, std::ref(map_path), player_count, string_game_number, p, mult1, mult2, mult3);
-            sleep(10);
-            float status = game_number / total_games;
-            std::cout << std::setprecision(10) << status * 100 << "% done" << std::endl;
+            sleep(15);
+            float status = ((float)game_number / (float)total_games) * 100;
+            std::cout << std::setprecision(10) << status << "% done" << std::endl;
             game_number++;
             string_game_number = std::to_string(game_number);
         }
@@ -302,7 +302,7 @@ int main()
     char cwd[PATH_MAX];
     getcwd(cwd, sizeof(cwd));
     log_directory = std::string(cwd);
-    ThreadPool pool(std::thread::hardware_concurrency());
+    ThreadPool pool(std::thread::hardware_concurrency() * 4);
     int game_number = 0;
     int total_won_games = 0;
     uint8_t most_won_games = 0;
