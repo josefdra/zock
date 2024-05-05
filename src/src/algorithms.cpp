@@ -46,11 +46,15 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
         {
             p.m_points += 100000;
         }
+        if (pl.m_points < p.m_points)
+        {
+            p.m_points += p.m_points;
+        }
     }
     // get_frontier_score(p, currMap, g.m_map);
     p.m_board_value += p.m_frontier_score;
-    p.m_board_value += p.m_points;
-    p.m_board_value += valid_moves.size() * 20;
+    p.m_board_value += p.m_points * 10;
+    p.m_board_value += valid_moves.size() * 50;
     if (valid_moves.size() < 1)
     {
         p.m_board_value -= 100000;
