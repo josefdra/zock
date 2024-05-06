@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 
         freopen(filename.c_str(), "w", stdout);
 
-        Network network_handler("127.0.0.1", 7777, 1, atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
+        Network network_handler("127.0.0.1", atoi(argv[7]), 1, atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
         std::cout << "Game finished" << std::endl;
         fclose(stdout);
         if (network_handler.m_game.m_winner != 2)

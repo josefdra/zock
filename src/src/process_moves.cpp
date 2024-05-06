@@ -98,11 +98,11 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
         color(c, p.m_symbol, m);
         if (special == 20)
         {
-            p.m_bombs += 1;
+            p.m_bombs = p.m_bombs + 1;
         }
         else if (special == 21)
         {
-            p.m_overwrite_stones += 1;
+            p.m_overwrite_stones = p.m_overwrite_stones + 1;
         }
     }
     else
@@ -127,7 +127,7 @@ void execute_bomb(uint16_t c, Map &m, Player &p)
                 m.set_transition(temp_transition, (temp_direction + 4) % 8, 0);
             }
         }
-        p.m_bombs -= 1;
+        p.m_bombs = p.m_bombs - 1;
     }
 }
 

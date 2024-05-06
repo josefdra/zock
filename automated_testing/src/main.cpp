@@ -26,6 +26,7 @@
 #include <functional>
 #include <stdexcept>
 #include <iomanip>
+#include <unordered_set>
 
 class ThreadPool
 {
@@ -73,15 +74,19 @@ std::array<std::tuple<std::string, uint8_t>, 20> maps{
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_8p.map", 8)};
 
 std::string log_directory;
-std::vector<uint8_t> won_games;
-int total_games = maps.size() * 25 * 25 * 25;
-int port = 7000;
+std::vector<uint16_t> won_games;
+std::vector<uint16_t> finished_games;
+std::vector<std::array<uint16_t, 3>> mults;
+int total_games = 75 * 25 * 25 * 25;
 int game_number = 0;
 int total_won_games = 0;
-uint8_t most_won_games = 0;
-uint8_t best_mult1 = 0;
-uint8_t best_mult2 = 0;
-uint8_t best_mult3 = 0;
+int finished_games_number = 0;
+uint16_t most_won_games = 0;
+uint16_t best_mult1 = 0;
+uint16_t best_mult2 = 0;
+uint16_t best_mult3 = 0;
+bool finished = false;
+int threads = 500;
 
 inline ThreadPool::ThreadPool(size_t threads) : stop(false)
 {
@@ -188,15 +193,13 @@ pid_t start_binary(const char *path, const std::vector<const char *> &args, std:
     return pid;
 }
 
-void run_map(std::string &map_path, uint8_t player_count, std::string string_game_number, uint8_t client_position, uint8_t mult1, uint8_t mult2, uint8_t mult3, int var)
+void run_map(std::string &map_path, uint8_t player_count, std::string string_game_number, uint8_t client_position, uint16_t mult1, uint16_t mult2, uint16_t mult3, int var, int port)
 {
     // Path to the binaries
     std::string server = root_directory + "/automated_testing/server_binary/server_nogl";
     std::string client = root_directory + "/automated_testing/client_binary/client01";
     std::string trivial_ai = "/home/josefdra/ZOCK/ges/reversi-binaries/trivialai/ai_trivial";
-    uint8_t temp;
-    temp = (port - 7000 + 1) % 8;
-    port = 7000 + temp;
+
     std::string port_string = std::to_string(port);
     std::string ai_port_string = "127.0.0.1:" + std::to_string(port);
 
@@ -213,8 +216,9 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
     const char *player_num_cstr = player_num_str.c_str();
     std::vector<const char *> arguments_clients = {player_num_cstr, string_game_number.c_str(), (std::to_string(client_position)).c_str(), (std::to_string(mult1)).c_str(), (std::to_string(mult2)).c_str(), (std::to_string(mult3)).c_str(), port_string.c_str(), nullptr};
     std::vector<const char *> arguments_trivial_ai = {"-s", ai_port_string.c_str(), nullptr};
+    std::unordered_set<pid_t> client_ids;
 
-    usleep(500000);
+    sleep(1);
 
     for (uint16_t p = 0; p < player_count; p++)
     {
@@ -222,6 +226,7 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
         if (p == client_position)
         {
             client_pid = start_binary(client.c_str(), arguments_clients, string_game_number, client_position);
+            client_ids.insert(client_pid);
         }
         else
         {
@@ -239,71 +244,81 @@ void run_map(std::string &map_path, uint8_t player_count, std::string string_gam
             }
             client_pids.push_back(client_pid);
         }
-        usleep(50000);
+        usleep(500000);
     }
-    char winner = '0';
-    uint8_t counter = 1;
+    bool disqualified = false;
     for (pid_t client_pid : client_pids)
     {
         int status;
         pid_t result = waitpid(client_pid, &status, 0);
-        if (result > 0)
+        if (client_ids.find(client_pid) != client_ids.end())
         {
-            if (WIFEXITED(status))
+            finished_games[var] = finished_games[var] + 1;
+            if (result > 0)
             {
-                int exit_status = WEXITSTATUS(status);
-                if (exit_status == 1)
+                if (WIFEXITED(status))
                 {
-                    // std::cout << "won game " << string_game_number << std::endl;
-                    won_games[var] += 1;
-                    // std::cout << "won " << won_games << "/" << total_games << " games" << std::endl;
-                    winner += counter;
-                }
-                else if (exit_status == 2)
-                {
-                    winner += counter;
-                    counter = 0;
-                    break;
+                    int exit_status = WEXITSTATUS(status);
+                    if (exit_status == 1)
+                    {
+                        won_games[var] = won_games[var] + 1;
+                    }
+                    else if (exit_status == 2)
+                    {
+                        disqualified = true;
+                        break;
+                    }
                 }
             }
+            else
+            {
+                // Handle errors from waitpid
+                std::cerr << "Error waiting for child process with PID " << client_pid << std::endl;
+            }
         }
-        else
-        {
-            // Handle errors from waitpid
-            std::cerr << "Error waiting for child process with PID " << client_pid << std::endl;
-        }
-        counter++;
     }
     // std::cout << "Game " << string_game_number << " finished" << std::endl;
-    if (counter != 0)
+    if (!disqualified)
     {
         std::string command = "rm " + root_directory + "/automated_testing/server_binary/logs/game_" + string_game_number + "_server_client_position_" + std::to_string(client_position) + ".txt";
         system(command.c_str());
     }
 }
 
-void rate(uint8_t mult1, uint8_t mult2, uint8_t mult3, int var)
+void rate(int var)
 {
-    std::cout << "won " << won_games[var] << "/75 with configuration: " << mult1 << " " << mult2 << " " << mult3 << std::endl;
+    while (finished_games[var] != 75)
+    {
+        sleep(1);
+    }
+
+    std::cout << "won " << won_games[var] << "/75 with configuration: " << mults[var][0] << " " << mults[var][1] << " " << mults[var][2] << std::endl;
     if (most_won_games < won_games[var])
     {
         most_won_games = won_games[var];
-        best_mult1 = mult1;
-        best_mult2 = mult2;
-        best_mult3 = mult3;
+        best_mult1 = mults[var][0];
+        best_mult2 = mults[var][1];
+        best_mult3 = mults[var][2];
     }
-    total_won_games += won_games[var];
+    total_won_games = total_won_games + won_games[var];
     std::string command = "rm " + log_directory + "/*.txt";
     system(command.c_str());
-    float status = ((float)game_number / (float)total_games) * 100;
+    finished_games_number = finished_games_number + 75;
+    float status = ((float)finished_games_number / (float)total_games) * 100;
     std::cout << std::setprecision(10) << status << "% done" << std::endl;
-    std::cout << "best configuration at the moment: " << mult1 << " " << mult2 << " " << mult3 << std::endl;
+    std::cout << "best configuration at the moment: " << best_mult1 << " " << best_mult2 << " " << best_mult3 << std::endl;
+    if (var == 25 * 25 * 25)
+    {
+        finished = true;
+    }
 }
 
-void run_games(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
+void run_games(uint16_t mult1, uint16_t mult2, uint16_t mult3, ThreadPool &pool)
 {
     int var = won_games.size();
     won_games.push_back(0);
+    finished_games.push_back(0);
+    int port = 7000;
     for (auto &map : maps)
     {
         std::string map_path;
@@ -313,23 +328,28 @@ void run_games(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
         for (uint8_t p = 0; p < player_count; p++)
         {
             std::string string_game_number = std::to_string(game_number);
+            pool.enqueue(run_map, std::ref(map_path), player_count, string_game_number, p, mult1, mult2, mult3, var, port);
             game_number++;
-            pool.enqueue(run_map, std::ref(map_path), player_count, string_game_number, p, mult1, mult2, mult3, var);
-            if ((port - 7000) % 8 == 0)
+            if (port == 7008)
             {
-                sleep(5);
+                port = 7000;
             }
             else
             {
-                usleep(500000);
+                port++;
             }
+            sleep(2);
         }
     }
-    pool.enqueue(rate, mult1, mult2, mult3, var);
+    pool.enqueue(rate, var);
 }
 
 void end(std::chrono::_V2::steady_clock::time_point &start_time)
 {
+    while (finished != true)
+    {
+        sleep(1);
+    }
     auto end_time = std::chrono::steady_clock::now();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
     std::cout << "Played " << total_games << " games and won " << total_won_games << std::endl;
@@ -346,16 +366,17 @@ int main()
     char cwd[PATH_MAX];
     getcwd(cwd, sizeof(cwd));
     log_directory = std::string(cwd);
-    ThreadPool pool(std::thread::hardware_concurrency() * 5);
+    ThreadPool pool(threads);
     uint8_t variations = 26;
 
-    for (uint8_t mult1 = 1; mult1 < variations; mult1++)
+    for (uint16_t mult1 = 1; mult1 < variations; mult1++)
     {
-        for (uint8_t mult2 = 1; mult2 < variations; mult2++)
+        for (uint16_t mult2 = 1; mult2 < variations; mult2++)
         {
-            for (uint8_t mult3 = 1; mult3 < variations; mult3++)
+            for (uint16_t mult3 = 1; mult3 < variations; mult3++)
             {
                 run_games(mult1, mult2, mult3, pool);
+                mults.push_back(std::array<uint16_t, 3>{mult1, mult2, mult3});
             }
         }
     }
