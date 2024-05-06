@@ -7,8 +7,7 @@ Network::Network(const char *ip, uint16_t port, uint8_t g_n, uint8_t mult1, uint
     connect_to_server();
     send_group_number(m_group_number);
     Game m_game;
-    m_game.m_map.init_map(mult1, mult2, mult3);
-    init_map_and_player();
+    init_map_and_player(mult1, mult2, mult3);
     run_game();
 }
 
@@ -82,10 +81,11 @@ void Network::send_group_number(uint8_t group)
     send(m_csocket, m_send_buffer, 6, 0);
 }
 
-void Network::init_map_and_player()
+void Network::init_map_and_player(uint8_t mult1, uint8_t mult2, uint8_t mult3)
 {
     receive_data();
     receive_data();
+    m_game.m_map.init_mults(mult1, mult2, mult3);    
 }
 
 bool Network::check_socket_acitivity()
