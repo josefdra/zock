@@ -730,3 +730,237 @@ best configuration at the moment: 1 8 24
 won 16/75 with configuration: 1 10 19
 1.56159997% done
 best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 10 20
+1.568000078% done
+best configuration at the moment: 1 8 24
+won 13/75 with configuration: 1 10 21
+1.574400067% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 10 22
+1.580799937% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 10 23
+1.587199926% done
+best configuration at the moment: 1 8 24
+won 18/75 with configuration: 1 10 24
+1.593600035% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 10 25
+1.600000024% done
+best configuration at the moment: 1 8 24
+won 13/75 with configuration: 1 11 2
+1.606399894% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 11 3
+1.612800002% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 11 4
+1.619199991% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 11 5
+1.6256001% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 11 6
+1.631999969% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 11 7
+1.638399959% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 11 8
+1.644800067% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 11 9
+1.651199937% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 11 10
+1.657599926% done
+best configuration at the moment: 1 8 24
+won 10/75 with configuration: 1 11 11
+1.664000034% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 11 12
+1.670400023% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 11 13
+1.676799893% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 11 14
+1.683200002% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 11 15
+1.689599991% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 11 1
+1.696000099% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 11 16
+1.702399969% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 11 17
+1.708799958% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 11 18
+1.715200067% done
+best configuration at the moment: 1 8 24
+won 18/75 with configuration: 1 11 19
+1.721600056% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 11 20
+1.727999926% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 11 21
+1.734400034% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 11 22
+1.740800023% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 11 23
+1.747200131% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 11 24
+1.753599882% done
+best configuration at the moment: 1 8 24
+won 8/75 with configuration: 1 11 25
+1.75999999% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 12 1
+1.766400099% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 12 2
+1.772800088% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 12 3
+1.779199958% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 12 4
+1.785599947% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 12 5
+1.792000055% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 12 6
+1.798399925% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 12 7
+1.804799914% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 12 8
+1.811200023% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 12 9
+1.817600012% done
+best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 12 10
+1.823999882% done
+best configuration at the moment: 1 8 24
+won 19/75 with configuration: 1 12 11
+1.83039999% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 12 12
+1.836799979% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 12 13
+1.843200088% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 12 14
+1.849599957% done
+best configuration at the moment: 1 8 24
+won 19/75 with configuration: 1 12 16
+1.855999947% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 12 17
+1.862400055% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 12 18
+1.868800044% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 12 19
+1.875199914% done
+best configuration at the moment: 1 8 24
+won 18/75 with configuration: 1 12 20
+1.881600022% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 12 21
+1.888000011% done
+best configuration at the moment: 1 8 24
+won 19/75 with configuration: 1 12 22
+1.89440012% done
+best configuration at the moment: 1 8 24
+won 19/75 with configuration: 1 12 23
+1.90079999% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 12 24
+1.907199979% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 12 25
+1.913600087% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 13 1
+1.920000076% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 13 2
+1.926399946% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 13 3
+1.932800055% done
+best configuration at the moment: 1 8 24
+won 13/75 with configuration: 1 13 4
+1.939200044% done
+best configuration at the moment: 1 8 24
+won 19/75 with configuration: 1 13 5
+1.945599914% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 13 6
+1.951999903% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 13 8
+1.958400011% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 13 9
+1.964800119% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 12 15
+1.97119987% done
+best configuration at the moment: 1 8 24
+won 18/75 with configuration: 1 13 10
+1.977599978% done
+best configuration at the moment: 1 8 24
+won 13/75 with configuration: 1 13 11
+1.983999968% done
+best configuration at the moment: 1 8 24
+won 13/75 with configuration: 1 13 12
+1.990400076% done
+best configuration at the moment: 1 8 24
+won 20/75 with configuration: 1 13 13
+1.996799946% done
+best configuration at the moment: 1 8 24
+won 13/75 with configuration: 1 13 14
+2.003200054% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 13 16
+2.009599924% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 13 17
+2.016000032% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 13 18
+2.022399902% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 13 19
+2.028800011% done
+best configuration at the moment: 1 8 24
+won 19/75 with configuration: 1 13 20
+2.035200119% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 13 21
+2.041599989% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 13 22
+2.047999859% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 13 23
+2.054399967% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 13 24
+2.060800076% done
+best configuration at the moment: 1 8 24
