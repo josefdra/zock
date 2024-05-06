@@ -51,7 +51,7 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     {
         if (pl.m_points == 0 && pl.m_symbol != p.m_symbol)
         {
-            p.m_points + p.m_points + 100000;
+            p.m_points = p.m_points + 100000;
         }
         else if (pl.m_points == 0 && pl.m_symbol == p.m_symbol)
         {
