@@ -1,0 +1,15 @@
+won 14/75 with configuration: 1 1 1
+0.006399999838% done
+best configuration at the moment: 1 1 1
+won 13/75 with configuration: 1 1 2
+0.01279999968% done
+best configuration at the moment: 1 1 1
+won 17/75 with configuration: 1 1 3
+0.01920000091% done
+best configuration at the moment: 1 1 3
+won 15/75 with configuration: 1 1 4
+0.02559999935% done
+best configuration at the moment: 1 1 3
+won 17/75 with configuration: 1 1 5
+0.03199999779% done
+best configuration at the moment: 1 1 3
