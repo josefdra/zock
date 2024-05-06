@@ -86,7 +86,7 @@ uint16_t best_mult1 = 0;
 uint16_t best_mult2 = 0;
 uint16_t best_mult3 = 0;
 bool finished = false;
-int threads = 2000;
+int threads = 200;
 
 inline ThreadPool::ThreadPool(size_t threads) : stop(false)
 {
