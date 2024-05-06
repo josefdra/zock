@@ -25,7 +25,7 @@ class Map
 public:
     Map();
     ~Map();
-    void init_map(uint8_t, uint8_t, uint8_t);
+    void init_mults(uint8_t, uint8_t, uint8_t);
     void check_neighbours(uint16_t);
     void set_symbol(uint16_t, unsigned char);
     char get_symbol(uint16_t);

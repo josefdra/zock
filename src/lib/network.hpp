@@ -28,7 +28,7 @@ public:
     void connect_to_server();
     void close_socket();
     void send_group_number(uint8_t);
-    void init_map_and_player();
+    void init_map_and_player(uint8_t, uint8_t, uint8_t);
     bool check_socket_acitivity();
     void run_game();
     void send_move(uint8_t, uint8_t, uint8_t);

@@ -7,8 +7,7 @@ Network::Network(const char *ip, uint16_t port, uint8_t g_n, uint8_t mult1, uint
     connect_to_server();
     send_group_number(m_group_number);
     Game m_game;
-    m_game.m_map.init_map(mult1, mult2, mult3);
-    init_map_and_player();
+    init_map_and_player(mult1, mult2, mult3);
     run_game();
 }
 
@@ -82,10 +81,11 @@ void Network::send_group_number(uint8_t group)
     send(m_csocket, m_send_buffer, 6, 0);
 }
 
-void Network::init_map_and_player()
+void Network::init_map_and_player(uint8_t mult1, uint8_t mult2, uint8_t mult3)
 {
     receive_data();
     receive_data();
+    m_game.m_map.init_mults(mult1, mult2, mult3);
 }
 
 bool Network::check_socket_acitivity()
@@ -107,18 +107,27 @@ bool Network::check_socket_acitivity()
 void Network::run_game()
 {
     uint16_t counter = 0;
+    uint16_t fields = 0;
+    std::cout << m_game.m_map.m_mobility_multiplicator << " " << m_game.m_map.m_corners_and_special_multiplicator << " " << m_game.m_map.m_stone_multiplicator << " " << std::endl;
     m_game.m_map.print_map();
+    for (uint16_t c = 1; c < m_game.m_map.m_num_of_fields; c++)
+    {
+        if (m_game.m_map.m_symbols[c] != '-')
+        {
+            fields++;
+        }
+    }
     while (m_game_phase < 3 && m_game.m_winner != 2)
     {
         if (check_socket_acitivity())
         {
-            if (counter >= m_game.m_map.m_num_of_fields / 2 && m_game_phase != 2)
+            if (counter >= fields / 2 && m_game_phase != 2)
             {
                 m_game_phase = 1;
             }
             receive_data();
         }
-        counter++;
+        counter += m_game.m_map.m_player_count;
     }
 }
 
