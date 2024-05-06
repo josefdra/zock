@@ -964,3 +964,30 @@ best configuration at the moment: 1 8 24
 won 12/75 with configuration: 1 13 24
 2.060800076% done
 best configuration at the moment: 1 8 24
+won 17/75 with configuration: 1 13 25
+2.067199945% done
+best configuration at the moment: 1 8 24
+won 11/75 with configuration: 1 14 1
+2.073600054% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 14 2
+2.079999924% done
+best configuration at the moment: 1 8 24
+won 14/75 with configuration: 1 14 3
+2.086400032% done
+best configuration at the moment: 1 8 24
+won 13/75 with configuration: 1 14 4
+2.092799902% done
+best configuration at the moment: 1 8 24
+won 15/75 with configuration: 1 14 5
+2.09920001% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 14 6
+2.105600119% done
+best configuration at the moment: 1 8 24
+won 16/75 with configuration: 1 14 7
+2.111999989% done
+best configuration at the moment: 1 8 24
+won 12/75 with configuration: 1 14 8
+2.118399858% done
+best configuration at the moment: 1 8 24
