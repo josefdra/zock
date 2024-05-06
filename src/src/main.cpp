@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
         std::cout << "No valid input. Starting with standard configuration" << std::endl;
     }
     std::cout << "connecting to: ip(" << ip << "), port(" << port << ")" << std::endl;
-    Network network_handler(ip, port, group_number, 1, 1, 1);
+    Network network_handler(ip, port, group_number, 1, 8, 24);
     std::cout << "Game finished" << std::endl;
     return 0;
 }
