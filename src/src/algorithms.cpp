@@ -38,34 +38,34 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
         // Corners and Borders
         if (currMap[c] == p.m_symbol)
         {
-            corners_and_special_value = corners_and_special_value + m.m_constant_board_values[c];
-            corners_and_special_value = corners_and_special_value + m.m_variable_board_values[c];
+            corners_and_special_value += m.m_constant_board_values[c];
+            corners_and_special_value += m.m_variable_board_values[c];
         }
         // Stone counter
         else if (check_players(currMap[c]))
         {
-            players[currMap[c] - 1 - '0'].m_points = players[currMap[c] - 1 - '0'].m_points + 1;
+            players[currMap[c] - 1 - '0'].m_points += 1;
         }
     }
     for (auto &pl : players)
     {
         if (pl.m_points == 0 && pl.m_symbol != p.m_symbol)
         {
-            p.m_points = p.m_points + 100000;
+            p.m_board_value += 100000;
         }
         else if (pl.m_points == 0 && pl.m_symbol == p.m_symbol)
         {
-            p.m_points = p.m_points - 1000000;
+            p.m_board_value -= 1000000;
         }
         if (pl.m_points < p.m_points)
         {
             if (game_phase == 0)
             {
-                p.m_points = p.m_points - pl.m_points;
+                p.m_points = p.m_points / 2;
             }
             else if (game_phase == 1)
             {
-                p.m_points = p.m_points + pl.m_points;
+                p.m_points = p.m_points * 2;
             }
         }
         if (pl.m_symbol != p.m_symbol)
@@ -77,20 +77,21 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     {
         p.m_board_value = p.m_board_value - 100000;
     }
+    mobility = p.m_valid_moves.size() * 50;
     for (auto &pl : players)
     {
         if (p.m_valid_moves.size() < pl.m_valid_moves.size())
         {
-            mobility = mobility - 5000;
+            mobility = mobility - p.m_points * 25;
         }
         else
         {
-            mobility = mobility + 5000;
+            mobility = mobility + p.m_points * 25;
         }
     }
     mobility = mobility * m.m_mobility_multiplicator;
     corners_and_special_value = corners_and_special_value * m.m_corners_and_special_multiplicator;
-    p.m_points = p.m_points * 50 * m.m_stone_multiplicator;
+    p.m_points = p.m_points * 500 * m.m_stone_multiplicator;
     p.m_board_value = p.m_board_value + mobility + corners_and_special_value + p.m_points;
     return p.m_board_value;
 }
