@@ -91,7 +91,7 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     }
     mobility = mobility * p.m_mobility_multiplicator;
     corners_and_special_value = corners_and_special_value * p.m_corners_and_special_multiplicator;
-    p.m_points = p.m_points * 500 * p.m_stone_multiplicator;
+    p.m_points = p.m_points * 50 * p.m_stone_multiplicator;
     p.m_board_value = p.m_board_value + mobility + corners_and_special_value + p.m_points;
     return p.m_board_value;
 }

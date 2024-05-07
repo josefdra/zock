@@ -40,16 +40,15 @@ void Game::init_players(uint8_t best_mult1, uint8_t best_mult2, uint8_t best_mul
 
 bool Game::run()
 {
-    std::cout << "starting" << std::endl;
     while (1)
     {
         uint8_t counter = 0;
         uint8_t game_phase = 0;
         for (auto &p : m_players)
         {
-            m_map.m_symbols = get_turn(game_phase, p);
-            std::cout << p.m_valid_moves.size() << std::endl;
-            m_map.print_map();
+            uint16_t coord = get_turn(game_phase, p);
+            if (coord != 0)
+                execute_move(coord, m_spec, p, m_map);
             if (p.m_valid_moves.size() < 1)
             {
                 counter++;
@@ -57,7 +56,6 @@ bool Game::run()
         }
         if (counter == m_players.size())
         {
-            std::cout << "finished" << std::endl;
             break;
         }
     }
@@ -71,13 +69,10 @@ bool Game::run()
     }
 }
 
-std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
+uint16_t Game::get_turn(uint8_t &game_phase, Player &pl)
 {
-    std::vector<char> return_map = m_map.m_symbols;
-    std::vector<char> next_map;
-    uint8_t depth = 1;
-    uint16_t best_coord = 0;
     int bestEval = std::numeric_limits<int>::min();
+    uint16_t bestCoord = 0;
     calculate_valid_moves(m_map, pl, m_map.m_symbols);
 
     for (auto &possibleMove : pl.m_valid_moves)
@@ -88,35 +83,43 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
             {
                 if (p.m_symbol != pl.m_symbol)
                 {
-                    next_map = temp_color(possibleMove, pl.m_symbol, m_map, m_map.m_symbols);
+                    std::vector<char> next_map = temp_color(possibleMove, pl.m_symbol, m_map, m_map.m_symbols);
                     change_players(next_map, pl.m_symbol, p.m_symbol);
                     int currEval = evaluate_board(game_phase, pl, next_map, m_map, m_players);
                     if (currEval > bestEval)
                     {
+                        m_choice_value = p.m_symbol - '0';
                         bestEval = currEval;
-                        return_map = next_map;
-                        best_coord = possibleMove;
+                        bestCoord = possibleMove;
                     }
                 }
             }
         }
         else
         {
-            next_map = temp_color(possibleMove, pl.m_symbol, m_map, m_map.m_symbols);
+            std::vector<char> next_map = temp_color(possibleMove, pl.m_symbol, m_map, m_map.m_symbols);
             int currEval = evaluate_board(game_phase, pl, next_map, m_map, m_players);
             if (currEval > bestEval)
             {
+                m_choice_value = 0;
                 bestEval = currEval;
-                return_map = next_map;
-                best_coord = possibleMove;
+                bestCoord = possibleMove;
             }
         }
     }
-    if (check_empty_fields(return_map[best_coord]))
+    switch (m_map.m_symbols[bestCoord])
     {
-        pl.m_overwrite_stones -= 1;
+    case 'c':
+        m_spec = m_choice_value;
+        break;
+    case 'b':
+        m_spec = 20;
+        break;
+    default:
+        m_spec = 0;
+        break;
     }
-    return return_map;
+    return bestCoord;
 }
 
 uint8_t Game::check_winner()
