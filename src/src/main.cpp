@@ -171,7 +171,7 @@ void run_match(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
         usleep(5000);
     }
     total_finished_games += 71;
-    if (((71 - finished_games.load()) + won_games.load()) > most_won_games)
+    if (!(((71 - finished_games.load()) + won_games.load()) > most_won_games))
     {
         std::cout << "stopped remaining games, because most_won_games could not be bet" << std::endl;
     }
