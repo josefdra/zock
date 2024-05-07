@@ -107,6 +107,9 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
         spec = 0;
         break;
     }
+    std::cout << "best_eval = " << bestEval << std::endl;
+    std::cout << "best coord = " << bestCoord << std::endl;
+
     return bestCoord;
 }
 
