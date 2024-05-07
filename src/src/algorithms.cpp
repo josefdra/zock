@@ -42,7 +42,7 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
             corners_and_special_value += m.m_variable_board_values[c];
         }
         // Stone counter
-        else if (check_players(currMap[c]))
+        if (check_players(currMap[c]))
         {
             players[currMap[c] - 1 - '0'].m_points += 1;
         }

@@ -78,6 +78,7 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
 {
     std::vector<char> return_map = m_map.m_symbols;
     uint8_t depth = 1;
+    uint16_t best_coord = 0;
     int bestEval = std::numeric_limits<int>::min();
     calculate_valid_moves(m_map, pl, m_map.m_symbols);
 
@@ -96,6 +97,7 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
                     {
                         bestEval = currEval;
                         return_map = next_map;
+                        best_coord = possibleMove;
                     }
                 }
             }
@@ -108,9 +110,15 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
             {
                 bestEval = currEval;
                 return_map = next_map;
+                best_coord = possibleMove;
             }
         }
     }
+    std::cout << "best_eval = " << bestEval << std::endl;
+    uint8_t x;
+    uint8_t y;
+    one_dimension_2_second_dimension(best_coord, x, y, m_map);
+    std::cout << "best coord = " << (int)x << ", " << (int)y << std::endl;
     return return_map;
 }
 
