@@ -104,7 +104,6 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
     std::unordered_set<uint16_t> valid_moves;
     if (depth == 0)
     {
-        players[m.m_player_number].m_valid_moves = valid_moves;
         return evaluate_board(game_phase, players[m.m_player_number], currMap, m, players);
     }
 
