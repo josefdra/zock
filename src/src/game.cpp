@@ -79,10 +79,9 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
     std::vector<char> return_map = m_map.m_symbols;
     uint8_t depth = 1;
     int bestEval = std::numeric_limits<int>::min();
-    std::unordered_set<uint16_t> valid_moves;
-    calculate_valid_moves(m_map, pl, m_map.m_symbols, valid_moves);
+    calculate_valid_moves(m_map, pl, m_map.m_symbols);
 
-    for (auto &possibleMove : valid_moves)
+    for (auto &possibleMove : pl.m_valid_moves)
     {
         if (m_map.m_symbols[possibleMove] == 'c')
         {

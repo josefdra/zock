@@ -70,7 +70,7 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
         }
         if (pl.m_symbol != p.m_symbol)
         {
-            calculate_valid_moves(m, pl, currMap, p.m_valid_moves);
+            calculate_valid_moves(m, pl, currMap);
         }
     }
     if (p.m_valid_moves.size() < 1)

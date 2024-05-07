@@ -234,7 +234,7 @@ int main()
     auto start_time = std::chrono::steady_clock::now();
     ThreadPool pool(threads);
     uint8_t variations = 26;
-    run_match(mult1, mult2, mult3, pool);
+    run_match(1, 1, 1, pool);
     /*
     for (uint8_t mult1 = 1; mult1 < variations; mult1++)
     {
