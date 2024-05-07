@@ -1,21 +1,4 @@
-queued all 71 games
-stopped remaining games, because most_won_games could not be bet
-current best configuration: 1 1 2 winning 19 games
-0% done
-queued all 71 games
-won 15/71 games with configuration: 1 1 3
-current best configuration: 1 1 2 winning 19 games
-6.399999984e-05% done
-queued all 71 games
-won 19/71 games with configuration: 1 1 4
-current best configuration: 1 1 2 winning 19 games
-0.0001279999997% done
-queued all 71 games
-stopped remaining games, because most_won_games could not be bet
-current best configuration: 1 1 5 winning 21 games
-0% done
-queued all 71 games
-stopped remaining games, because most_won_games could not be bet
-current best configuration: 1 1 6 winning 23 games
+Starting match 1
+current best configuration: 1 1 1 winning 0 games
 0% done
 queued all 71 games

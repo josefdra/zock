@@ -189,9 +189,9 @@ void run_match(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
         mult2 = 1;
         mult3 = 1;
         total_finished_games = 0;
+        std::cout << "Restarting with these best values: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << " winning " << (int)most_won_games << std::endl;
+        return;
     }
-    std::cout << "current best configuration: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << " winning " << (int)most_won_games << " games" << std::endl;
-    std::cout << std::setprecision(10) << (float)total_finished_games / float(total_games) << "% done" << std::endl;
     finished_games.store(0);
     won_games.store(0);
     if (total_finished_games == total_games)
@@ -211,8 +211,11 @@ int main()
     {
         for (uint8_t mult2 = 1; mult2 < variations; mult2++)
         {
-            for (uint8_t mult3 = 2; mult3 < variations; mult3++)
+            for (uint8_t mult3 = 1; mult3 < variations; mult3++)
             {
+                std::cout << "Starting match " << (int)(25 * 25 * mult1 - 25 * 25 + 25 * mult2 - 25 + mult3) << std::endl;
+                std::cout << "current best configuration: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << " winning " << (int)most_won_games << " games" << std::endl;
+                std::cout << std::setprecision(10) << (float)total_finished_games / float(total_games) << "% done" << std::endl;
                 // one match is all maps with all player positions
                 run_match(mult1, mult2, mult3, pool);
             }
@@ -224,7 +227,7 @@ int main()
     }
     auto end_time = std::chrono::steady_clock::now();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-    std::cout << "The best configuration was: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << std::endl;
+    std::cout << "The best configuration was: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << " winning " << (int)most_won_games << " games" << std::endl;
     std::cout << "Elapsed time: " << seconds.count() << " seconds" << std::endl;
     fclose(stdout);
     return 0;
