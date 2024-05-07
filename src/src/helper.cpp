@@ -78,17 +78,6 @@ bool check_special(unsigned char c)
     return var;
 }
 
-// Timer function removed, because it won't work. Just copy code
-/*
-h_res_clock::time_point start_time = h_res_clock::now();
-
-h_res_clock::time_point end_time = h_res_clock::now();
-std::chrono::duration<double, std::micro> elapsed_time =
-    std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-std::cout << "return_valid_moves unordered_map: " << std::endl;
-std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
-*/
-
 uint16_t check_frontier(Map &m, uint16_t c, std::vector<char> &currMap)
 {
     uint16_t score = 8;

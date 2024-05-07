@@ -11,13 +11,6 @@ Map::Map(){};
 
 Map::~Map(){};
 
-void Map::init_mults(uint8_t mult1, uint8_t mult2, uint8_t mult3)
-{
-    m_mobility_multiplicator = mult1;
-    m_corners_and_special_multiplicator = mult2;
-    m_stone_multiplicator = mult3;    
-}
-
 /**
  * @brief Calculation of all possible transitions and their coordinates depending on their direction
  *
@@ -173,25 +166,6 @@ void Map::calculate_board_values()
         }
         board_values.push_back(temp);
         counter++;
-        /*
-        for (uint16_t c = 1; c < m_num_of_fields; c++)
-        {
-            if (temp.find(c) != temp.end())
-            {
-                std::cout << "\e[93m" << std::setw(1) << m_symbols[c] << " "
-                          << "\e[0m";
-            }
-            else
-            {
-                std::cout << std::setw(1) << m_symbols[c] << " ";
-            }
-            if (c % m_width == 0)
-            {
-                std::cout << std::endl;
-            }
-        }
-        std::cout << std::endl;
-        */
     } while (temp.size() > 0);
     uint8_t a = board_values.size() - 2;
     for (auto &set : board_values)
@@ -241,17 +215,6 @@ void Map::calculate_board_values()
             m_constant_board_values[c] = m_constant_board_values[c] * wall_values[counter];
         }
     }
-    /*
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        std::cout << std::setw(5) << m_constant_board_values[c] << " ";
-        if (c % m_width == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
-    std::cout << std::endl;
-    */
 }
 
 /**
@@ -297,84 +260,6 @@ void Map::read_hash_map(std::stringstream &mapfile)
         set_transition(pos2, r2, pos1r);
     }
     calculate_board_values();
-}
-
-/**
- * @brief prints the map with transitions
- */
-void Map::print_map_with_transitions()
-{
-    std::cout << m_player_count << std::endl;
-    std::cout << m_initial_overwrite_stones << std::endl;
-    std::cout << m_initial_bombs << " " << m_strength << std::endl;
-    std::cout << m_height << " " << m_width << std::endl;
-    std::cout << std::endl;
-    for (uint8_t y = 0; y < m_height; y++)
-    {
-        for (uint8_t x = 1; x < m_width + 1; x++)
-        {
-            uint16_t c = m_width * y + x;
-            std::cout << std::setw(3) << get_transition(c, 7) << " ";
-            std::cout << std::setw(3) << get_transition(c, 0) << " ";
-            std::cout << std::setw(3) << get_transition(c, 1) << " ";
-            std::cout << "  ";
-        }
-        std::cout << std::endl;
-        for (uint8_t x = 1; x < m_width + 1; x++)
-        {
-            uint16_t c = m_width * y + x;
-            std::cout << std::setw(3) << get_transition(c, 6) << " ";
-            if (check_players(get_symbol(c)))
-            {
-                std::cout << getColorString(Colors((get_symbol(c) - '0'))) << std::setw(3) << get_symbol(c) << " "
-                          << "\e[0m";
-            }
-            else
-            {
-                std::cout << std::setw(3) << get_symbol(c) << " ";
-            }
-            std::cout << std::setw(3) << get_transition(c, 2) << " ";
-            std::cout << "  ";
-        }
-        std::cout << std::endl;
-        for (uint8_t x = 1; x < m_width + 1; x++)
-        {
-            uint16_t c = m_width * y + x;
-            std::cout << std::setw(3) << get_transition(c, 5) << " ";
-            std::cout << std::setw(3) << get_transition(c, 4) << " ";
-            std::cout << std::setw(3) << get_transition(c, 3) << " ";
-            std::cout << "  ";
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
-    }
-}
-
-/**
- * @brief prints the map without transitions but with spectifications
- */
-void Map::print_map_with_spectifications()
-{
-    std::cout << m_player_count << std::endl;
-    std::cout << m_initial_overwrite_stones << std::endl;
-    std::cout << m_initial_bombs << " " << m_strength << std::endl;
-    std::cout << m_height << " " << m_width << std::endl;
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        if (check_players(get_symbol(c)))
-        {
-            std::cout << getColorString(Colors((get_symbol(c) - '0'))) << std::setw(3) << get_symbol(c) << " "
-                      << "\e[0m";
-        }
-        else
-        {
-            std::cout << std::setw(3) << get_symbol(c) << " ";
-        }
-        if (c % m_width == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
 }
 
 /**

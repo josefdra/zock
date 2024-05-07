@@ -107,7 +107,6 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
     }
     else
     {
-        std::cout << "Invalid special value" << std::endl;
         return;
     }
 }

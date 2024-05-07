@@ -25,7 +25,6 @@ class Map
 public:
     Map();
     ~Map();
-    void init_mults(uint8_t, uint8_t, uint8_t);
     void check_neighbours(uint16_t);
     void set_symbol(uint16_t, unsigned char);
     char get_symbol(uint16_t);
@@ -48,9 +47,6 @@ public:
     uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
     uint16_t m_num_of_fields;
-    uint8_t m_mobility_multiplicator;
-    uint8_t m_corners_and_special_multiplicator;
-    uint8_t m_stone_multiplicator;
     std::unordered_map<uint16_t, int16_t> m_moves_scores;
     std::vector<int> m_constant_board_values;
     std::vector<int> m_variable_board_values;

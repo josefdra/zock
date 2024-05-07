@@ -89,95 +89,9 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
             mobility = mobility + p.m_points * 25;
         }
     }
-    mobility = mobility * m.m_mobility_multiplicator;
-    corners_and_special_value = corners_and_special_value * m.m_corners_and_special_multiplicator;
-    p.m_points = p.m_points * 500 * m.m_stone_multiplicator;
+    mobility = mobility * p.m_mobility_multiplicator;
+    corners_and_special_value = corners_and_special_value * p.m_corners_and_special_multiplicator;
+    p.m_points = p.m_points * 500 * p.m_stone_multiplicator;
     p.m_board_value = p.m_board_value + mobility + corners_and_special_value + p.m_points;
     return p.m_board_value;
-}
-
-// this algorithm could be optimized by adding functionality to check if enemy has direct influence in our player and if he can "attack" us, else his
-// possible turns could be ignored
-int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns)
-{
-    turns++;
-    std::unordered_set<uint16_t> valid_moves;
-    if (depth == 0)
-    {
-        players[m.m_player_number].m_valid_moves = valid_moves;
-        return evaluate_board(game_phase, players[m.m_player_number], currMap, m, players);
-    }
-
-    uint8_t nextPlayer = ((playersTurn + 1) % m.m_player_count);
-    calculate_valid_moves(m, players[playersTurn], currMap, valid_moves);
-
-    uint8_t counter = 0;
-    while (valid_moves.size() < 1 && counter < m.m_player_count)
-    {
-        counter++;
-        nextPlayer = ((playersTurn + 1) % m.m_player_count);
-        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap, valid_moves);
-    }
-    if (counter == m.m_player_count)
-    {
-        players[m.m_player_number].m_valid_moves = valid_moves;
-        return evaluate_board(game_phase, players[m.m_player_number], currMap, m, players);
-    }
-
-    int maxEval;
-    int minEval;
-    for (auto &move : valid_moves)
-    {
-        int eval = -INT32_MAX, currEval;
-        if (m.m_symbols[move] == 'c')
-        {
-            for (auto &p : players)
-            {
-                if (p.m_symbol != players[m.m_player_number].m_symbol)
-                {
-                    std::vector<char> next_map = temp_color(move, players[m.m_player_number].m_symbol, m, currMap);
-                    change_players(next_map, players[m.m_player_number].m_symbol, p.m_symbol);
-                    currEval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);
-                    if (currEval > eval)
-                    {
-                        eval = currEval;
-                    }
-                }
-            }
-        }
-        else
-        {
-            std::vector<char> next_map = temp_color(move, players[(playersTurn + counter) % m.m_player_count].m_symbol, m, currMap);
-            eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);
-        }
-
-        if (players[(playersTurn + counter) % m.m_player_count].m_symbol == players[m.m_player_number].m_symbol)
-        {
-            maxEval = std::numeric_limits<int>::min();
-            maxEval = std::max(maxEval, eval);
-            alpha = std::max(alpha, eval);
-            if (beta <= alpha)
-            {
-                break;
-            }
-        }
-        else
-        {
-            minEval = std::numeric_limits<int>::max();
-            minEval = std::min(minEval, eval);
-            beta = std::min(beta, eval);
-            if (beta <= alpha)
-            {
-                break;
-            }
-        }
-    }
-    if (players[(playersTurn + counter) % m.m_player_count].m_symbol == players[m.m_player_number].m_symbol)
-    {
-        return maxEval;
-    }
-    else
-    {
-        return minEval;
-    }
 }

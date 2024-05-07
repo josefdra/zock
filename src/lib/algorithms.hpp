@@ -15,6 +15,5 @@ class Game;
 
 void get_frontier_score(Player &, std::vector<char> &, Map &);
 int evaluate_board(uint8_t, Player &, std::vector<char> &, Map &, std::vector<Player> &);
-int minimaxOrParanoidWithPruning(Map &, std::vector<Player> &, uint8_t, int, int, std::vector<char> &, uint8_t &, uint8_t &, uint16_t &);
 
 #endif // ALGORITHMS_HPP
