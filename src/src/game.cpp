@@ -115,10 +115,7 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
         }
     }
     std::cout << "best_eval = " << bestEval << std::endl;
-    uint8_t x;
-    uint8_t y;
-    one_dimension_2_second_dimension(best_coord, x, y, m_map);
-    std::cout << "best coord = " << (int)x << ", " << (int)y << std::endl;
+    std::cout << "best coord = " << best_coord << std::endl;
     return return_map;
 }
 
