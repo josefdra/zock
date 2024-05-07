@@ -91,10 +91,8 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     h_res_clock::time_point end_time = h_res_clock::now();
     std::chrono::duration<double, std::micro> elapsed_time =
         std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-#ifdef RELEASING
     std::cout << "minimax/paranoid: tried " << tried_turns << " turns" << std::endl;
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
-#endif
     // @todo add special evaluation
     switch (m_map.m_symbols[bestCoord])
     {
