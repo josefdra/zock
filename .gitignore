@@ -2,6 +2,3 @@
 output
 build
 main
-automated_testing/client_binary/logs
-automated_testing/server_binary/logs
-automated_testing/values
