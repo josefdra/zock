@@ -1,31 +1,4 @@
-Starting match 1
+Starting match 1 with this configuration: 1 1 1
 current best configuration: 1 1 1 winning 0 games
 0% done
-queued all 71 games
-won 19/71 games with configuration: 1 1 1
-Restarting with these best values: 1 1 1 winning 19
-Starting match 2
-current best configuration: 1 1 1 winning 19 games
-0% done
-queued all 71 games
-stopped remaining games, because most_won_games could not be bet
-Starting match 3
-current best configuration: 1 1 1 winning 19 games
-6.399999984e-05% done
-queued all 71 games
-won 21/71 games with configuration: 1 1 3
-Restarting with these best values: 1 1 3 winning 21
-Starting match 4
-current best configuration: 1 1 3 winning 21 games
-0% done
-queued all 71 games
-stopped remaining games, because most_won_games could not be bet
-Starting match 5
-current best configuration: 1 1 3 winning 21 games
-6.399999984e-05% done
-queued all 71 games
-stopped remaining games, because most_won_games could not be bet
-Starting match 6
-current best configuration: 1 1 3 winning 21 games
-0.0001279999997% done
 queued all 71 games
