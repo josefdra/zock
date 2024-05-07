@@ -70,7 +70,7 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
         }
         if (pl.m_symbol != p.m_symbol)
         {
-            calculate_valid_moves(m, pl, currMap, p.m_valid_moves);
+            calculate_valid_moves(m, pl, currMap);
         }
     }
     if (p.m_valid_moves.size() < 1)
@@ -108,14 +108,16 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
     }
 
     uint8_t nextPlayer = ((playersTurn + 1) % m.m_player_count);
-    calculate_valid_moves(m, players[playersTurn], currMap, valid_moves);
+    calculate_valid_moves(m, players[playersTurn], currMap);
+    valid_moves = players[playersTurn].m_valid_moves;
 
     uint8_t counter = 0;
     while (valid_moves.size() < 1 && counter < m.m_player_count)
     {
         counter++;
         nextPlayer = ((playersTurn + 1) % m.m_player_count);
-        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap, valid_moves);
+        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap);
+        valid_moves = players[(playersTurn + counter) % m.m_player_count].m_valid_moves;
     }
     if (counter == m.m_player_count)
     {
