@@ -169,7 +169,7 @@ void run_match(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
     uint8_t game_number = 0;
     std::string map_path;
     uint8_t player_count;
-    std::tie(map_path, player_count) = maps[1];
+    std::tie(map_path, player_count) = maps[2];
     run_game(map_path, mult1, mult2, mult3, 0, won_games_in_match, finished_games_in_match, game_number);
     /*
     for (auto &map : maps)
@@ -230,7 +230,7 @@ void run_match(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
 int main()
 {
     std::string filename = root_directory + "/ges_log.txt";
-    freopen(filename.c_str(), "w", stdout);
+    // freopen(filename.c_str(), "w", stdout);
     auto start_time = std::chrono::steady_clock::now();
     ThreadPool pool(threads);
     uint8_t variations = 26;
@@ -254,8 +254,8 @@ int main()
     */
     auto end_time = std::chrono::steady_clock::now();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-    std::cout << "The best configuration was: " << best_mult1 << " " << best_mult2 << " " << best_mult3;
+    std::cout << "The best configuration was: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << std::endl;
     std::cout << "Elapsed time: " << seconds.count() << " seconds" << std::endl;
-    fclose(stdout);
+    // fclose(stdout);
     return 0;
 }

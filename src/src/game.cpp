@@ -47,6 +47,7 @@ bool Game::run()
         uint8_t game_phase = 0;
         for (auto &p : m_players)
         {
+            std::cout << "Player " << p.m_symbol << std::endl;
             m_map.m_symbols = get_turn(game_phase, p);
             if (p.m_valid_moves.size() < 1)
             {
