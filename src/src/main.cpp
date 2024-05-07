@@ -76,7 +76,6 @@ std::array<std::tuple<std::string, uint8_t>, 20> maps{
     std::tuple<std::string, uint8_t>(root_directory + "/automated_testing/maps/comp2020_02_8p.map", 8)};
 
 int total_games = 67 * 25 * 25 * 25;
-int total_won_games = 0;
 int total_finished_games = 0;
 uint8_t most_won_games = 0;
 uint8_t best_mult1 = 1;
@@ -153,6 +152,7 @@ inline ThreadPool::~ThreadPool()
 void run_game(std::string &map_path, uint8_t mult1, uint8_t mult2, uint8_t mult3, uint8_t position, std::vector<bool> &won_games_in_match, std::vector<bool> &finished_games_in_match, uint8_t game_number)
 {
     Game game(map_path, best_mult1, best_mult2, best_mult3, mult1, mult2, mult3, position);
+    std::cout << "starting game " << (int)game_number << " with configuration: " << (int)mult1 << " " << (int)mult2 << " " << (int)mult3 << std::endl;
     bool result = game.run();
     if (result)
     {
@@ -167,11 +167,6 @@ void run_match(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
     std::vector<bool> won_games_in_match(67, false);
     std::vector<bool> finished_games_in_match(67, false);
     uint8_t game_number = 0;
-    std::string map_path;
-    uint8_t player_count;
-    std::tie(map_path, player_count) = maps[2];
-    run_game(map_path, mult1, mult2, mult3, 0, won_games_in_match, finished_games_in_match, game_number);
-    /*
     for (auto &map : maps)
     {
         std::string map_path;
@@ -180,7 +175,8 @@ void run_match(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
 
         for (uint8_t p = 0; p < player_count; p++)
         {
-            pool.enqueue(run_game, map_path, mult1, mult2, mult3, p, won_games_in_match, finished_games_in_match, game_number);
+            // pool.enqueue(run_game, map_path, mult1, mult2, mult3, p, won_games_in_match, finished_games_in_match, game_number);
+            run_game(map_path, mult1, mult2, mult3, p, won_games_in_match, finished_games_in_match, game_number);
             game_number++;
         }
     }
@@ -211,8 +207,8 @@ void run_match(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
         }
     }
     std::cout << "won " << (int)counter << "/67 games with configuration: " << (int)mult1 << " " << (int)mult2 << " " << (int)mult3 << std::endl;
+    std::cout << "current best configuration: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << std::endl;
     std::cout << std::setprecision(5) << (float)total_finished_games / float(total_games) << "% done" << std::endl;
-    total_won_games += counter;
     if (counter > most_won_games)
     {
         most_won_games = counter;
@@ -224,7 +220,10 @@ void run_match(uint8_t mult1, uint8_t mult2, uint8_t mult3, ThreadPool &pool)
         mult3 = 1;
         total_finished_games = 0;
     }
-    */
+    if (total_finished_games == total_games)
+    {
+        finished = true;
+    }
 }
 
 int main()
@@ -233,9 +232,7 @@ int main()
     // freopen(filename.c_str(), "w", stdout);
     auto start_time = std::chrono::steady_clock::now();
     ThreadPool pool(threads);
-    uint8_t variations = 26;
-    run_match(1, 1, 1, pool);
-    /*
+    uint8_t variations = 2;
     for (uint8_t mult1 = 1; mult1 < variations; mult1++)
     {
         for (uint8_t mult2 = 1; mult2 < variations; mult2++)
@@ -247,11 +244,10 @@ int main()
             }
         }
     }
-    while (finished != true)
+    while (!finished)
     {
         sleep(1);
     }
-    */
     auto end_time = std::chrono::steady_clock::now();
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
     std::cout << "The best configuration was: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << std::endl;

@@ -40,27 +40,24 @@ void Game::init_players(uint8_t best_mult1, uint8_t best_mult2, uint8_t best_mul
 
 bool Game::run()
 {
-    m_map.print_map();
+    std::cout << "starting" << std::endl;
     while (1)
     {
         uint8_t counter = 0;
         uint8_t game_phase = 0;
         for (auto &p : m_players)
         {
-            std::cout << "Player " << p.m_symbol << std::endl;
             m_map.m_symbols = get_turn(game_phase, p);
+            std::cout << p.m_valid_moves.size() << std::endl;
+            m_map.print_map();
             if (p.m_valid_moves.size() < 1)
             {
-                std::cout << "no valid move" << std::endl;
                 counter++;
-            }
-            else
-            {
-                m_map.print_map();
             }
         }
         if (counter == m_players.size())
         {
+            std::cout << "finished" << std::endl;
             break;
         }
     }
@@ -77,6 +74,7 @@ bool Game::run()
 std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
 {
     std::vector<char> return_map = m_map.m_symbols;
+    std::vector<char> next_map;
     uint8_t depth = 1;
     uint16_t best_coord = 0;
     int bestEval = std::numeric_limits<int>::min();
@@ -90,7 +88,7 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
             {
                 if (p.m_symbol != pl.m_symbol)
                 {
-                    std::vector<char> next_map = temp_color(possibleMove, pl.m_symbol, m_map, m_map.m_symbols);
+                    next_map = temp_color(possibleMove, pl.m_symbol, m_map, m_map.m_symbols);
                     change_players(next_map, pl.m_symbol, p.m_symbol);
                     int currEval = evaluate_board(game_phase, pl, next_map, m_map, m_players);
                     if (currEval > bestEval)
@@ -104,7 +102,7 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
         }
         else
         {
-            std::vector<char> next_map = temp_color(possibleMove, pl.m_symbol, m_map, m_map.m_symbols);
+            next_map = temp_color(possibleMove, pl.m_symbol, m_map, m_map.m_symbols);
             int currEval = evaluate_board(game_phase, pl, next_map, m_map, m_players);
             if (currEval > bestEval)
             {
@@ -114,8 +112,10 @@ std::vector<char> Game::get_turn(uint8_t &game_phase, Player &pl)
             }
         }
     }
-    std::cout << "best_eval = " << bestEval << std::endl;
-    std::cout << "best coord = " << best_coord << std::endl;
+    if (check_empty_fields(return_map[best_coord]))
+    {
+        pl.m_overwrite_stones -= 1;
+    }
     return return_map;
 }
 

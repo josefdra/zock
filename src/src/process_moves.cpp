@@ -111,24 +111,7 @@ void execute_move(uint16_t c, uint8_t special, Player &p, Map &m)
     }
 }
 
-void execute_bomb(uint16_t c, Map &m, Player &p)
-{
-    if (m.m_strength == 0)
-    {
-        m.m_symbols[c] = '-';
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-        {
-            uint16_t temp_transition = m.get_transition(c, d);
-            if (temp_transition != 0)
-            {
-                uint8_t temp_direction = m.get_direction(c, d);
-                m.set_transition(c, d, 0);
-                m.set_transition(temp_transition, (temp_direction + 4) % 8, 0);
-            }
-        }
-        p.m_bombs = p.m_bombs - 1;
-    }
-}
+
 
 std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &currMap)
 {
