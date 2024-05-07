@@ -38,9 +38,9 @@ void Game::init_players(uint8_t best_mult1, uint8_t best_mult2, uint8_t best_mul
     }
 }
 
-bool Game::run()
+bool Game::run(bool &stop)
 {
-    while (1)
+    while (!stop)
     {
         uint8_t counter = 0;
         uint8_t game_phase = 0;

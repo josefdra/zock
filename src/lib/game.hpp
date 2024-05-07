@@ -17,7 +17,7 @@ public:
     ~Game();
     void init_map(const std::string &);
     void init_players(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
-    bool run();
+    bool run(bool &);
     uint16_t get_turn(uint8_t &, Player &);
     uint8_t check_winner();
     Map m_map;

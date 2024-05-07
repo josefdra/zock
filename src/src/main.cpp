@@ -142,7 +142,7 @@ void run_game(std::string &map_path, uint8_t mult1, uint8_t mult2, uint8_t mult3
     if (!stop)
     {
         Game game(map_path, best_mult1, best_mult2, best_mult3, mult1, mult2, mult3, position);
-        bool result = game.run();
+        bool result = game.run(stop);
         if (result)
         {
             won_games.store(won_games.load() + 1);
@@ -213,9 +213,9 @@ int main()
         {
             for (uint8_t mult3 = 1; mult3 < variations; mult3++)
             {
-                std::cout << "Starting match " << (int)(25 * 25 * mult1 - 25 * 25 + 25 * mult2 - 25 + mult3) << std::endl;
+                std::cout << "Starting match " << (int)(25 * 25 * mult1 - 25 * 25 + 25 * mult2 - 25 + mult3) << " with this configuration: " << (int)mult1 << " " << (int)mult2 << " " << (int)mult3 << std::endl;
                 std::cout << "current best configuration: " << (int)best_mult1 << " " << (int)best_mult2 << " " << (int)best_mult3 << " winning " << (int)most_won_games << " games" << std::endl;
-                std::cout << std::setprecision(10) << (float)total_finished_games / float(total_games) << "% done" << std::endl;
+                std::cout << std::setprecision(5) << (float)total_finished_games / float(total_games) << "% done" << std::endl;
                 // one match is all maps with all player positions
                 run_match(mult1, mult2, mult3, pool);
             }
