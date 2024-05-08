@@ -10,6 +10,8 @@
 #include "helper.hpp"
 #include "process_moves.hpp"
 
+void print_to_file(const std::string &);
+
 class Game
 {
 public:

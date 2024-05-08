@@ -1,5 +1,16 @@
 #include "game.hpp"
 
+std::mutex file_mutex;
+
+void print_to_file(const std::string &message)
+{
+    std::string root_directory = "C:\\Users\\Dell\\Desktop\\Dateien\\Studium\\g01";
+    std::string filename = root_directory + "\\ges_log.txt";
+    std::lock_guard<std::mutex> lock(file_mutex);
+    std::ofstream file(filename.c_str(), std::ios::app);
+    file << message << std::endl;
+}
+
 // initialize Game
 Game::Game(const std::string &map_name, uint8_t best_mult1, uint8_t best_mult2, uint8_t best_mult3, uint8_t mult1, uint8_t mult2, uint8_t mult3, uint8_t pos)
 {
@@ -59,7 +70,7 @@ bool Game::run(bool &stop)
             break;
         }
     }
-    if (check_winner() == m_pos)
+    if (!stop && check_winner() == m_pos)
     {
         return true;
     }
@@ -124,6 +135,11 @@ uint16_t Game::get_turn(uint8_t &game_phase, Player &pl)
 
 uint8_t Game::check_winner()
 {
+    std::string root_directory = "C:\\Users\\Dell\\Desktop\\Dateien\\Studium\\g01";
+    std::string filename = root_directory + "\\ges_log.txt";
+    std::lock_guard<std::mutex> lock(file_mutex);
+    std::ofstream file(filename.c_str(), std::ios::app);
+    file << std::endl;
     for (auto &p : m_players)
     {
         p.m_points = 0;
@@ -139,11 +155,15 @@ uint8_t Game::check_winner()
     char winner;
     for (auto &p : m_players)
     {
+        file << "Player " << p.m_symbol << ": " << p.m_points << std::endl;
         if (p.m_points > most_points)
         {
             winner = p.m_symbol;
             most_points = p.m_points;
         }
     }
+    file << std::endl
+         << "We are Player " << m_pos + 1 << std::endl;
+    file << "The Winner is: Player " << winner << std::endl;
     return winner - '0' - 1;
 }
