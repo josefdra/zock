@@ -95,9 +95,41 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     return p.m_board_value;
 }
 
-// this algorithm could be optimized by adding functionality to check if enemy has direct influence in our player and if he can "attack" us, else his
-// possible turns could be ignored
-int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns)
+int simple_eval(Player &p, std::vector<char> &currMap, Map &m)
+{
+    int eval = 0;
+    for (uint16_t c = 1; c < m.m_num_of_fields; c++)
+    {
+        // Bonus Fields
+        if (currMap[c] == 'c' || currMap[c] == 'b')
+        {
+            m.m_variable_board_values[c] = 200;
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                if (uint16_t trans = m.get_transition(c, d) != 0)
+                {
+                    m.m_variable_board_values[trans] = -200;
+                }
+            }
+        }
+        // Stone counter
+        else if (check_players(currMap[c]))
+        {
+            if (currMap[c] != p.m_symbol)
+            {
+                eval -= 10;
+            }
+            else
+            {
+                eval += 10;
+            }
+        }
+    }
+    eval *= 10 * m.m_stone_multiplicator;
+    return eval;
+}
+
+int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns, const bool sort)
 {
     turns++;
     std::unordered_set<uint16_t> valid_moves;
@@ -123,6 +155,34 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
         return evaluate_board(game_phase, players[m.m_player_number], currMap, m, players);
     }
 
+    if (sort)
+    {
+        std::vector<std::pair<int, uint16_t>> move_values;
+
+        for (const auto &move : valid_moves)
+        {
+            std::vector<char> this_map = currMap;
+            std::vector<char> next_map = temp_color(move, players[(playersTurn + counter) % m.m_player_count].m_symbol, m, currMap);
+            move_values.push_back({simple_eval(players[m.m_player_number], next_map, m), move});
+            currMap = this_map;
+        }
+        if (players[m.m_player_number].m_symbol == players[playersTurn].m_symbol)
+        {
+            std::sort(move_values.begin(), move_values.end(), [](const std::pair<int, uint16_t> move1, const std::pair<int, uint16_t> move2)
+                      { return move1.first > move2.first; });
+        }
+        else
+        {
+            std::sort(move_values.begin(), move_values.end(), [](const std::pair<int, uint16_t> move1, const std::pair<int, uint16_t> move2)
+                      { return move1.first < move2.first; });
+        }
+        valid_moves.clear();
+        for (const auto &move_values : move_values)
+        {
+            valid_moves.insert(move_values.second);
+        }
+    }
+
     int maxEval;
     int minEval;
     for (auto &move : valid_moves)
@@ -136,7 +196,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
                 {
                     std::vector<char> next_map = temp_color(move, players[m.m_player_number].m_symbol, m, currMap);
                     change_players(next_map, players[m.m_player_number].m_symbol, p.m_symbol);
-                    currEval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);
+                    currEval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort);
                     if (currEval > eval)
                     {
                         eval = currEval;
@@ -147,7 +207,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
         else
         {
             std::vector<char> next_map = temp_color(move, players[(playersTurn + counter) % m.m_player_count].m_symbol, m, currMap);
-            eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns);
+            eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort);
         }
 
         if (players[(playersTurn + counter) % m.m_player_count].m_symbol == players[m.m_player_number].m_symbol)

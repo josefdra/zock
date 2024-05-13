@@ -47,71 +47,106 @@ int main(int argc, char *argv[])
     const char *ip = "127.0.0.1";
     int port = 7777;
     uint8_t group_number = 1;
-    if (argc > 1)
+    bool sorting = true;
+    bool quietMode = false;
+    for (int i = 1; i < argc; ++i)
     {
-        if (std::strcmp(argv[1], "-i") == 0)
+        if (std::strcmp(argv[i], "-n") == 0)
         {
-            if (argc > 2)
-            {
-                if (std::strcmp(argv[2], "localhost") != 0 && std::strcmp(argv[2], "127.0.0.1") != 0)
-                {
-                    ip = argv[2];
-                }
-            }
-            else
-            {
-                std::cout << "-i argument missing" << std::endl;
-            }
+            sorting = false;
         }
-        if (argc > 3)
+        else if (std::strcmp(argv[i], "-q") == 0)
         {
-            if (std::strcmp(argv[3], "-p") == 0)
+            quietMode = true;
+        }
+        else if (std::strcmp(argv[i], "-h") == 0)
+        {
+            std::cout << "Parameter:\n"
+                         "-n: Zugsortierung abschalten\n"
+                         "-q: alle Console-Ausgaben unterdrücken (quiet mode)\n"
+                         "-h: Ausgabe der Hilfe\n"
+                         "Standardwerte:\n"
+                         "Zugsortierung: "
+                      << (sorting ? "aktiviert" : "deaktiviert") << "\n"
+                                                                    "Quiet mode: "
+                      << (quietMode ? "aktiviert" : "deaktiviert") << std::endl;
+            return 0;
+        }
+        else if (std::strcmp(argv[i], "-i") == 0)
+        {
+            if (i + 1 < argc)
             {
-                if (argc > 4)
+                if (std::strcmp(argv[i + 1], "-p") != 0 && std::strcmp(argv[i + 1], "-n") != 0 && std::strcmp(argv[i + 1], "-q") != 0 && std::strcmp(argv[i + 1], "-h") != 0)
                 {
-                    port = atoi(argv[4]);
+                    ip = argv[i + 1];
+                    ++i;
                 }
                 else
                 {
-                    std::cout << "-p argument missing" << std::endl;
-                }
-            }
-        }
-        else if (std::strcmp(argv[1], "-p") == 0)
-        {
-            if (argc > 2)
-            {
-                port = atoi(argv[2]);
-                if (argc > 3)
-                {
-                    if (std::strcmp(argv[3], "-i") == 0)
-                    {
-                        if (argc > 4)
-                        {
-                            if (std::strcmp(argv[2], "localhost") != 0 && std::strcmp(argv[2], "127.0.0.1") != 0)
-                            {
-                                ip = argv[4];
-                            }
-                        }
-                        else
-                        {
-                            std::cout << "-i argument missing" << std::endl;
-                        }
-                    }
+                    std::cout << "Invalid value for -i" << std::endl;
                 }
             }
             else
             {
-                std::cout << "-p argument missing" << std::endl;
+                std::cout << "IP address missing after -i" << std::endl;
             }
         }
+        else if (std::strcmp(argv[i], "-p") == 0)
+        {
+            if (i + 1 < argc)
+            {
+                if (std::strcmp(argv[i + 1], "-i") != 0 && std::strcmp(argv[i + 1], "-n") != 0 && std::strcmp(argv[i + 1], "-q") != 0 && std::strcmp(argv[i + 1], "-h") != 0)
+                {
+                    port = std::atoi(argv[i + 1]);
+                    ++i;
+                }
+                else
+                {
+                    std::cout << "Invalid value for -p" << std::endl;
+                }
+            }
+            else
+            {
+                std::cout << "Port number missing after -p" << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "Unknown parameter: " << argv[i] << std::endl;
+        }
+    }
+
+    if (sorting)
+    {
+        std::cout << "Zugsortierung aktiviert" << std::endl;
     }
     else
     {
-        std::cout << "No valid input. Starting with standard configuration" << std::endl;
+        std::cout << "Zugsortierung deaktiviert" << std::endl;
+    }
+
+    if (quietMode)
+    {
+        std::cout << "Quiet mode aktiviert" << std::endl;
+    }
+
+    if (ip != nullptr)
+    {
+        std::cout << "IP-Adresse: " << ip << std::endl;
+    }
+
+    if (port != -1)
+    {
+        std::cout << "Port: " << port << std::endl;
+    }
+    if (quietMode)
+    {
+        std::ofstream devnull;
+        devnull.open("/dev/null");
+        std::cout.rdbuf(devnull.rdbuf());
     }
     std::cout << "connecting to: ip(" << ip << "), port(" << port << ")" << std::endl;
-    Network network_handler(ip, port, group_number, 1, 1, 1);
+    Network network_handler(ip, port, group_number, 1, 2, 11, sorting);
     std::cout << "Game finished" << std::endl;
     return 0;
 }

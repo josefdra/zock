@@ -20,7 +20,7 @@
 class Network
 {
 public:
-    Network(const char *, uint16_t, uint8_t, uint8_t, uint8_t, uint8_t);
+    Network(const char *, uint16_t, uint8_t, uint8_t, uint8_t, uint8_t, bool);
     ~Network();
 
     void init_socket();
@@ -28,13 +28,13 @@ public:
     void connect_to_server();
     void close_socket();
     void send_group_number(uint8_t);
-    void init_map_and_player();
+    void init_map_and_player(uint8_t, uint8_t, uint8_t);
     bool check_socket_acitivity();
     void run_game();
     void send_move(uint8_t, uint8_t, uint8_t);
     void receive_map(uint32_t);
     void receive_player_number(uint32_t);
-    void receive_move_prompt(uint32_t);
+    void receive_move_prompt();
     void receive_move(uint32_t);
     void receive_disqualification(uint32_t);
     void receive_end_of_phase_1();
@@ -51,7 +51,7 @@ public:
     uint8_t m_game_phase = 0;
     Game m_game;
     uint32_t m_time = 0;
-    uint8_t m_search_depth = 0;    
+    uint8_t m_search_depth = 0;
 };
 
 #endif // CLIENT_CONNECTION_H

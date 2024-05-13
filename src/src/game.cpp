@@ -4,7 +4,7 @@
 Game::Game()
 {
     Map m_map;
-    Player m_player;    
+    Player m_player;
 }
 
 Game::~Game() {}
@@ -12,6 +12,10 @@ Game::~Game() {}
 void Game::init_map(std::stringstream &ss)
 {
     m_map.read_hash_map(ss);
+}
+void Game::init_sorting(const bool toSort)
+{
+    m_toSort = toSort;
 }
 
 void Game::init_players()
@@ -45,8 +49,26 @@ void Game::init_players()
  *
  */
 
-uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
+uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase, double &delta)
 {
+    bool panic = false;
+    if (delta < 100)
+    {
+        panic = true;
+    }
+    // initialization of some variables is not necessary for a panic return, so here are just the most significant variables initialized
+    // and in normal mode (panic == false) the variables get initialized after the timer started to get the most exact time
+    if (panic)
+    {
+        std::unordered_set<uint16_t> valid_moves;
+        calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols, valid_moves);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, valid_moves.size() - 1);
+        auto it = valid_moves.begin();
+        std::advance(it, dis(gen));
+        return *it;
+    }
     h_res_clock::time_point start_time = h_res_clock::now();
     int bestEval = std::numeric_limits<int>::min();
     uint16_t bestCoord = 0;
@@ -54,37 +76,71 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
     std::unordered_set<uint16_t> valid_moves;
     calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols, valid_moves);
+    std::chrono::duration<double> duration_last_depth_search = std::chrono::duration<double>::zero();
+    std::chrono::duration<double> time_left = std::chrono::duration<double>::zero();
+    double duration_last_depth_search_milli = 0;
 
-    for (auto &possibleMove : valid_moves)
+    for (uint8_t i = 1; i <= depth; i++)
     {
-        if (m_map.m_symbols[possibleMove] == 'c')
+        auto begin_iteration = std::chrono::high_resolution_clock::now();
+        std::cout << "depth: " << static_cast<int>(i) << std::endl;
+        std::cout << "delta: " << delta << std::endl;
+        std::cout << "last depth evaluation took: " << duration_last_depth_search_milli << " milliseconds" << std::endl;
+        if (duration_last_depth_search_milli * 3 < delta)
         {
-            for (auto &p : m_players)
+
+            for (auto &possibleMove : valid_moves)
             {
-                if (p.m_symbol != m_players[m_player_number].m_symbol)
+
+                if (m_map.m_symbols[possibleMove] == 'c')
+                {
+                    for (auto &p : m_players)
+                    {
+                        if (p.m_symbol != m_players[m_player_number].m_symbol)
+                        {
+                            std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
+                            change_players(next_map, m_players[m_player_number].m_symbol, p.m_symbol);
+                            int currEval = minimaxOrParanoidWithPruning(m_map, m_players, i - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns, m_toSort);
+                            if (currEval > bestEval)
+                            {
+                                m_choice_value = p.m_symbol - '0';
+                                bestEval = currEval;
+                                bestCoord = possibleMove;
+                            }
+                        }
+                    }
+                }
+                else
                 {
                     std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
-                    change_players(next_map, m_players[m_player_number].m_symbol, p.m_symbol);
-                    int currEval = minimaxOrParanoidWithPruning(m_map, m_players, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
+                    int currEval = minimaxOrParanoidWithPruning(m_map, m_players, i - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns, m_toSort);
                     if (currEval > bestEval)
                     {
-                        m_choice_value = p.m_symbol - '0';
+                        m_choice_value = 0;
                         bestEval = currEval;
                         bestCoord = possibleMove;
                     }
                 }
+                auto pause = std::chrono::high_resolution_clock::now();
+                time_left = pause - begin_iteration;
+                double time_left_mil = time_left.count() * 1000;
+                std::cout << "time left for next move evaluation: " << delta - time_left_mil << std::endl;
+                if (delta - time_left_mil < 500)
+                {
+                    std::cout << "TIMES UP! RETURNING LAST BEST MOVE!" << std::endl;
+                    return bestCoord;
+                }
             }
+            auto end_of_calc = std::chrono::high_resolution_clock::now();
+            duration_last_depth_search = end_of_calc - begin_iteration;
+            duration_last_depth_search_milli = duration_last_depth_search.count() * 1000;
+            std::cout << duration_last_depth_search_milli << std::endl;
+            std::cout << "time left after last depth search: " << delta - duration_last_depth_search_milli << std::endl;
+            delta -= duration_last_depth_search_milli;
         }
         else
         {
-            std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
-            int currEval = minimaxOrParanoidWithPruning(m_map, m_players, depth - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns);
-            if (currEval > bestEval)
-            {
-                m_choice_value = 0;
-                bestEval = currEval;
-                bestCoord = possibleMove;
-            }
+            break;
         }
     }
     std::cout << "valid positions: " << m_players[m_player_number].m_valid_moves.size() << std::endl;

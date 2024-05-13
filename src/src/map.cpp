@@ -11,7 +11,7 @@ Map::Map(){};
 
 Map::~Map(){};
 
-void Map::init_map(uint8_t mult1, uint8_t mult2, uint8_t mult3)
+void Map::init_mults(uint8_t mult1, uint8_t mult2, uint8_t mult3)
 {
     m_mobility_multiplicator = mult1;
     m_corners_and_special_multiplicator = mult2;
