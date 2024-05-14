@@ -62,10 +62,12 @@ int main(int argc, char *argv[])
         else if (std::strcmp(argv[i], "-h") == 0)
         {
             std::cout << "Parameter:\n"
+                         "-i <ip>: Eingabe IP von Server\n"
+                         "-p <port: Eingabe Port von Server\n"
                          "-n: Zugsortierung abschalten\n"
                          "-q: alle Console-Ausgaben unterdrücken (quiet mode)\n"
                          "-h: Ausgabe der Hilfe\n"
-                         "Standardwerte:\n"
+                         "Standardwerte:\n" 
                          "Zugsortierung: "
                       << (sorting ? "aktiviert" : "deaktiviert") << "\n"
                                                                     "Quiet mode: "
@@ -146,7 +148,7 @@ int main(int argc, char *argv[])
         std::cout.rdbuf(devnull.rdbuf());
     }
     std::cout << "connecting to: ip(" << ip << "), port(" << port << ")" << std::endl;
-    Network network_handler(ip, port, group_number, 1, 2, 11, sorting);
+    Network network_handler(ip, port, group_number, 1, 8, 9, sorting);
     std::cout << "Game finished" << std::endl;
     return 0;
 }
