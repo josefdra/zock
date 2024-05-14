@@ -1,4 +1,5 @@
 #include "algorithms.hpp"
+#define TIME_LIMIT 100
 
 void get_frontier_score(Player &p, std::vector<char> &currMap, Map &m)
 {
@@ -129,28 +130,28 @@ int simple_eval(Player &p, std::vector<char> &currMap, Map &m)
     return eval;
 }
 
-int minimaxTimer(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns, const bool sort, double& delta)
-{
-    h_res_clock::time_point start_time = h_res_clock::now();
-    int res = 0;
-    try{
-        res = minimaxOrParanoidWithPruning(m,players,depth, alpha, beta, currMap, playersTurn, game_phase,turns, sort, start_time, delta);
-    }
-    catch(const std::runtime_error& e){
-        throw std::runtime_error("Time limit exceeded");
-    }
-
-}
-
-int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns, const bool sort, std::chrono::time_point<std::chrono::high_resolution_clock>& start_time, double delta)
+int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns, const bool sort, std::chrono::time_point<std::chrono::high_resolution_clock> &start_time, double &delta)
 {
     turns++;
     std::unordered_set<uint16_t> valid_moves;
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-start_time).count();
-    double next_delta = delta - elapsed_time;
-    //std::cout << "elapsed Time: " << elapsed_time << " delta: " << delta << std::endl;
-    if (elapsed_time >= delta - 250){
-        throw std::runtime_error("Time limit exceeded");
+    auto start_last_minimax = std::chrono::high_resolution_clock::now();
+    auto pause = std::chrono::high_resolution_clock::now();
+    auto duration = pause - start_time;
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+    /*std::cout << pause.time_since_epoch().count() << '\n'
+              << start_time.time_since_epoch().count() << '\n'
+              << duration.count() << '\n'
+              << elapsed_time << std::endl;*/
+    if (turns % 100 == 0)
+    {
+        std::cout << "\ndelta: " << delta << std::endl;
+        std::cout << "elapsed Time since start: " << elapsed_time << std::endl;
+    }
+    delta = delta - elapsed_time;
+
+    if (delta < 100)
+    {
+        throw TimeoutException("Time limit exceeded in minimax!");
     }
     if (depth == 0)
     {
@@ -215,7 +216,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
                 {
                     std::vector<char> next_map = temp_color(move, players[m.m_player_number].m_symbol, m, currMap);
                     change_players(next_map, players[m.m_player_number].m_symbol, p.m_symbol);
-                    currEval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort, start_time, next_delta);
+                    currEval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort, start_last_minimax, delta);
                     if (currEval > eval)
                     {
                         eval = currEval;
@@ -226,7 +227,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
         else
         {
             std::vector<char> next_map = temp_color(move, players[(playersTurn + counter) % m.m_player_count].m_symbol, m, currMap);
-            eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort, start_time, next_delta);
+            eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort, start_last_minimax, delta);
         }
 
         if (players[(playersTurn + counter) % m.m_player_count].m_symbol == players[m.m_player_number].m_symbol)

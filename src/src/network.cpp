@@ -36,6 +36,7 @@ void Network::init_socket()
 
 void Network::init_server()
 {
+
     m_server_addr.sin_family = AF_INET;
     m_server_addr.sin_port = htons(m_port);
     if (inet_pton(AF_INET, m_ip, &m_server_addr.sin_addr) <= 0)

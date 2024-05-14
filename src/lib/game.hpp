@@ -9,6 +9,7 @@
 #include "algorithms.hpp"
 #include "helper.hpp"
 #include "process_moves.hpp"
+#include "own_exceptions.hpp"
 
 class Game
 {
