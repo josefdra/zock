@@ -1,4 +1,0 @@
-Starting match 1 with this configuration: 1 1 1
-current best configuration: 1 1 1 winning 0 games
-0% done
-queued all 71 games
