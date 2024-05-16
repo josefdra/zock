@@ -1,5 +1,5 @@
 #include "algorithms.hpp"
-#define TIME_LIMIT 100
+#define TIME_BUFFER 100
 
 void get_frontier_score(Player &p, std::vector<char> &currMap, Map &m)
 {
@@ -130,29 +130,24 @@ int simple_eval(Player &p, std::vector<char> &currMap, Map &m)
     return eval;
 }
 
-int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns, const bool sort, std::chrono::time_point<std::chrono::high_resolution_clock> &start_time, double &delta)
+int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t depth, int alpha, int beta, std::vector<char> &currMap, uint8_t &playersTurn, uint8_t &game_phase, uint16_t &turns, const bool sort, std::chrono::high_resolution_clock::time_point &start_time, double &delta)
 {
     turns++;
     std::unordered_set<uint16_t> valid_moves;
-    auto start_last_minimax = std::chrono::high_resolution_clock::now();
-    auto pause = std::chrono::high_resolution_clock::now();
-    auto duration = pause - start_time;
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    /*std::cout << pause.time_since_epoch().count() << '\n'
-              << start_time.time_since_epoch().count() << '\n'
-              << duration.count() << '\n'
-              << elapsed_time << std::endl;*/
-    if (turns % 100 == 0)
+    auto current_time = std::chrono::high_resolution_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
+    if (turns % 500 == 0)
     {
-        std::cout << "\ndelta: " << delta << std::endl;
-        std::cout << "elapsed Time since start: " << elapsed_time << std::endl;
+        std::cout << "remaining time in minimax: " << delta << std::endl;
     }
-    delta = delta - elapsed_time;
 
-    if (delta < 100)
+    if (elapsed_time >= delta - TIME_BUFFER)
     {
         throw TimeoutException("Time limit exceeded in minimax!");
     }
+
+    double time_remaining = delta - elapsed_time;
+
     if (depth == 0)
     {
         players[m.m_player_number].m_valid_moves = valid_moves;
@@ -216,7 +211,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
                 {
                     std::vector<char> next_map = temp_color(move, players[m.m_player_number].m_symbol, m, currMap);
                     change_players(next_map, players[m.m_player_number].m_symbol, p.m_symbol);
-                    currEval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort, start_last_minimax, delta);
+                    currEval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort, current_time, time_remaining);
                     if (currEval > eval)
                     {
                         eval = currEval;
@@ -227,7 +222,7 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
         else
         {
             std::vector<char> next_map = temp_color(move, players[(playersTurn + counter) % m.m_player_count].m_symbol, m, currMap);
-            eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort, start_last_minimax, delta);
+            eval = minimaxOrParanoidWithPruning(m, players, depth - 1, alpha, beta, next_map, nextPlayer, game_phase, turns, sort, current_time, time_remaining);
         }
 
         if (players[(playersTurn + counter) % m.m_player_count].m_symbol == players[m.m_player_number].m_symbol)

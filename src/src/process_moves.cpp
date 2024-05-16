@@ -177,6 +177,7 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
 /// @param player_number current player at turn
 void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, std::unordered_set<uint16_t> &valid_moves)
 {
+
     valid_moves.clear();
     bool overrides = false;
     if (p.has_overwrite_stones())
@@ -185,6 +186,7 @@ void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, std::u
     }
     for (uint16_t c = 1; c < m.m_num_of_fields; c++)
     {
+
         if (currMap[c] == 'x' && overrides)
         {
             valid_moves.insert(c);
