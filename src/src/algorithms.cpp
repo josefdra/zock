@@ -11,7 +11,6 @@ void get_frontier_score(Player &p, std::vector<char> &currMap, Map &m)
     }
 }
 
-
 int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Map &m, std::vector<Player> &players)
 {
     int corners_and_special_value = 0;
@@ -43,7 +42,7 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
             corners_and_special_value += m.m_variable_board_values[c];
         }
         // Stone counter
-        if (check_players(currMap[c]))
+        else if (check_players(currMap[c]))
         {
             players[currMap[c] - 1 - '0'].m_points += 1;
         }
@@ -71,7 +70,7 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
         }
         if (pl.m_symbol != p.m_symbol)
         {
-            calculate_valid_moves(m, pl, currMap);
+            calculate_valid_moves(m, pl, currMap, p.m_valid_moves);
         }
     }
     if (p.m_valid_moves.size() < 1)
@@ -92,11 +91,10 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     }
     mobility = mobility * m.m_mobility_multiplicator;
     corners_and_special_value = corners_and_special_value * m.m_corners_and_special_multiplicator;
-    p.m_points = p.m_points * 50 * m.m_stone_multiplicator;
+    p.m_points = p.m_points * 500 * m.m_stone_multiplicator;
     p.m_board_value = p.m_board_value + mobility + corners_and_special_value + p.m_points;
     return p.m_board_value;
 }
-
 
 // this algorithm could be optimized by adding functionality to check if enemy has direct influence in our player and if he can "attack" us, else his
 // possible turns could be ignored
@@ -106,20 +104,19 @@ int minimaxOrParanoidWithPruning(Map &m, std::vector<Player> &players, uint8_t d
     std::unordered_set<uint16_t> valid_moves;
     if (depth == 0)
     {
+        players[m.m_player_number].m_valid_moves = valid_moves;
         return evaluate_board(game_phase, players[m.m_player_number], currMap, m, players);
     }
 
     uint8_t nextPlayer = ((playersTurn + 1) % m.m_player_count);
-    calculate_valid_moves(m, players[playersTurn], currMap);
-    valid_moves = players[playersTurn].m_valid_moves;
+    calculate_valid_moves(m, players[playersTurn], currMap, valid_moves);
 
     uint8_t counter = 0;
     while (valid_moves.size() < 1 && counter < m.m_player_count)
     {
         counter++;
         nextPlayer = ((playersTurn + 1) % m.m_player_count);
-        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap);
-        valid_moves = players[(playersTurn + counter) % m.m_player_count].m_valid_moves;
+        calculate_valid_moves(m, players[(playersTurn + counter) % m.m_player_count], currMap, valid_moves);
     }
     if (counter == m.m_player_count)
     {

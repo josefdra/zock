@@ -18,7 +18,7 @@ public:
     void init_map(std::stringstream &);
     void init_players();
     uint16_t get_turn(uint8_t &, uint8_t &, uint8_t &);
-    uint16_t get_bomb_throw();   
+    uint16_t get_bomb_throw();
     void check_winner();
     // end coord          //special field(0-4)       //coords of the way
 

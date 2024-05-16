@@ -4,7 +4,7 @@
 Game::Game()
 {
     Map m_map;
-    Player m_player;    
+    Player m_player;
 }
 
 Game::~Game() {}
@@ -53,8 +53,7 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     uint16_t tried_turns = 0;
     uint8_t nextPlayer = ((m_player_number + 1) % m_map.m_player_count);
     std::unordered_set<uint16_t> valid_moves;
-    calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols);
-    valid_moves = m_players[m_player_number].m_valid_moves;
+    calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols, valid_moves);
 
     for (auto &possibleMove : valid_moves)
     {
@@ -92,8 +91,10 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
     h_res_clock::time_point end_time = h_res_clock::now();
     std::chrono::duration<double, std::micro> elapsed_time =
         std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+#ifdef RELEASING
     std::cout << "minimax/paranoid: tried " << tried_turns << " turns" << std::endl;
     std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
+#endif
     // @todo add special evaluation
     switch (m_map.m_symbols[bestCoord])
     {
@@ -107,7 +108,6 @@ uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase)
         spec = 0;
         break;
     }
-
     return bestCoord;
 }
 

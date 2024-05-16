@@ -175,9 +175,9 @@ std::vector<char> temp_color(uint16_t c, char s, Map &m, std::vector<char> &curr
 /// @brief This function asks for a coordinate and checks if it's a valid move
 /// @param map current map layout
 /// @param player_number current player at turn
-void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap)
+void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap, std::unordered_set<uint16_t> &valid_moves)
 {
-    p.m_valid_moves.clear();
+    valid_moves.clear();
     bool overrides = false;
     if (p.has_overwrite_stones())
     {
@@ -187,7 +187,7 @@ void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap)
     {
         if (currMap[c] == 'x' && overrides)
         {
-            p.m_valid_moves.insert(c);
+            valid_moves.insert(c);
         }
         if (currMap[c] == p.m_symbol)
         {
@@ -202,17 +202,17 @@ void calculate_valid_moves(Map &m, Player &p, std::vector<char> &currMap)
                 {
                     if (currMap[next_field] == p.m_symbol && overrides && valid)
                     {
-                        p.m_valid_moves.insert(next_field);
+                        valid_moves.insert(next_field);
                         break;
                     }
                     else if ((check_empty_fields(currMap[next_field]) && valid))
                     {
-                        p.m_valid_moves.insert(next_field);
+                        valid_moves.insert(next_field);
                         break;
                     }
                     else if (valid && overrides)
                     {
-                        p.m_valid_moves.insert(next_field);
+                        valid_moves.insert(next_field);
                     }
                     else if (currMap[next_field] == p.m_symbol || next_field == c || check_empty_fields(currMap[next_field]))
                     {

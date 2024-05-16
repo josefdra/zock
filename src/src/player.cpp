@@ -3,11 +3,12 @@
 
 Player::Player() {}
 
-Player::~Player() {
-    
+Player::~Player()
+{
 }
 
-void Player::init(uint16_t o, uint16_t b, char s){
+void Player::init(uint16_t o, uint16_t b, char s)
+{
     m_symbol = s;
     m_overwrite_stones = o;
     m_bombs = b;
