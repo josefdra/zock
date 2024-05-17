@@ -110,18 +110,27 @@ bool Network::check_socket_acitivity()
 void Network::run_game()
 {
     uint16_t counter = 0;
+    uint16_t fields = 0;
+    std::cout << m_game.m_map.m_mobility_multiplicator << " " << m_game.m_map.m_corners_and_special_multiplicator << " " << m_game.m_map.m_stone_multiplicator << " " << std::endl;
     m_game.m_map.print_map();
+    for (uint16_t c = 1; c < m_game.m_map.m_num_of_fields; c++)
+    {
+        if (m_game.m_map.m_symbols[c] != '-')
+        {
+            fields++;
+        }
+    }
     while (m_game_phase < 3 && m_game.m_winner != 2)
     {
         if (check_socket_acitivity())
         {
-            if (counter >= m_game.m_map.m_num_of_fields / 2 && m_game_phase != 2)
+            if (counter >= fields / 2 && m_game_phase != 2)
             {
                 m_game_phase = 1;
             }
             receive_data();
         }
-        counter++;
+        counter += m_game.m_map.m_player_count;
     }
 }
 

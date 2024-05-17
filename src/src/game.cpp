@@ -209,7 +209,7 @@ void Game::check_winner()
     {
         if (check_players(m_map.m_symbols[c]))
         {
-            m_players[m_map.m_symbols[c] - '0' - 1].m_points += 1;
+            m_players[m_map.m_symbols[c] - '0' - 1].m_points = m_players[m_map.m_symbols[c] - '0' - 1].m_points + 1;
         }
     }
     uint16_t most_points = 0;

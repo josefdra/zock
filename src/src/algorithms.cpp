@@ -7,7 +7,7 @@ void get_frontier_score(Player &p, std::vector<char> &currMap, Map &m)
     {
         if (currMap[c] == p.m_symbol)
         {
-            p.m_frontier_score += check_frontier(m, c, currMap);
+            p.m_frontier_score = p.m_frontier_score + check_frontier(m, c, currMap);
         }
     }
 }
@@ -52,21 +52,21 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     {
         if (pl.m_points == 0 && pl.m_symbol != p.m_symbol)
         {
-            p.m_points += 100000;
+            p.m_board_value += 100000;
         }
         else if (pl.m_points == 0 && pl.m_symbol == p.m_symbol)
         {
-            p.m_points -= 1000000;
+            p.m_board_value -= 1000000;
         }
         if (pl.m_points < p.m_points)
         {
             if (game_phase == 0)
             {
-                p.m_points -= pl.m_points;
+                p.m_points = p.m_points / 2;
             }
             else if (game_phase == 1)
             {
-                p.m_points += pl.m_points;
+                p.m_points = p.m_points * 2;
             }
         }
         if (pl.m_symbol != p.m_symbol)
@@ -76,17 +76,18 @@ int evaluate_board(uint8_t game_phase, Player &p, std::vector<char> &currMap, Ma
     }
     if (p.m_valid_moves.size() < 1)
     {
-        p.m_board_value -= 100000;
+        p.m_board_value = p.m_board_value - 100000;
     }
+    mobility = p.m_valid_moves.size() * 50;
     for (auto &pl : players)
     {
         if (p.m_valid_moves.size() < pl.m_valid_moves.size())
         {
-            mobility -= 5000;
+            mobility = mobility - p.m_points * 25;
         }
         else
         {
-            mobility += 5000;
+            mobility = mobility + p.m_points * 25;
         }
     }
     mobility *= m.m_mobility_multiplicator;
