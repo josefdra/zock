@@ -11,7 +11,7 @@ Map::Map(){};
 
 Map::~Map(){};
 
-void Map::init_map(uint8_t mult1, uint8_t mult2, uint8_t mult3)
+void Map::init_mults(uint8_t mult1, uint8_t mult2, uint8_t mult3)
 {
     m_mobility_multiplicator = mult1;
     m_corners_and_special_multiplicator = mult2;
@@ -224,7 +224,7 @@ void Map::calculate_board_values()
                 counter++;
             }
         }
-        m_constant_board_values[c] *= wall_values[counter];
+        m_constant_board_values[c] = m_constant_board_values[c] * wall_values[counter];
     }
     if (board_values.size() > 1)
     {
@@ -238,7 +238,7 @@ void Map::calculate_board_values()
                     counter++;
                 }
             }
-            m_constant_board_values[c] *= wall_values[counter];
+            m_constant_board_values[c] = m_constant_board_values[c] * wall_values[counter];
         }
     }
     /*
@@ -252,17 +252,6 @@ void Map::calculate_board_values()
     }
     std::cout << std::endl;
     */
-}
-
-void Map::calculate_radius_size()
-{
-    m_radius_size = 0;
-    for (uint8_t n = 1; n < m_strength + 1; n++)
-    {
-        m_radius_size += n;
-    }
-    m_radius_size *= 8;
-    m_radius_size += 1;
 }
 
 /**
@@ -308,7 +297,6 @@ void Map::read_hash_map(std::stringstream &mapfile)
         set_transition(pos2, r2, pos1r);
     }
     calculate_board_values();
-    calculate_radius_size();
 }
 
 /**

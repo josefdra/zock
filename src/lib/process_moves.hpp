@@ -1,9 +1,12 @@
 #ifndef PROCESS_MOVES_HPP
 #define PROCESS_MOVES_HPP
 
+#include "chrono"
+
 #include "map.hpp"
 #include "player.hpp"
 #include "helper.hpp"
+#include "own_exceptions.hpp"
 
 void change_players(std::vector<char> &, char, char);
 void execute_inversion(std::vector<char> &, std::vector<char> &, Map &);

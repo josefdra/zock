@@ -1,14 +1,15 @@
 #include "network.hpp"
 
-Network::Network(const char *ip, uint16_t port, uint8_t g_n, uint8_t mult1, uint8_t mult2, uint8_t mult3) : m_port(port), m_ip(ip), m_group_number(g_n)
+Network::Network(const char *ip, uint16_t port, uint8_t g_n, uint8_t mult1, uint8_t mult2, uint8_t mult3, bool toSort) : m_port(port), m_ip(ip), m_group_number(g_n)
 {
     init_socket();
     init_server();
     connect_to_server();
     send_group_number(m_group_number);
     Game m_game;
-    m_game.m_map.init_map(mult1, mult2, mult3);
-    init_map_and_player();
+    m_game.m_map.init_mults(mult1, mult2, mult3);
+    init_map_and_player(mult1, mult2, mult3);
+    m_game.init_sorting(toSort);
     run_game();
 }
 
@@ -35,6 +36,7 @@ void Network::init_socket()
 
 void Network::init_server()
 {
+
     m_server_addr.sin_family = AF_INET;
     m_server_addr.sin_port = htons(m_port);
     if (inet_pton(AF_INET, m_ip, &m_server_addr.sin_addr) <= 0)
@@ -82,10 +84,11 @@ void Network::send_group_number(uint8_t group)
     send(m_csocket, m_send_buffer, 6, 0);
 }
 
-void Network::init_map_and_player()
+void Network::init_map_and_player(uint8_t mult1, uint8_t mult2, uint8_t mult3)
 {
     receive_data();
     receive_data();
+    m_game.m_map.init_mults(mult1, mult2, mult3);
 }
 
 bool Network::check_socket_acitivity()
@@ -107,18 +110,27 @@ bool Network::check_socket_acitivity()
 void Network::run_game()
 {
     uint16_t counter = 0;
+    uint16_t fields = 0;
+    std::cout << m_game.m_map.m_mobility_multiplicator << " " << m_game.m_map.m_corners_and_special_multiplicator << " " << m_game.m_map.m_stone_multiplicator << " " << std::endl;
     m_game.m_map.print_map();
+    for (uint16_t c = 1; c < m_game.m_map.m_num_of_fields; c++)
+    {
+        if (m_game.m_map.m_symbols[c] != '-')
+        {
+            fields++;
+        }
+    }
     while (m_game_phase < 3 && m_game.m_winner != 2)
     {
         if (check_socket_acitivity())
         {
-            if (counter >= m_game.m_map.m_num_of_fields / 2 && m_game_phase != 2)
+            if (counter >= fields / 2 && m_game_phase != 2)
             {
                 m_game_phase = 1;
             }
             receive_data();
         }
-        counter++;
+        counter += m_game.m_map.m_player_count;
     }
 }
 
@@ -157,20 +169,24 @@ void Network::receive_player_number(uint32_t actual_message_length)
     m_game.init_players();
 }
 
-void Network::receive_move_prompt(uint32_t actual_message_length)
+void Network::receive_move_prompt()
 {
 #ifdef RELEASING
     std::cout << "Received move prompt, calculating move" << std::endl;
 #endif
-    char message[actual_message_length];
-    recv(m_csocket, &message, actual_message_length, 0);
-    memcpy(&m_time, message, sizeof(m_time));
-    m_search_depth = message[4];
+    recv(m_csocket, &m_time, sizeof(m_time), 0);
+    recv(m_csocket, &m_search_depth, sizeof(m_search_depth), 0);
+    auto start = std::chrono::high_resolution_clock::now();
+    m_time = ntohl(m_time);
     uint8_t spec = 0;
     uint16_t turn;
+
     if (m_game_phase != 2)
     {
-        turn = m_game.get_turn(spec, m_search_depth, m_game_phase);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> duration = end - start;
+        double delta = (double)m_time - duration.count();
+        turn = m_game.get_turn(spec, m_search_depth, m_game_phase, delta);
 #ifdef RELEASING
         std::cout << "Placing stone at: ";
 #endif
@@ -262,7 +278,7 @@ void Network::receive_data()
             receive_player_number(actual_message_length);
             break;
         case TYPE_RECEIVE_TURN_REQUEST:
-            receive_move_prompt(actual_message_length);
+            receive_move_prompt();
             break;
         case TYPE_RECEIVE_PLAYER_TURN:
             receive_move(actual_message_length);
