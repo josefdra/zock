@@ -20,7 +20,7 @@
 class Network
 {
 public:
-    Network(const char *, uint16_t, uint8_t, uint8_t, uint8_t, uint8_t);
+    Network(const char *, uint16_t, uint8_t, uint8_t, uint8_t, uint8_t, bool);
     ~Network();
 
     void init_socket();
@@ -34,7 +34,7 @@ public:
     void send_move(uint8_t, uint8_t, uint8_t);
     void receive_map(uint32_t);
     void receive_player_number(uint32_t);
-    void receive_move_prompt(uint32_t);
+    void receive_move_prompt();
     void receive_move(uint32_t);
     void receive_disqualification(uint32_t);
     void receive_end_of_phase_1();
