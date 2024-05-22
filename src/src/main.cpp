@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 #else
 int main(int argc, char *argv[])
 {
+    std::cout << "Koch, Kuhn, Dräxl" << std::endl;
     const char *ip = "127.0.0.1";
     int port = 7777;
     uint8_t group_number = 1;
