@@ -6,6 +6,9 @@ https://172.20.0.41:8091
 
 http://172.20.0.41:8088/current
 
+# MatchPoint - Aachen
+
+https://matchpoint.moves.rwth-aachen.de/current
 
 # RevXT-SS24-g01
 
