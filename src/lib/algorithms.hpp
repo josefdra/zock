@@ -1,22 +1,30 @@
 #ifndef ALGORITHMS_HPP
 #define ALGORITHMS_HPP
 
-#include <chrono>
-#include <iostream>
-#include <algorithm>
+#include <stdint.h>
+#include <array>
+#include <bitset>
+#include <vector>
 
-#include "map.hpp"
-#include "player.hpp"
-#include "process_moves.hpp"
-#include "game.hpp"
-#include "helper.hpp"
-#include "own_exceptions.hpp"
+#include "move_generator.hpp"
+#include "move_executer.hpp"
 
-class Game;
+class Timer;
+class Board;
 
-void get_frontier_score(Player &, std::vector<char> &, Map &);
-int evaluate_board(uint8_t, Player &, std::vector<char> &, Map &, std::vector<Player> &);
-int simple_eval(Player &, std::vector<char> &, Map &);
-int minimaxOrParanoidWithPruning(Map &, std::vector<Player> &, uint8_t, int, int, std::vector<char> &, uint8_t &, uint8_t &, uint16_t &, bool, std::chrono::high_resolution_clock::time_point &, double &);
+class MiniMax
+{
+public:
+    MiniMax(MoveExecuter &, MoveGenerator &);
+    ~MiniMax();
+
+    int minimaxOrParanoidWithPruning(Board &, int, int, int8_t, uint8_t, bool, Timer &);
+    std::vector<Board> generate_boards(Board &, uint8_t, Timer &);
+    Board get_best_coord(Board &, Timer &, uint8_t, bool);
+
+private:
+    MoveExecuter m_move_exec;
+    MoveGenerator m_move_gen;
+};
 
 #endif // ALGORITHMS_HPP

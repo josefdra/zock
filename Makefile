@@ -2,7 +2,7 @@
 # The name of the executable to be created
 BIN_NAME := client01
 # Compiler used
-CXX ?= g++
+CXX = g++
 # Extension of source files used in the project
 SRC_EXT = cpp
 # Path to the source directory, relative to the makefile
@@ -10,11 +10,11 @@ SRC_PATH = ./src/src
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags
-COMPILE_FLAGS = -std=c++11 -Wall -g -Wextra
+COMPILE_FLAGS = -std=c++11 -Wall -Wextra
 # Additional release-specific flags
-RCOMPILE_FLAGS = -D NDEBUG -DESTING -DRELEASING
-# Additional testing-specific flags
-DCOMPILE_FLAGS = -D DEBUG -DESTING -DTESTING
+RCOMPILE_FLAGS = -O3 -DNDEBUG
+# Additional debug-specific flags
+DCOMPILE_FLAGS = -g -DDEBUG
 # Add additional include paths
 INCLUDES = -I ./src/lib
 # General linker settings
@@ -23,9 +23,6 @@ LINK_FLAGS =
 RLINK_FLAGS =
 # Additional debug-specific linker settings
 DLINK_FLAGS =
-
-TESTING =
-RELEASING =
 
 #### END PROJECT SETTINGS ####
 
@@ -69,14 +66,14 @@ endif
 # Combine compiler and linker flags
 release: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(RCOMPILE_FLAGS)
 release: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(RLINK_FLAGS)
-testing: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
-testing: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
+debug: export CXXFLAGS := $(CXXFLAGS) $(COMPILE_FLAGS) $(DCOMPILE_FLAGS)
+debug: export LDFLAGS := $(LDFLAGS) $(LINK_FLAGS) $(DLINK_FLAGS)
 
 # Build and output paths
 release: export BUILD_PATH := build/release
 release: export BIN_PATH := bin
-testing: export BUILD_PATH := build/testing
-testing: export BIN_PATH := automated_testing/client_binary
+debug: export BUILD_PATH := build/debug
+debug: export BIN_PATH := bin/debug
 install: export BIN_PATH := bin/release
 
 # Find all source files in the source directory, sorted by most
@@ -142,7 +139,7 @@ ifeq ($(shell git describe > /dev/null 2>&1 ; echo $$?), 0)
 		-D VERSION_HASH=\"$(VERSION_HASH)\"
 endif
 
-# Standard, non-optimized release build
+# Standard, optimized release build
 .PHONY: release
 release: dirs
 ifeq ($(USE_VERSION), true)
@@ -157,12 +154,12 @@ endif
 	@$(RM) -r build
 
 # Debug build for gdb debugging
-.PHONY: testing
-testing: dirs
+.PHONY: debug
+debug: dirs
 ifeq ($(USE_VERSION), true)
-	@echo "Beginning testing build v$(VERSION_STRING)"
+	@echo "Beginning debug build v$(VERSION_STRING)"
 else
-	@echo "Beginning testing build"
+	@echo "Beginning debug build"
 endif
 	@$(START_TIME)
 	@$(MAKE) all --no-print-directory
