@@ -133,7 +133,7 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_DISQUALIFICATION:
         {
-            set_disqualified(board, data & 0xFF);
+            set_disqualified(board, (data & 0xFF) - 1);
             break;
         }
         case TYPE_PHASE1_END:
