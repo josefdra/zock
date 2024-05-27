@@ -112,11 +112,6 @@ uint16_t Map::get_num_of_fields()
     return m_num_of_fields;
 }
 
-std::vector<uint16_t> Map::get_transitions()
-{
-    return m_transitions;
-}
-
 uint16_t Map::get_initial_overwrite_stones()
 {
     return m_initial_overwrite_stones;
@@ -125,6 +120,21 @@ uint16_t Map::get_initial_overwrite_stones()
 uint16_t Map::get_initial_bombs()
 {
     return m_initial_bombs;
+}
+
+std::vector<uint16_t> Map::get_transitions()
+{
+    return m_transitions;
+}
+
+std::vector<std::bitset<20000>> Map::get_transitions_to_remove()
+{
+    return transitions_to_remove;
+}
+
+std::vector<std::bitset<2501>> Map::get_fields_to_remove()
+{
+    return fields_to_remove;
 }
 
 /**
@@ -323,9 +333,6 @@ bool Map::set_player_border_sets(Board &board, std::bitset<2501> set)
     if (set.count() == 0)
         return false;
     board.border_sets.push_back(set);
-
-    board.print(0, false);
-    board.print_bitset(set);
     return true;
 }
 
@@ -334,8 +341,6 @@ void Map::init_evaluation(Board &board)
     std::bitset<2501> checked;
     if (get_walls(board, checked))
     {
-        board.print(0, false);
-        board.print_bitset(checked);
         uint16_t counter = 0;
         while (set_player_border_sets(board, get_inside_of_walls(board, checked, counter)))
             counter++;
@@ -344,6 +349,8 @@ void Map::init_evaluation(Board &board)
 
 Board Map::init_boards_and_players()
 {
+    fields_to_remove = std::vector<std::bitset<2501>>(m_num_of_fields);
+    transitions_to_remove = std::vector<std::bitset<20000>>(m_num_of_fields);
     Board ret_board(*this);
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
@@ -370,4 +377,140 @@ Board Map::init_boards_and_players()
     }
     init_evaluation(ret_board);
     return ret_board;
+}
+
+void Map::print_bitset(std::bitset<2501> &bitset)
+{
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        if (bitset.test(c))
+        {
+            std::cout << "\e[93m"
+                      << "1 "
+                      << "\033[0m";
+        }
+        else
+        {
+            std::cout << "0 ";
+        }
+        if (c % m_width == 0)
+        {
+            std::cout << std::endl;
+        }
+    }
+    std::cout << std::endl;
+}
+
+void Map::print_transitions()
+{
+    std::cout << std::endl;
+    for (int y = 0; y < m_height; y++)
+    {
+        for (int n = 1; n < m_width + 1; n++)
+        {
+            int x = m_width * y + n;
+            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 7] / 10 << " ";
+            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 0] / 10 << " ";
+            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 1] / 10 << " ";
+            std::cout << "  ";
+        }
+        std::cout << std::endl;
+        for (int n = 1; n < m_width + 1; n++)
+        {
+            int x = m_width * y + n;
+            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 6] / 10 << " ";
+            std::cout << std::setw(3) << m_numbers[x] << " ";
+            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 2] / 10 << " ";
+            std::cout << "  ";
+        }
+        std::cout << std::endl;
+        for (int n = 1; n < m_width + 1; n++)
+        {
+            int x = m_width * y + n;
+            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 5] / 10 << " ";
+            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 4] / 10 << " ";
+            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 3] / 10 << " ";
+            std::cout << "  ";
+        }
+        std::cout << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+/**
+ * @brief prints the map with transitions
+ */
+void Map::print_map_with_transitions()
+{
+    for (int i = 1; i < (m_width * m_height + 1); i++)
+    {
+        std::cout << m_numbers[i] << " ";
+        if (i % m_width == 0)
+        {
+            std::cout << std::endl;
+        }
+    }
+    print_transitions();
+}
+
+void Map::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength)
+{
+    if (strength == 0)
+    {
+        for (uint8_t dir = 0; dir < NUM_OF_DIRECTIONS; dir++)
+        {
+            uint16_t next_coord2 = get_transition(c, dir);
+            if (next_coord2 != 0)
+            {
+                transitions_to_remove[start_coord].set((next_coord2 - 1) * 8 + (dir + 4) % 8);
+            }
+        }
+        return;
+    }
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0)
+        {
+            for (uint8_t dir = 0; dir < NUM_OF_DIRECTIONS; dir++)
+                transitions_to_remove[start_coord].set((next_coord - 1) * 8 + dir);
+            fields_to_remove[start_coord].set(next_coord);
+            get_bomb_coords(start_coord, next_coord, strength - 1);
+        }
+    }
+}
+
+void Map::init_bomb_phase_boards()
+{
+    uint8_t strength = m_strength;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        fields_to_remove[c].set(c);
+        std::cout << c << std::endl;
+        if (strength > 0)
+        {
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0)
+                {
+                    transitions_to_remove[c].set((c - 1) * 8 + d);
+                    fields_to_remove[c].set(next_coord);
+                    get_bomb_coords(c, next_coord, strength - 1);
+                }
+            }
+        }
+        else
+        {
+            for (uint8_t dir = 0; dir < NUM_OF_DIRECTIONS; dir++)
+            {
+                transitions_to_remove[c].set((c - 1) * 8 + dir);
+                uint16_t next_coord = get_transition(c, dir);
+                if (next_coord != 0)
+                {
+                    transitions_to_remove[c].set((next_coord - 1) * 8 + (dir + 4) % 8);
+                }
+            }
+        }
+    }
 }

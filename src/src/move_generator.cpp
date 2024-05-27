@@ -4,6 +4,7 @@
 #include "move_executer.hpp"
 #include "timer.hpp"
 #include "board.hpp"
+#include "bomb_board.hpp"
 
 MoveGenerator::MoveGenerator() {}
 
@@ -209,8 +210,8 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
 {
     if (search_depth == 1)
     {
-        search_depth = 4;
-        timer.exception_time = (search_depth + 1) * 5000;
+        search_depth = 1;
+        timer.exception_time = (search_depth + 1) * 5000 + 200000;
     }
     MoveExecuter move_exec(map);
     MoveGenerator move_gen(map);
@@ -219,6 +220,10 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
     player = map.get_player_number();
     calculate_valid_moves(board, player, timer);
     Board res = minimax.get_best_coord(board, timer, search_depth, sorting);
+    if (board.board_sets[3].test(res.get_coord()))
+    {
+        res.set_spec(res.get_spec() + 1);
+    }
     board.reset_overwrite_moves();
     std::cout << "Debug print, to see valid moves, before move executed" << std::endl;
     board.print(player, true);
@@ -227,8 +232,61 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
     return move;
 }
 
-uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
+uint32_t MoveGenerator::generate_bomb(BombBoard &bomb_board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
 {
-    uint32_t bomb = 0;
+    // bomb_board.init_bomb_phase_boards();
+    // @todo somewhere is a mistake when playing even_more_transitions.map
+    std::cout << "gen" << std::endl;
+    uint8_t x, y;
+    uint16_t coord;
+    uint16_t affected_by_bomb = 1;
+    if (map.get_strength() > 0)
+        affected_by_bomb = map.get_strength() * 8;
+    // Sort players by number of stones in ascending order
+    std::vector<std::pair<uint8_t, uint16_t>> player_stones;
+    for (uint8_t i = 0; i < m_num_of_players; i++)
+    {
+        player_stones.push_back(std::make_pair(i, bomb_board.player_sets[i].count()));
+    }
+    std::sort(player_stones.begin(), player_stones.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
+              { return a.second > b.second; });
+    uint8_t target_player = (map.get_player_number() + 1) % map.get_player_count();
+    uint8_t player_index;
+    for (uint8_t i = 0; i < player_stones.size(); ++i)
+    {
+        if (player_stones[i].first == map.get_player_number())
+        {
+            player_index = i;
+            if (i > 0)
+            {
+                target_player = player_stones[i - 1].first;
+            }
+            else
+            {
+                target_player = player_stones[i + 1].first;
+            }
+            break;
+        }
+    }
+    if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * bomb_board.get_bombs(map.get_player_number()) && (player_index + 1) < player_stones.size())
+        target_player = player_stones[player_index + 1].first;
+    if((player_index + 1) < player_stones.size()){
+        target_player = map.get_player_number();
+    }
+    uint16_t most_deleted_stones = 0;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        if (bomb_board.board_sets[0].test(c))
+            continue;
+        uint16_t target_deleted_stones = (bomb_board.player_sets[target_player] & bomb_board.fields_to_remove[c]).count();
+        uint16_t current_player_deleted_stones = (bomb_board.player_sets[map.get_player_number()] & bomb_board.fields_to_remove[c]).count();
+        if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (bomb_board.player_sets[map.get_player_number()] & bomb_board.fields_to_remove[c]).count()))
+        {
+            most_deleted_stones = target_deleted_stones;
+            coord = c;
+        }
+    }
+    map.one_dimension_2_second_dimension(coord, x, y);
+    uint32_t bomb = (uint32_t)x << 16 | (uint32_t)y << 8;
     return bomb;
 }

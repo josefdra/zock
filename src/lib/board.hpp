@@ -7,6 +7,8 @@
 #include <array>
 #include <string>
 
+class Map;
+
 enum Colors
 {
     red = 1,
@@ -18,8 +20,6 @@ enum Colors
     dark_black,
     orange
 };
-
-class Map;
 
 class Board
 {
