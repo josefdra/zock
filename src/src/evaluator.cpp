@@ -11,9 +11,9 @@ int get_wall_value(Board &board, uint8_t player_num)
     value += (board.player_sets[player_num] & board.wall_sets[2]).count() * 5;
     value += (board.player_sets[player_num] & board.wall_sets[3]).count() * 9;
     value += (board.player_sets[player_num] & board.wall_sets[4]).count() * 7;
-    value += (board.player_sets[player_num] & board.wall_sets[5]).count() * 5;
-    value += (board.player_sets[player_num] & board.wall_sets[6]).count() * 3;
-    value += (board.player_sets[player_num] & board.wall_sets[7]).count() * 1;
+    value += (board.player_sets[player_num] & board.wall_sets[5]).count() * 3;
+    value += (board.player_sets[player_num] & board.wall_sets[6]).count() * 1;
+    value += (board.player_sets[player_num] & board.wall_sets[7]).count() * -5;
     return value * 10;
 }
 
@@ -47,7 +47,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
         if (j == 0)
             score += get_wall_value(board, player_num);
         else if (j == 1)
-            score += -(border_set_size) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
+            score -= (border_set_size) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
         else
             score += (border_set_size - j) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
     }

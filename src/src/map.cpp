@@ -323,6 +323,9 @@ bool Map::set_player_border_sets(Board &board, std::bitset<2501> set)
     if (set.count() == 0)
         return false;
     board.border_sets.push_back(set);
+
+    board.print(0, false);
+    board.print_bitset(set);
     return true;
 }
 
@@ -331,6 +334,8 @@ void Map::init_evaluation(Board &board)
     std::bitset<2501> checked;
     if (get_walls(board, checked))
     {
+        board.print(0, false);
+        board.print_bitset(checked);
         uint16_t counter = 0;
         while (set_player_border_sets(board, get_inside_of_walls(board, checked, counter)))
             counter++;
