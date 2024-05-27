@@ -30,6 +30,7 @@ private:
     bool m_game_over = false;
     bool m_disqualified = false;
     bool m_bomb_phase = false;
+    uint32_t m_initial_time_limit = 1000000;
 };
 
 #endif // GAME_H

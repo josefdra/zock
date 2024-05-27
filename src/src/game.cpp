@@ -71,6 +71,10 @@ void Game::end(Board &board)
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
 {
+    if (m_initial_time_limit == 1000000)
+    {
+        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF) * 1000;
+    }
     Timer timer((data >> 8) & 0xFFFFFFFF);
     uint8_t search_depth = data & 0xFF;
     MoveGenerator move_gen(map);
@@ -86,7 +90,7 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     board.set_spec((data >> 8) & 0xFF);
     uint8_t player = (data & 0xFF) - 1;
     MoveExecuter move_exec(map);
-    Timer timer(1000);
+    Timer timer(m_initial_time_limit);
     if (!bomb_phase)
     {
         std::cout << "Overwrites: " << board.get_overwrite_stones(player) << " | Bombs: " << board.get_bombs(player) << std::endl;

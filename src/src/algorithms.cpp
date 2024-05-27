@@ -14,7 +14,7 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
     {
         return get_evaluation(board, player_num, m_move_gen, timer);
     }
-    if (timer.return_rest_time() < 5000)
+    if (timer.return_rest_time() < timer.exception_time)
     {
         throw TimeLimitExceededException();
     }
@@ -63,7 +63,7 @@ std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Ti
     {
         if (board.valid_moves[player_num].test(i))
         {
-            if (timer.return_rest_time() < 5000)
+            if (timer.return_rest_time() < timer.exception_time)
             {
                 throw TimeLimitExceededException();
             }
@@ -88,13 +88,38 @@ std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Ti
     return boards;
 }
 
+void MiniMax::init_best_board(Board &board)
+{
+    for (uint16_t c = 0; c < board.get_num_of_fields(); c++)
+    {
+        if (board.valid_moves[m_move_exec.get_player_num()].test(c))
+        {
+            board.set_coord(c);
+            if (board.board_sets[3].test(c))
+            {
+                board.set_spec(m_move_exec.get_player_num());
+            }
+            else if (board.board_sets[4].test(c))
+            {
+                board.set_spec(20);
+            }
+            else
+            {
+                board.set_spec(0);
+            }
+            break;
+        }
+    }
+}
+
 Board MiniMax::get_best_coord(Board &board, Timer &timer, uint8_t depth, bool sorting)
 {
     int best_eval = -INT32_MAX;
-    std::vector<Board> boards = generate_boards(board, m_move_exec.get_player_num(), timer);
-    Board best_board(boards[0]);
+    Board best_board(board);
+    init_best_board(best_board);
     try
     {
+        std::vector<Board> boards = generate_boards(board, m_move_exec.get_player_num(), timer);
         for (auto &b : boards)
         {
             int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, depth, m_move_exec.get_player_num(), sorting, timer);
@@ -107,6 +132,7 @@ Board MiniMax::get_best_coord(Board &board, Timer &timer, uint8_t depth, bool so
     }
     catch (TimeLimitExceededException &e)
     {
+        std::cout << timer.return_rest_time() << std::endl;
         std::cout << "time limit exceeded" << std::endl;
     }
     std::cout << "best eval" << std::endl;

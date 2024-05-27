@@ -81,7 +81,7 @@ private:
     uint8_t m_width;
     uint8_t m_height;
     uint16_t m_coord;
-    uint8_t m_spec;
+    uint8_t m_spec;    
     std::vector<bool> m_overwrite_move;
     int evaluation;
 };

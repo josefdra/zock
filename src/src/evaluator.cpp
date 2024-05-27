@@ -50,7 +50,6 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
         else
             score += (border_set_size - j) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
     }
-    move_gen.calculate_valid_moves(board, player_num, timer);
     if (board.is_overwrite_move(player_num))
         score -= 100000;
     return score + board.player_sets[player_num].count() * 10 + board.valid_moves[player_num].count() * 100;
