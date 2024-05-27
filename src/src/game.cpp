@@ -15,11 +15,6 @@ bool Game::is_game_over()
     return m_game_over;
 }
 
-bool Game::is_disqualified()
-{
-    return m_disqualified;
-}
-
 bool Game::is_bomb_phase()
 {
     return m_bomb_phase;
@@ -30,9 +25,9 @@ void Game::set_game_over()
     m_game_over = true;
 }
 
-void Game::set_disqualified()
+void Game::set_disqualified(Board &board, uint8_t player_number)
 {
-    m_disqualified = true;
+    board.disqualified[player_number] = true;
 }
 
 void Game::set_bomb_phase()
@@ -47,7 +42,11 @@ void Game::calculate_winner(Board &board)
     std::cout << "Scores:" << std::endl;
     for (uint16_t i = 0; i < board.get_player_count(); i++)
     {
-        std::cout << "Player " << i + 1 << ": " << board.player_sets[i].count() << " points" << std::endl;
+        std::cout << "Player " << i + 1 << ": ";
+        if (board.disqualified[i])
+            std::cout << "disqualified" << std::endl;
+        else
+            std::cout << board.player_sets[i].count() << " points" << std::endl;
         if (board.player_sets[i].count() > max)
         {
             max = board.player_sets[i].count();
@@ -57,9 +56,9 @@ void Game::calculate_winner(Board &board)
     std::cout << "The winner is player " << winner << " with " << max << " points" << std::endl;
 }
 
-void Game::end(Board &board)
+void Game::end(Board &board, uint8_t player_number)
 {
-    if (is_disqualified())
+    if (board.disqualified[player_number])
     {
         std::cout << "We are disqualified" << std::endl;
     }
@@ -112,7 +111,7 @@ void Game::run(Network &net, bool sorting)
     Board board = map.init_boards_and_players();
     board.print(0, false);
 
-    while (!is_game_over() && !is_disqualified())
+    while (!is_game_over() && !board.disqualified[map.get_player_number()])
     {
         uint64_t data = net.receive_data();
         switch (data >> 56)
@@ -134,7 +133,7 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_DISQUALIFICATION:
         {
-            set_disqualified();
+            set_disqualified(board, data & 0xFF);
             break;
         }
         case TYPE_PHASE1_END:
@@ -155,5 +154,5 @@ void Game::run(Network &net, bool sorting)
         }
         }
     }
-    end(board);
+    end(board, map.get_player_number());
 }

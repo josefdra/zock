@@ -111,16 +111,9 @@ void Network::send_move(uint32_t move)
 
 uint32_t Network::get_actual_message_length(uint8_t &type)
 {
-    int counter = 0;
-    while (!check_socket_acitivity() && counter < 100000)
+    while (!check_socket_acitivity())
     {
         usleep(10);
-        counter++;
-    }
-    if(counter == 100000)
-    {
-        std::cout << "Timeout, receiving data" << std::endl;
-        exit(1);
     }
     recv(m_csocket, &type, sizeof(type), 0);
     uint32_t message_length = 0;

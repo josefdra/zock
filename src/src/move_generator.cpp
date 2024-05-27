@@ -50,12 +50,12 @@ bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player
         uint8_t next_direction = get_direction(c, d);
         uint16_t prev_coord = c;
         uint8_t prev_direction = d;
+        if (timer.return_rest_time() < timer.exception_time)
+        {
+            throw TimeLimitExceededException();
+        }
         while (next_coord != 0 && next_coord != c && !board.board_sets[1].test(next_coord) && !board.player_sets[player_number].test(next_coord))
         {
-            if (timer.return_rest_time() < timer.exception_time)
-            {
-                throw TimeLimitExceededException();
-            }
             prev_coord = next_coord;
             prev_direction = next_direction;
             next_coord = get_transition(prev_coord, prev_direction);
@@ -136,11 +136,11 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
     {
         if (board.player_sets[player_number].test(c))
         {
-            calculate_valid_no_overwrite_moves_from_player(board, player_number, c);
             if (timer.return_rest_time() < timer.exception_time)
             {
                 throw TimeLimitExceededException();
             }
+            calculate_valid_no_overwrite_moves_from_player(board, player_number, c);
         }
     }
     if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
@@ -150,11 +150,11 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
         {
             if (board.player_sets[player_number].test(c))
             {
-                calculate_valid_overwrite_moves_from_player(board, player_number, c);
                 if (timer.return_rest_time() < timer.exception_time)
                 {
                     throw TimeLimitExceededException();
                 }
+                calculate_valid_overwrite_moves_from_player(board, player_number, c);
             }
             if (board.board_sets[5].test(c))
             {
@@ -172,10 +172,6 @@ void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_numb
         {
             if (check_if_valid_move(board, c, player_number, timer))
                 board.valid_moves[player_number].set(c);
-            if (timer.return_rest_time() < timer.exception_time)
-            {
-                throw TimeLimitExceededException();
-            }
         }
     }
     if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
@@ -187,10 +183,6 @@ void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_numb
             {
                 if (check_if_valid_move(board, c, player_number, timer))
                     board.valid_moves[player_number].set(c);
-                if (timer.return_rest_time() < timer.exception_time)
-                {
-                    throw TimeLimitExceededException();
-                }
             }
             if (board.board_sets[5].test(c))
             {

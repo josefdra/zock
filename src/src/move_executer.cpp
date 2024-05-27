@@ -112,6 +112,10 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
         board.board_sets[2].reset(coord);
         inversion = true;
     }
+    if (timer.return_rest_time() < timer.exception_time)
+    {
+        throw TimeLimitExceededException();
+    }
     std::bitset<2501> to_color = get_bits_to_update(player, board, timer);
     update_bits(to_color, player, board);
     if (inversion)

@@ -75,6 +75,8 @@ public:
     std::vector<uint16_t> overwrite_stones;
     std::vector<uint16_t> bombs;
 
+    std::vector<bool> disqualified;
+
 private:
     uint8_t m_player_count;
     uint16_t m_num_of_fields;

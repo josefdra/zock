@@ -14,16 +14,20 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
     {
         return get_evaluation(board, player_num, m_move_gen, timer);
     }
-    if (timer.return_rest_time() < timer.exception_time)
-    {
-        throw TimeLimitExceededException();
-    }
     uint8_t next_player = (player_num + 1) % m_move_exec.get_num_of_players();
+    while (board.disqualified[next_player])
+    {
+        next_player = (next_player + 1) % m_move_exec.get_num_of_players();
+    }
     m_move_gen.calculate_valid_moves(board, player_num, timer);
     uint8_t prev_player = player_num;
     while (board.valid_moves[player_num].count() == 0)
     {
         player_num = (player_num + 1) % m_move_exec.get_num_of_players();
+        while (board.disqualified[next_player])
+        {
+            next_player = (next_player + 1) % m_move_exec.get_num_of_players();
+        }
         if (player_num == prev_player)
             return get_evaluation(board, player_num, m_move_gen, timer);
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
@@ -63,10 +67,6 @@ std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Ti
     {
         if (board.valid_moves[player_num].test(i))
         {
-            if (timer.return_rest_time() < timer.exception_time)
-            {
-                throw TimeLimitExceededException();
-            }
             if (board.board_sets[3].test(i))
             {
                 for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)

@@ -35,11 +35,12 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
 
     for (uint8_t i = 0; i < board.get_player_count(); i++)
     {
-        move_gen.calculate_valid_moves(board, i, timer);
+        if (!board.disqualified[i])
+            move_gen.calculate_valid_moves(board, i, timer);
+        else
+            board.valid_moves[i].reset();
         if (i != player_num)
-        {
             score -= board.player_sets[i].count() * 100;
-        }
     }
     for (uint16_t j = 0; j < border_set_size; j++)
     {
