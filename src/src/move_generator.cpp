@@ -210,7 +210,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
 {
     if (search_depth == 1)
     {
-        search_depth = 1;
+        search_depth = 5;
         timer.exception_time = (search_depth + 1) * 5000 + 200000;
     }
     MoveExecuter move_exec(map);
