@@ -211,7 +211,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
     if (search_depth == 1)
     {
         search_depth = 5;
-        timer.exception_time = (search_depth + 1) * 5000 + 200000;
+        timer.exception_time = (search_depth + 1) * 5000;
     }
     MoveExecuter move_exec(map);
     MoveGenerator move_gen(map);
@@ -234,8 +234,6 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
 
 uint32_t MoveGenerator::generate_bomb(BombBoard &bomb_board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
 {
-    // bomb_board.init_bomb_phase_boards();
-    // @todo somewhere is a mistake when playing even_more_transitions.map
     std::cout << "gen" << std::endl;
     uint8_t x, y;
     uint16_t coord;
@@ -270,7 +268,8 @@ uint32_t MoveGenerator::generate_bomb(BombBoard &bomb_board, Map &map, Timer &ti
     }
     if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * bomb_board.get_bombs(map.get_player_number()) && (player_index + 1) < player_stones.size())
         target_player = player_stones[player_index + 1].first;
-    if((player_index + 1) < player_stones.size()){
+    if ((player_index + 1) < player_stones.size())
+    {
         target_player = map.get_player_number();
     }
     uint16_t most_deleted_stones = 0;

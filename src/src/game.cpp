@@ -89,11 +89,11 @@ void Game::end(Board &board, uint8_t player_number, BombBoard &bomb_board)
 
 void Game::move_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting)
 {
-    if (m_initial_time_limit == 1000000)
+    if (((data >> 8) & 0xFFFFFFFF) != 0)
     {
-        // m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF) * 1000;
+        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF);
     }
-    Timer timer((data >> 8) & 0xFFFFFFFF);
+    Timer timer(m_initial_time_limit);
     uint8_t search_depth = data & 0xFF;
     MoveGenerator move_gen(map);
     net.send_move(move_gen.generate_move(board, map, timer, search_depth, sorting));
@@ -101,11 +101,11 @@ void Game::move_request(Network &net, uint64_t &data, Map &map, Board &board, bo
 
 void Game::bomb_request(Network &net, uint64_t &data, Map &map, BombBoard &bomb_board, bool sorting)
 {
-    if (m_initial_time_limit == 1000000)
+    if (((data >> 8) & 0xFFFFFFFF) != 0)
     {
-        // m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF) * 1000;
+        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF);
     }
-    Timer timer((data >> 8) & 0xFFFFFFFF);
+    Timer timer(m_initial_time_limit);
     uint8_t search_depth = data & 0xFF;
     MoveGenerator move_gen(map);
     net.send_move(move_gen.generate_bomb(bomb_board, map, timer, search_depth, sorting));
