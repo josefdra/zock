@@ -463,8 +463,11 @@ void Map::init_bomb_phase_boards()
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t temp_transition = get_transition(c, d);
-                uint8_t temp_direction = get_direction(c, d);
-                transitions_to_remove[c].set((temp_transition - 1) * 8 + (temp_direction + 4) % 8);
+                if (temp_transition != 0)
+                {
+                    uint8_t temp_direction = get_direction(c, d);
+                    transitions_to_remove[c].set((temp_transition - 1) * 8 + (temp_direction + 4) % 8);
+                }
             }
         }
         else

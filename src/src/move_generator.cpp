@@ -226,7 +226,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
     }
     board.reset_overwrite_moves();
     std::cout << "Debug print, to see valid moves, before move executed" << std::endl;
-    board.print(player, true);
+    // board.print(player, true);
     map.one_dimension_2_second_dimension(res.get_coord(), x, y);
     uint32_t move = (uint32_t)x << 16 | (uint32_t)y << 8 | (uint32_t)res.get_spec();
     return move;

@@ -34,6 +34,7 @@ void Network::init_socket()
 
 bool Network::init_server()
 {
+    memset(&m_server_addr, 0, sizeof(m_server_addr)); // Sichere Initialisierung
     m_server_addr.sin_family = AF_INET;
     m_server_addr.sin_port = htons(m_port);
     if (inet_pton(AF_INET, m_ip, &m_server_addr.sin_addr) <= 0)
@@ -125,10 +126,10 @@ std::stringstream Network::receive_map()
 {
     uint8_t type = 0;
     uint32_t actual_message_length = get_actual_message_length(type);
-    char message[actual_message_length + 1];
-    recv(m_csocket, &message, actual_message_length, 0);
+    std::vector<char> message(actual_message_length + 1);
+    recv(m_csocket, message.data(), actual_message_length, 0);
     message[actual_message_length] = '\0';
-    std::stringstream ss(message);
+    std::stringstream ss(message.data());
     std::cout << "Received map" << std::endl;
     return ss;
 }

@@ -15,6 +15,7 @@
 #include <sstream>
 #include <string.h>
 #include <stdint.h>
+#include <vector>
 
 class Network
 {

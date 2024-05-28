@@ -121,7 +121,7 @@ void Game::receive_move(Map &map, uint64_t &data, Board &board)
     std::cout << "Overwrites: " << board.get_overwrite_stones(player) << " | Bombs: " << board.get_bombs(player) << std::endl;
     std::cout << "Player " << (int)player + 1 << " moved to " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
     board = move_exec.exec_move(player, board, timer);
-    board.print(player, (map.get_player_number() == player));
+    // board.print(player, (map.get_player_number() == player));
 }
 
 void Game::receive_bomb(Map &map, uint64_t &data, BombBoard &bomb_board)
