@@ -453,62 +453,55 @@ void Map::print_map_with_transitions()
     print_transitions();
 }
 
-void Map::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength)
-{
-    if (strength == 0)
-    {
-        for (uint8_t dir = 0; dir < NUM_OF_DIRECTIONS; dir++)
-        {
-            uint16_t next_coord2 = get_transition(c, dir);
-            if (next_coord2 != 0)
-            {
-                transitions_to_remove[start_coord].set((next_coord2 - 1) * 8 + (dir + 4) % 8);
-            }
-        }
-        return;
-    }
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-    {
-        uint16_t next_coord = get_transition(c, d);
-        if (next_coord != 0)
-        {
-            for (uint8_t dir = 0; dir < NUM_OF_DIRECTIONS; dir++)
-                transitions_to_remove[start_coord].set((next_coord - 1) * 8 + dir);
-            fields_to_remove[start_coord].set(next_coord);
-            get_bomb_coords(start_coord, next_coord, strength - 1);
-        }
-    }
-}
-
 void Map::init_bomb_phase_boards()
 {
-    uint8_t strength = m_strength;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
-        fields_to_remove[c].set(c);
-        std::cout << c << std::endl;
-        if (strength > 0)
+        if (m_strength == 0)
         {
+            fields_to_remove[c].set(c);
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
-                uint16_t next_coord = get_transition(c, d);
-                if (next_coord != 0)
-                {
-                    transitions_to_remove[c].set((c - 1) * 8 + d);
-                    fields_to_remove[c].set(next_coord);
-                    get_bomb_coords(c, next_coord, strength - 1);
-                }
+                uint16_t temp_transition = get_transition(c, d);
+                uint8_t temp_direction = get_direction(c, d);
+                transitions_to_remove[c].set((temp_transition - 1) * 8 + (temp_direction + 4) % 8);
             }
         }
         else
         {
-            for (uint8_t dir = 0; dir < NUM_OF_DIRECTIONS; dir++)
+            std::unordered_set<uint16_t> bombed_stones;
+            bombed_stones.insert(c);
+            fields_to_remove[c].set(c);
+            for (uint8_t s = 1; s <= m_strength; ++s)
             {
-                transitions_to_remove[c].set((c - 1) * 8 + dir);
-                uint16_t next_coord = get_transition(c, dir);
-                if (next_coord != 0)
+                std::vector<uint16_t> next_bombed_stones;
+                for (auto &stone : bombed_stones)
                 {
-                    transitions_to_remove[c].set((next_coord - 1) * 8 + (dir + 4) % 8);
+                    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                    {
+                        uint16_t transition = get_transition(stone, d);
+                        if (transition != 0 && get_symbol(transition) != '-')
+                        {
+                            fields_to_remove[c].set(transition);
+                            next_bombed_stones.push_back(transition);
+                        }
+                    }
+                }
+                bombed_stones.insert(next_bombed_stones.begin(), next_bombed_stones.end());
+            }
+
+            // Update transitions for all destroyed stones
+            for (auto &stone : bombed_stones)
+            {
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t transition = get_transition(stone, d);
+                    if (transition != 0)
+                    {
+                        uint16_t direction = get_direction(stone, d);
+                        transitions_to_remove[c].set((stone - 1) * 8 + d);
+                        transitions_to_remove[c].set((transition - 1) * 8 + (direction + 4) % 8);
+                    }
                 }
             }
         }
