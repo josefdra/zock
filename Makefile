@@ -18,9 +18,9 @@ DCOMPILE_FLAGS = -g -DDEBUG
 # Add additional include paths
 INCLUDES = -I ./src/lib
 # General linker settings
-LINK_FLAGS =
+LINK_FLAGS = -static
 # Additional release-specific linker settings
-RLINK_FLAGS =
+RLINK_FLAGS = -flto -static-libgcc -static-libstdc++
 # Additional debug-specific linker settings
 DLINK_FLAGS =
 
