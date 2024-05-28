@@ -2,6 +2,7 @@
 #define EVALUATOR_HPP
 
 #include <bitset>
+#include <stdint.h>
 
 class Board;
 class MoveGenerator;

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <bitset>
+#include <stdint.h>
 
 class Board;
 class Map;

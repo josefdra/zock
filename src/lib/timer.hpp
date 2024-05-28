@@ -2,6 +2,7 @@
 #define TIMER_HPP
 
 #include <chrono>
+#include <stdint.h>
 
 class TimeLimitExceededException : public std::exception
 {
