@@ -33,7 +33,9 @@ void Game::set_disqualified(Board &board, uint8_t player_number)
 
 void Game::set_bomb_phase(BombBoard &bomb_board, Map &map, Board &board)
 {
-    bomb_board.init_bomb_board(board, map);
+    std::cout << std::endl
+              << "bomb phase starting" << std::endl
+              << std::endl;
     m_bomb_phase = true;
 }
 
@@ -118,22 +120,19 @@ void Game::receive_move(Map &map, uint64_t &data, Board &board)
     uint8_t player = (data & 0xFF) - 1;
     MoveExecuter move_exec(map);
     Timer timer(m_initial_time_limit);
-    std::cout << "Overwrites: " << board.get_overwrite_stones(player) << " | Bombs: " << board.get_bombs(player) << std::endl;
-    std::cout << "Player " << (int)player + 1 << " moved to " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
-    board = move_exec.exec_move(player, board, timer);
-    // board.print(player, (map.get_player_number() == player));
-}
-
-void Game::receive_bomb(Map &map, uint64_t &data, BombBoard &bomb_board)
-{
-    bomb_board.set_coord(map.two_dimension_2_one_dimension((data >> 32) & 0xFF, (data >> 16) & 0xFF));
-    uint8_t player = (data & 0xFF) - 1;
-    MoveExecuter move_exec(map);
-    Timer timer(m_initial_time_limit);
-    std::cout << "Bombs: " << bomb_board.get_bombs(player) << std::endl;
-    std::cout << "Player " << (int)player + 1 << " threw bomb at " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
-    bomb_board = move_exec.exec_bomb(player, bomb_board, timer);
-    bomb_board.print(player, false);
+    if (!bomb_phase)
+    {
+        std::cout << "Overwrites: " << board.get_overwrite_stones(player) << " | Bombs: " << board.get_bombs(player) << std::endl;
+        std::cout << "Player " << (int)player + 1 << " moved to " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
+        board = move_exec.exec_move(player, board, timer);
+    }
+    else
+    {
+        std::cout << "Bombs: " << board.get_bombs(player) << std::endl;
+        std::cout << "Player " << (int)player + 1 << " threw bomb at " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
+        board = move_exec.exec_move(player, board, timer);
+    }
+    board.print(player, (map.get_player_number() == player));
 }
 
 void Game::run(Network &net, bool sorting)
@@ -178,7 +177,8 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_PHASE1_END:
         {
-            set_bomb_phase(bomb_board, map, board);
+            board = Board(board, map.fields_to_remove);
+            set_bomb_phase();
             break;
         }
         case TYPE_GAME_END:

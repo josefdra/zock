@@ -203,24 +203,23 @@ Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
     return board;
 }
 
-BombBoard MoveExecuter::exec_bomb(uint8_t player, BombBoard bomb_board, Timer &timer)
+Board MoveExecuter::exec_bomb(uint8_t player, Board board, Timer &timer)
 {
     std::cout << "exec" << std::endl;
-    uint16_t coord = bomb_board.get_coord();
-    bomb_board.decrement_bombs(player);
-    for (uint8_t i = 0; i < bomb_board.board_sets.size(); i++)
+    uint16_t coord = board.get_coord();
+    board.decrement_bombs(player);
+    for (uint8_t i = 0; i < board.board_sets.size(); i++)
     {
-        bomb_board.board_sets[i] &= ~bomb_board.fields_to_remove[coord];
+        board.board_sets[i] |= board.fields_to_remove[coord];
+        board.board_sets[i] &= ~board.fields_to_remove[coord];
     }
-    for (uint8_t i = 0; i < bomb_board.player_sets.size(); i++)
+    for (uint8_t i = 0; i < board.player_sets.size(); i++)
     {
-        bomb_board.player_sets[i] &= ~bomb_board.fields_to_remove[coord];
+        board.player_sets[i] |= board.fields_to_remove[coord];
+        board.player_sets[i] &= ~board.fields_to_remove[coord];
     }
-    bomb_board.board_sets[0] |= bomb_board.fields_to_remove[coord];
-    for (uint16_t i = 0; i < bomb_board.transitions_to_remove[coord].size(); i++)
-    {
-        if (bomb_board.transitions_to_remove[coord].test(i))
-            bomb_board.set_zero_transition(i);
-    }
-    return bomb_board;
+    board.board_sets[0] |= board.fields_to_remove[coord];
+    return board;
 }
+
+

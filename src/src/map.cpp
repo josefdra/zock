@@ -350,7 +350,6 @@ void Map::init_evaluation(Board &board)
 Board Map::init_boards_and_players()
 {
     fields_to_remove = std::vector<std::bitset<2501>>(m_num_of_fields);
-    transitions_to_remove = std::vector<std::bitset<20000>>(m_num_of_fields);
     Board ret_board(*this);
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
@@ -379,132 +378,39 @@ Board Map::init_boards_and_players()
     return ret_board;
 }
 
-void Map::print_bitset(std::bitset<2501> &bitset)
+void Map::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength)
 {
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    if (strength == 0)
     {
-        if (bitset.test(c))
+        return;
+    }
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0)
         {
-            std::cout << "\e[93m"
-                      << "1 "
-                      << "\033[0m";
-        }
-        else
-        {
-            std::cout << "0 ";
-        }
-        if (c % m_width == 0)
-        {
-            std::cout << std::endl;
+            fields_to_remove[start_coord].set(next_coord);
+            get_bomb_coords(start_coord, next_coord, strength - 1);
         }
     }
-    std::cout << std::endl;
-}
-
-void Map::print_transitions()
-{
-    std::cout << std::endl;
-    for (int y = 0; y < m_height; y++)
-    {
-        for (int n = 1; n < m_width + 1; n++)
-        {
-            int x = m_width * y + n;
-            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 7] / 10 << " ";
-            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 0] / 10 << " ";
-            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 1] / 10 << " ";
-            std::cout << "  ";
-        }
-        std::cout << std::endl;
-        for (int n = 1; n < m_width + 1; n++)
-        {
-            int x = m_width * y + n;
-            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 6] / 10 << " ";
-            std::cout << std::setw(3) << m_numbers[x] << " ";
-            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 2] / 10 << " ";
-            std::cout << "  ";
-        }
-        std::cout << std::endl;
-        for (int n = 1; n < m_width + 1; n++)
-        {
-            int x = m_width * y + n;
-            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 5] / 10 << " ";
-            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 4] / 10 << " ";
-            std::cout << std::setw(3) << m_transitions[(x - 1) * 8 + 3] / 10 << " ";
-            std::cout << "  ";
-        }
-        std::cout << std::endl;
-        std::cout << std::endl;
-    }
-}
-
-/**
- * @brief prints the map with transitions
- */
-void Map::print_map_with_transitions()
-{
-    for (int i = 1; i < (m_width * m_height + 1); i++)
-    {
-        std::cout << m_numbers[i] << " ";
-        if (i % m_width == 0)
-        {
-            std::cout << std::endl;
-        }
-    }
-    print_transitions();
 }
 
 void Map::init_bomb_phase_boards()
 {
+    uint8_t strength = m_strength;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
-        if (m_strength == 0)
+        fields_to_remove[c].set(c);
+        std::cout << c << std::endl;
+        if (strength > 0)
         {
-            fields_to_remove[c].set(c);
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
-                uint16_t temp_transition = get_transition(c, d);
-                if (temp_transition != 0)
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0)
                 {
-                    uint8_t temp_direction = get_direction(c, d);
-                    transitions_to_remove[c].set((temp_transition - 1) * 8 + (temp_direction + 4) % 8);
-                }
-            }
-        }
-        else
-        {
-            std::unordered_set<uint16_t> bombed_stones;
-            bombed_stones.insert(c);
-            fields_to_remove[c].set(c);
-            for (uint8_t s = 1; s <= m_strength; ++s)
-            {
-                std::vector<uint16_t> next_bombed_stones;
-                for (auto &stone : bombed_stones)
-                {
-                    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                    {
-                        uint16_t transition = get_transition(stone, d);
-                        if (transition != 0 && get_symbol(transition) != '-')
-                        {
-                            fields_to_remove[c].set(transition);
-                            next_bombed_stones.push_back(transition);
-                        }
-                    }
-                }
-                bombed_stones.insert(next_bombed_stones.begin(), next_bombed_stones.end());
-            }
-
-            // Update transitions for all destroyed stones
-            for (auto &stone : bombed_stones)
-            {
-                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                {
-                    uint16_t transition = get_transition(stone, d);
-                    if (transition != 0)
-                    {
-                        uint16_t direction = get_direction(stone, d);
-                        transitions_to_remove[c].set((stone - 1) * 8 + d);
-                        transitions_to_remove[c].set((transition - 1) * 8 + (direction + 4) % 8);
-                    }
+                    fields_to_remove[c].set(next_coord);
+                    get_bomb_coords(c, next_coord, strength - 1);
                 }
             }
         }

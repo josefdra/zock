@@ -244,7 +244,7 @@ uint32_t MoveGenerator::generate_bomb(BombBoard &bomb_board, Map &map, Timer &ti
     std::vector<std::pair<uint8_t, uint16_t>> player_stones;
     for (uint8_t i = 0; i < m_num_of_players; i++)
     {
-        player_stones.push_back(std::make_pair(i, bomb_board.player_sets[i].count()));
+        player_stones.push_back(std::make_pair(i, board.player_sets[i].count()));
     }
     std::sort(player_stones.begin(), player_stones.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
               { return a.second > b.second; });
@@ -266,7 +266,7 @@ uint32_t MoveGenerator::generate_bomb(BombBoard &bomb_board, Map &map, Timer &ti
             break;
         }
     }
-    if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * bomb_board.get_bombs(map.get_player_number()) && (player_index + 1) < player_stones.size())
+    if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * board.get_bombs(map.get_player_number()) && (player_index + 1) < player_stones.size())
         target_player = player_stones[player_index + 1].first;
     if ((player_index + 1) < player_stones.size())
     {
@@ -275,11 +275,11 @@ uint32_t MoveGenerator::generate_bomb(BombBoard &bomb_board, Map &map, Timer &ti
     uint16_t most_deleted_stones = 0;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
-        if (bomb_board.board_sets[0].test(c))
+        if (board.board_sets[0].test(c))
             continue;
-        uint16_t target_deleted_stones = (bomb_board.player_sets[target_player] & bomb_board.fields_to_remove[c]).count();
-        uint16_t current_player_deleted_stones = (bomb_board.player_sets[map.get_player_number()] & bomb_board.fields_to_remove[c]).count();
-        if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (bomb_board.player_sets[map.get_player_number()] & bomb_board.fields_to_remove[c]).count()))
+        uint16_t target_deleted_stones = (board.player_sets[target_player] & board.fields_to_remove[c]).count();
+        uint16_t current_player_deleted_stones = (board.player_sets[map.get_player_number()] & board.fields_to_remove[c]).count();
+        if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (board.player_sets[map.get_player_number()] & board.fields_to_remove[c]).count()))
         {
             most_deleted_stones = target_deleted_stones;
             coord = c;

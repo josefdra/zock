@@ -19,6 +19,12 @@ Board::Board(Map &map)
     disqualified = std::vector<bool>(m_player_count, false);
 }
 
+Board::Board(Board &board, std::vector<std::bitset<2501>> &to_remove)
+{
+    *this = board;
+    fields_to_remove = to_remove;
+}
+
 Board::Board(Board &board, uint16_t coord, uint8_t spec)
 {
     *this = board;

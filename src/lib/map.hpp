@@ -50,13 +50,9 @@ public:
     void init_evaluation(Board &);
     Board init_boards_and_players();
     void get_bomb_coords(uint16_t, uint16_t, uint8_t);
-    void print_bitset(std::bitset<2501> &);
-    void print_transitions();
-    void print_map_with_transitions();
     void init_bomb_phase_boards();
 
     std::vector<std::bitset<2501>> fields_to_remove;
-    std::vector<std::bitset<20000>> transitions_to_remove;
 
 private:
     std::vector<char> m_numbers;
