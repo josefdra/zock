@@ -197,10 +197,12 @@ void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, T
     board.valid_moves[player_number].reset();
     if (2 * board.player_sets[player_number].count() < board.board_sets[6].count())
     {
+        std::cout << "calculating move from player" << std::endl;
         calculate_moves_from_player(board, player_number, timer);
     }
     else
     {
+        std::cout << "calculating move from frame" << std::endl;
         calculate_moves_from_frame(board, player_number, timer);
     }
 }
