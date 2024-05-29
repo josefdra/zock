@@ -32,6 +32,9 @@ void Game::set_disqualified(Board &board, uint8_t player_number)
 
 void Game::set_bomb_phase()
 {
+    std::cout << std::endl
+              << "bomb phase starting" << std::endl
+              << std::endl;
     m_bomb_phase = true;
 }
 
@@ -100,6 +103,7 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     {
         std::cout << "Bombs: " << board.get_bombs(player) << std::endl;
         std::cout << "Player " << (int)player + 1 << " threw bomb at " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
+        board = move_exec.exec_move(player, board, timer);
     }
     board.print(player, (map.get_player_number() == player));
 }
@@ -138,6 +142,7 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_PHASE1_END:
         {
+            board = Board(board, map.fields_to_remove);
             set_bomb_phase();
             break;
         }

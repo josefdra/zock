@@ -198,4 +198,23 @@ Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
     return board;
 }
 
-Board MoveExecuter::exec_bomb(uint8_t player, Board board) { return board; }
+Board MoveExecuter::exec_bomb(uint8_t player, Board board, Timer &timer)
+{
+    std::cout << "exec" << std::endl;
+    uint16_t coord = board.get_coord();
+    board.decrement_bombs(player);
+    for (uint8_t i = 0; i < board.board_sets.size(); i++)
+    {
+        board.board_sets[i] |= board.fields_to_remove[coord];
+        board.board_sets[i] &= ~board.fields_to_remove[coord];
+    }
+    for (uint8_t i = 0; i < board.player_sets.size(); i++)
+    {
+        board.player_sets[i] |= board.fields_to_remove[coord];
+        board.player_sets[i] &= ~board.fields_to_remove[coord];
+    }
+    board.board_sets[0] |= board.fields_to_remove[coord];
+    return board;
+}
+
+

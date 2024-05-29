@@ -7,6 +7,7 @@
 #include <iostream>
 #include <bitset>
 #include <tuple>
+#include <algorithm>
 
 class Map;
 class Board;

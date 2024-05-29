@@ -28,7 +28,7 @@ public:
     void update_boards(uint8_t, uint8_t, Board &, Timer &);
     // void adjust_protected_fields(Board &, uint8_t);
     Board exec_move(uint8_t, Board, Timer &);
-    Board exec_bomb(uint8_t, Board);
+    Board exec_bomb(uint8_t, Board, Timer &);
 
 private:
     std::vector<uint16_t> m_transitions;

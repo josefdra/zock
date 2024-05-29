@@ -344,6 +344,7 @@ void Map::init_evaluation(Board &board)
 
 Board Map::init_boards_and_players()
 {
+    fields_to_remove = std::vector<std::bitset<2501>>(m_num_of_fields);
     Board ret_board(*this);
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
@@ -370,4 +371,43 @@ Board Map::init_boards_and_players()
     }
     init_evaluation(ret_board);
     return ret_board;
+}
+
+void Map::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength)
+{
+    if (strength == 0)
+    {
+        return;
+    }
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0)
+        {
+            fields_to_remove[start_coord].set(next_coord);
+            get_bomb_coords(start_coord, next_coord, strength - 1);
+        }
+    }
+}
+
+void Map::init_bomb_phase_boards()
+{
+    uint8_t strength = m_strength;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        fields_to_remove[c].set(c);
+        std::cout << c << std::endl;
+        if (strength > 0)
+        {
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0)
+                {
+                    fields_to_remove[c].set(next_coord);
+                    get_bomb_coords(c, next_coord, strength - 1);
+                }
+            }
+        }
+    }
 }

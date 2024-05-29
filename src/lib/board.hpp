@@ -26,6 +26,7 @@ class Board
 public:
     Board(Map &);
     Board(Board &, uint16_t, uint8_t);
+    Board(Board &, std::vector<std::bitset<2501>> &);
     ~Board();
 
     void set_coord(uint16_t);
@@ -71,6 +72,8 @@ public:
     std::array<std::bitset<2501>, 8> wall_sets;
     std::vector<std::bitset<2501>> border_sets;
     std::vector<std::bitset<2501>> protected_fields;
+
+    std::vector<std::bitset<2501>> fields_to_remove;
 
     std::vector<uint16_t> overwrite_stones;
     std::vector<uint16_t> bombs;
