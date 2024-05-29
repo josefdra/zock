@@ -3,7 +3,6 @@
 #include "board.hpp"
 #include "move_generator.hpp"
 #include "timer.hpp"
-#include "bomb_board.hpp"
 
 MoveExecuter::MoveExecuter() {}
 

@@ -7,7 +7,6 @@
 class Network;
 class Map;
 class Board;
-class BombBoard;
 
 class Game
 {
@@ -19,13 +18,11 @@ public:
     bool is_bomb_phase();
     void set_game_over();
     void set_disqualified(Board &, uint8_t);
-    void set_bomb_phase(BombBoard &, Map &, Board &);
-    void calculate_winner(Board &, BombBoard &);
-    void end(Board &, uint8_t, BombBoard &);
-    void move_request(Network &, uint64_t &, Map &, Board &, bool);
-    void bomb_request(Network &, uint64_t &, Map &, BombBoard &, bool);
-    void receive_move(Map &, uint64_t &, Board &);
-    void receive_bomb(Map &, uint64_t &, BombBoard &);
+    void set_bomb_phase();
+    void calculate_winner(Board &);
+    void end(Board &, uint8_t);
+    void turn_request(Network &, uint64_t &, Map &, Board &, bool, bool);
+    void receive_turn(Map &, uint64_t &, Board &, bool);
     void run(Network &, bool);
 
 private:

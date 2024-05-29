@@ -4,7 +4,6 @@
 #include "move_executer.hpp"
 #include "timer.hpp"
 #include "board.hpp"
-#include "bomb_board.hpp"
 
 MoveGenerator::MoveGenerator() {}
 
@@ -232,7 +231,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
     return move;
 }
 
-uint32_t MoveGenerator::generate_bomb(BombBoard &bomb_board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
+uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
 {
     std::cout << "gen" << std::endl;
     uint8_t x, y;

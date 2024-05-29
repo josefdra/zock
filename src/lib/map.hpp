@@ -36,7 +36,6 @@ public:
     uint16_t get_initial_bombs();
     std::vector<uint16_t> get_transitions();
     std::vector<std::bitset<2501>> get_fields_to_remove();
-    std::vector<std::bitset<20000>> get_transitions_to_remove();
     void read_map(std::stringstream);
     void one_dimension_2_second_dimension(uint16_t, uint8_t &, uint8_t &);
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);

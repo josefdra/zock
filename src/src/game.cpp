@@ -5,7 +5,6 @@
 #include "move_executer.hpp"
 #include "board.hpp"
 #include "timer.hpp"
-#include "bomb_board.hpp"
 
 Game::Game() {}
 
@@ -31,7 +30,7 @@ void Game::set_disqualified(Board &board, uint8_t player_number)
     board.disqualified[player_number] = true;
 }
 
-void Game::set_bomb_phase(BombBoard &bomb_board, Map &map, Board &board)
+void Game::set_bomb_phase()
 {
     std::cout << std::endl
               << "bomb phase starting" << std::endl
@@ -39,7 +38,7 @@ void Game::set_bomb_phase(BombBoard &bomb_board, Map &map, Board &board)
     m_bomb_phase = true;
 }
 
-void Game::calculate_winner(Board &board, BombBoard &bomb_board)
+void Game::calculate_winner(Board &board)
 {
     uint16_t max = 0;
     uint16_t winner = 0;
@@ -52,32 +51,18 @@ void Game::calculate_winner(Board &board, BombBoard &bomb_board)
             std::cout << "disqualified" << std::endl;
         else
         {
-            if (!is_bomb_phase())
-                std::cout << board.player_sets[i].count() << " points" << std::endl;
-            else
-                std::cout << bomb_board.player_sets[i].count() << " points" << std::endl;
+            std::cout << board.player_sets[i].count() << " points" << std::endl;
         }
-        if (!is_bomb_phase())
+        if (board.player_sets[i].count() > max)
         {
-            if (board.player_sets[i].count() > max)
-            {
-                max = board.player_sets[i].count();
-                winner = i + 1;
-            }
-        }
-        else
-        {
-            if (bomb_board.player_sets[i].count() > max)
-            {
-                max = bomb_board.player_sets[i].count();
-                winner = i + 1;
-            }
+            max = board.player_sets[i].count();
+            winner = i + 1;
         }
     }
     std::cout << "The winner is player " << winner << " with " << max << " points" << std::endl;
 }
 
-void Game::end(Board &board, uint8_t player_number, BombBoard &bomb_board)
+void Game::end(Board &board, uint8_t player_number)
 {
     if (board.disqualified[player_number])
     {
@@ -85,35 +70,26 @@ void Game::end(Board &board, uint8_t player_number, BombBoard &bomb_board)
     }
     else
     {
-        calculate_winner(board, bomb_board);
+        calculate_winner(board);
     }
 }
 
-void Game::move_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting)
+void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
 {
-    if (((data >> 8) & 0xFFFFFFFF) != 0)
+    if (m_initial_time_limit == 1000000)
     {
-        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF);
+        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF) * 1000;
     }
-    Timer timer(m_initial_time_limit);
+    Timer timer((data >> 8) & 0xFFFFFFFF);
     uint8_t search_depth = data & 0xFF;
     MoveGenerator move_gen(map);
-    net.send_move(move_gen.generate_move(board, map, timer, search_depth, sorting));
+    if (!bomb_phase)
+        net.send_move(move_gen.generate_move(board, map, timer, search_depth, sorting));
+    else
+        net.send_move(move_gen.generate_bomb(board, map, timer, search_depth, sorting));
 }
 
-void Game::bomb_request(Network &net, uint64_t &data, Map &map, BombBoard &bomb_board, bool sorting)
-{
-    if (((data >> 8) & 0xFFFFFFFF) != 0)
-    {
-        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF);
-    }
-    Timer timer(m_initial_time_limit);
-    uint8_t search_depth = data & 0xFF;
-    MoveGenerator move_gen(map);
-    net.send_move(move_gen.generate_bomb(bomb_board, map, timer, search_depth, sorting));
-}
-
-void Game::receive_move(Map &map, uint64_t &data, Board &board)
+void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
 {
     board.set_coord(map.two_dimension_2_one_dimension((data >> 32) & 0xFF, (data >> 16) & 0xFF));
     board.set_spec((data >> 8) & 0xFF);
@@ -156,18 +132,12 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_RECEIVE_TURN_REQUEST:
         {
-            if (!is_bomb_phase())
-                move_request(net, data, map, board, sorting);
-            else
-                bomb_request(net, data, map, bomb_board, sorting);
+            turn_request(net, data, map, board, sorting, m_bomb_phase);
             break;
         }
         case TYPE_RECEIVE_PLAYER_TURN:
         {
-            if (!is_bomb_phase())
-                receive_move(map, data, board);
-            else
-                receive_bomb(map, data, bomb_board);
+            receive_turn(map, data, board, m_bomb_phase);
             break;
         }
         case TYPE_DISQUALIFICATION:

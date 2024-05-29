@@ -127,11 +127,6 @@ std::vector<uint16_t> Map::get_transitions()
     return m_transitions;
 }
 
-std::vector<std::bitset<20000>> Map::get_transitions_to_remove()
-{
-    return transitions_to_remove;
-}
-
 std::vector<std::bitset<2501>> Map::get_fields_to_remove()
 {
     return fields_to_remove;

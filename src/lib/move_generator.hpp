@@ -12,7 +12,6 @@
 class Map;
 class Board;
 class Timer;
-class BombBoard;
 
 class MoveGenerator
 {
@@ -33,7 +32,7 @@ public:
     void calculate_moves_from_frame(Board &, uint8_t, Timer &);
     void calculate_valid_moves(Board &, uint8_t, Timer &);
     uint32_t generate_move(Board &, Map &, Timer &, uint8_t, bool);
-    uint32_t generate_bomb(BombBoard &, Map &, Timer &, uint8_t, bool);
+    uint32_t generate_bomb(Board &, Map &, Timer &, uint8_t, bool);
 
 private:
     std::vector<uint16_t> m_transitions;

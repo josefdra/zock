@@ -10,7 +10,6 @@ class Map;
 class Board;
 class Evaluator;
 class Timer;
-class BombBoard;
 
 class MoveExecuter
 {
