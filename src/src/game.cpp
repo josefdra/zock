@@ -76,11 +76,11 @@ void Game::end(Board &board, uint8_t player_number)
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
 {
-    if (m_initial_time_limit == 1000000)
+    if (((data >> 8) & 0xFFFFFFFF) != 0)
     {
-        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF) * 1000;
+        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF);
     }
-    Timer timer((data >> 8) & 0xFFFFFFFF);
+    Timer timer(m_initial_time_limit);
     uint8_t search_depth = data & 0xFF;
     MoveGenerator move_gen(map);
     if (!bomb_phase)
@@ -106,7 +106,7 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     {
         std::cout << "Bombs: " << board.get_bombs(player) << std::endl;
         std::cout << "Player " << (int)player + 1 << " threw bomb at " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
-        board = move_exec.exec_move(player, board, timer);
+        board = move_exec.exec_bomb(player, board, timer);
     }
     board.print(player, (map.get_player_number() == player));
 }
@@ -116,7 +116,6 @@ void Game::run(Network &net, bool sorting)
     Map map;
     map.read_map(net.receive_map());
     Board board = map.init_boards_and_players();
-    BombBoard bomb_board;
     map.init_bomb_phase_boards();
     board.print(0, false);
 
