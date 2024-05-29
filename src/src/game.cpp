@@ -163,5 +163,5 @@ void Game::run(Network &net, bool sorting)
         }
         }
     }
-    end(board, map.get_player_number(), bomb_board);
+    end(board, map.get_player_number());
 }
