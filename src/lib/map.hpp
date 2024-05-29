@@ -48,7 +48,7 @@ public:
     bool set_player_border_sets(Board &, std::bitset<2501>);
     void init_evaluation(Board &);
     Board init_boards_and_players();
-    void get_bomb_coords(uint16_t, uint16_t, uint8_t);
+    void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &);
     void init_bomb_phase_boards();
 
     std::vector<std::bitset<2501>> fields_to_remove;
