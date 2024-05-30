@@ -170,8 +170,8 @@ std::string Board::get_color_string(Colors color)
         return "\e[95m";
     case cyan:
         return "\e[96m";
-    case dark_black:
-        return "\e[30m";
+    case black:
+        return "\e[90m";
     default:
         return "\e[37m";
     }
@@ -248,7 +248,7 @@ void Board::print(uint8_t player, bool our_player)
                 {
                     if (player_sets[i].test(c))
                     {
-                        std::cout << get_color_string(Colors(i + 1)) << i + 1;
+                        std::cout << get_color_string(Colors(i + 1)) << (uint16_t)(i + 1);
 #ifdef COLOR
                         std::cout << "\033[0m";
 #endif

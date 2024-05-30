@@ -217,7 +217,13 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
     MiniMax minimax(move_exec, move_gen);
     uint8_t x, y, player;
     player = map.get_player_number();
-    calculate_valid_moves(board, player, timer);
+    try
+    {
+        calculate_valid_moves(board, player, timer);
+    }
+    catch (TimeLimitExceededException &e)
+    {
+    }
     Board res = minimax.get_best_coord(board, timer, search_depth, sorting);
     if (board.board_sets[3].test(res.get_coord()))
     {

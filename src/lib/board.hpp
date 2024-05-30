@@ -17,7 +17,7 @@ enum Colors
     yellow,
     cyan,
     magenta,
-    dark_black,
+    black,
     orange
 };
 

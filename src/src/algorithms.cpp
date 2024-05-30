@@ -19,6 +19,10 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
     }
+    if (timer.return_rest_time() < timer.exception_time)
+    {
+        throw TimeLimitExceededException();
+    }
     m_move_gen.calculate_valid_moves(board, player_num, timer);
     uint8_t prev_player = player_num;
     while (board.valid_moves[player_num].count() == 0)
@@ -31,7 +35,15 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
         if (player_num == prev_player)
             return get_evaluation(board, player_num, m_move_gen, timer);
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
+        if (timer.return_rest_time() < timer.exception_time)
+        {
+            throw TimeLimitExceededException();
+        }
         m_move_gen.calculate_valid_moves(board, player_num, timer);
+    }
+    if (timer.return_rest_time() < timer.exception_time)
+    {
+        throw TimeLimitExceededException();
     }
     std::vector<Board> boards = generate_boards(board, player_num, timer);
     int best_eval;
@@ -65,19 +77,26 @@ std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Ti
     std::vector<Board> boards;
     for (uint16_t i = 1; i < m_move_exec.get_num_of_fields(); i++)
     {
+        if (timer.return_rest_time() < timer.exception_time)
+        {
+            throw TimeLimitExceededException();
+        }
         if (board.valid_moves[player_num].test(i))
         {
             if (board.board_sets[3].test(i))
             {
                 for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
                 {
+                    if (timer.return_rest_time() < timer.exception_time)
+                    {
+                        throw TimeLimitExceededException();
+                    }
                     boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, j), timer));
                 }
             }
             else if (board.board_sets[4].test(i))
             {
                 boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 20), timer));
-                boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 21), timer));
             }
             else
             {
