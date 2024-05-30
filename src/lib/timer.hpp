@@ -40,9 +40,18 @@ public:
         return duration.count();
     }
 
-    uint32_t exception_time = 5000;
+    uint32_t get_exception_time() const
+    {
+        return m_exception_time;
+    }
+
+    void set_exception_time(uint32_t exception_time)
+    {
+        m_exception_time = exception_time;
+    }
 
 private:
+    uint32_t m_exception_time = 5000;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_start_time;
     uint32_t m_time_limit;
 };

@@ -1,45 +1,46 @@
 #include "algorithms.hpp"
 #include "map.hpp"
 #include "timer.hpp"
-#include "board.hpp"
+#include "move_board.hpp"
+#include "bomb_board.hpp"
 #include "evaluator.hpp"
 
 MiniMax::MiniMax(MoveExecuter &move_exec, MoveGenerator &move_gen) : m_move_exec(move_exec), m_move_gen(move_gen) {}
 
 MiniMax::~MiniMax() {}
 
-int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int8_t depth, uint8_t player_num, bool sorting, Timer &timer)
+int MiniMax::minimaxOrParanoidWithPruning(MoveBoard &move_board, int alpha, int beta, int8_t depth, uint8_t player_num, bool sorting, Timer &timer)
 {
     if (depth == 0)
     {
-        return get_evaluation(board, player_num, m_move_gen, timer);
+        return get_evaluation(move_board, player_num, m_move_gen, timer);
     }
     uint8_t next_player = (player_num + 1) % m_move_exec.get_num_of_players();
-    while (board.disqualified[next_player])
+    while (move_board.is_disqualified(next_player))
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
     }
-    m_move_gen.calculate_valid_moves(board, player_num, timer);
+    m_move_gen.calculate_valid_moves(move_board, player_num, timer);
     uint8_t prev_player = player_num;
-    while (board.valid_moves[player_num].count() == 0)
+    while (move_board.get_valid_moves(player_num).count() == 0)
     {
         player_num = (player_num + 1) % m_move_exec.get_num_of_players();
-        while (board.disqualified[next_player])
+        while (move_board.is_disqualified(next_player))
         {
             next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         }
         if (player_num == prev_player)
-            return get_evaluation(board, player_num, m_move_gen, timer);
+            return get_evaluation(move_board, player_num, m_move_gen, timer);
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
-        m_move_gen.calculate_valid_moves(board, player_num, timer);
+        m_move_gen.calculate_valid_moves(move_board, player_num, timer);
     }
-    std::vector<Board> boards = generate_boards(board, player_num, timer);
+    std::vector<MoveBoard> move_boards = generate_boards(move_board, player_num, timer);
     int best_eval;
     if (player_num == m_move_exec.get_player_num())
         best_eval = -INT32_MAX;
     else
         best_eval = INT32_MAX;
-    for (auto &b : boards)
+    for (auto &b : move_boards)
     {
         int eval = minimaxOrParanoidWithPruning(b, alpha, beta, depth - 1, next_player, sorting, timer);
         if (player_num == m_move_exec.get_player_num())
@@ -60,67 +61,66 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
     return best_eval;
 }
 
-std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Timer &timer)
+std::vector<MoveBoard> MiniMax::generate_boards(MoveBoard &move_board, uint8_t player_num, Timer &timer)
 {
-    std::vector<Board> boards;
+    std::vector<MoveBoard> move_boards;
     for (uint16_t i = 1; i < m_move_exec.get_num_of_fields(); i++)
     {
-        if (board.valid_moves[player_num].test(i))
+        if (move_board.get_valid_moves(player_num).test(i))
         {
-            if (board.board_sets[3].test(i))
+            if (move_board.get_board_set(3).test(i))
             {
                 for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
                 {
-                    boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, j), timer));
+                    move_boards.push_back(m_move_exec.exec_move(player_num, MoveBoard(move_board, i, j), timer));
                 }
             }
-            else if (board.board_sets[4].test(i))
+            else if (move_board.get_board_set(4).test(i))
             {
-                boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 20), timer));
-                boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 21), timer));
+                move_boards.push_back(m_move_exec.exec_move(player_num, MoveBoard(move_board, i, 21), timer));
             }
             else
             {
-                boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 0), timer));
+                move_boards.push_back(m_move_exec.exec_move(player_num, MoveBoard(move_board, i, 0), timer));
             }
         }
     }
-    return boards;
+    return move_boards;
 }
 
-void MiniMax::init_best_board(Board &board)
+void MiniMax::init_best_board(MoveBoard &move_board)
 {
-    for (uint16_t c = 0; c < board.get_num_of_fields(); c++)
+    for (uint16_t c = 0; c < move_board.get_num_of_fields(); c++)
     {
-        if (board.valid_moves[m_move_exec.get_player_num()].test(c))
+        if (move_board.get_valid_moves(move_board.get_player_num()).test(c))
         {
-            board.set_coord(c);
-            if (board.board_sets[3].test(c))
+            move_board.set_coord(c);
+            if (move_board.get_board_set(3).test(c))
             {
-                board.set_spec(m_move_exec.get_player_num());
+                move_board.set_spec(m_move_exec.get_player_num());
             }
-            else if (board.board_sets[4].test(c))
+            else if (move_board.get_board_set(4).test(c))
             {
-                board.set_spec(20);
+                move_board.set_spec(21);
             }
             else
             {
-                board.set_spec(0);
+                move_board.set_spec(0);
             }
             break;
         }
     }
 }
 
-Board MiniMax::get_best_coord(Board &board, Timer &timer, uint8_t depth, bool sorting)
+MoveBoard MiniMax::get_best_coord(MoveBoard &move_board, Timer &timer, uint8_t depth, bool sorting)
 {
     int best_eval = -INT32_MAX;
-    Board best_board(board);
+    MoveBoard best_board(move_board);
     init_best_board(best_board);
     try
     {
-        std::vector<Board> boards = generate_boards(board, m_move_exec.get_player_num(), timer);
-        for (auto &b : boards)
+        std::vector<MoveBoard> move_boards = generate_boards(move_board, m_move_exec.get_player_num(), timer);
+        for (auto &b : move_boards)
         {
             int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, depth, m_move_exec.get_player_num(), sorting, timer);
             if (eval > best_eval)

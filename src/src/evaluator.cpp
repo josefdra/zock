@@ -1,57 +1,57 @@
 #include "evaluator.hpp"
-#include "board.hpp"
+#include "move_board.hpp"
 #include "move_generator.hpp"
 #include "timer.hpp"
 
-int get_wall_value(Board &board, uint8_t player_num)
+int get_wall_value(MoveBoard &move_board, uint8_t player_num)
 {
     int value = 0;
-    value += (board.player_sets[player_num] & board.wall_sets[0]).count() * 2;
-    value += (board.player_sets[player_num] & board.wall_sets[1]).count() * 3;
-    value += (board.player_sets[player_num] & board.wall_sets[2]).count() * 5;
-    value += (board.player_sets[player_num] & board.wall_sets[3]).count() * 9;
-    value += (board.player_sets[player_num] & board.wall_sets[4]).count() * 7;
-    value += (board.player_sets[player_num] & board.wall_sets[5]).count() * 3;
-    value += (board.player_sets[player_num] & board.wall_sets[6]).count() * 1;
-    value += (board.player_sets[player_num] & board.wall_sets[7]).count() * -5;
+    value += (move_board.get_player_set(player_num) & move_board.get_wall_set(0)).count() * 2;
+    value += (move_board.get_player_set(player_num) & move_board.get_wall_set(1)).count() * 3;
+    value += (move_board.get_player_set(player_num) & move_board.get_wall_set(2)).count() * 5;
+    value += (move_board.get_player_set(player_num) & move_board.get_wall_set(3)).count() * 9;
+    value += (move_board.get_player_set(player_num) & move_board.get_wall_set(4)).count() * 7;
+    value += (move_board.get_player_set(player_num) & move_board.get_wall_set(5)).count() * 3;
+    value += (move_board.get_player_set(player_num) & move_board.get_wall_set(6)).count() * 1;
+    value += (move_board.get_player_set(player_num) & move_board.get_wall_set(7)).count() * -5;
     return value * 10;
 }
 
-int get_eliminate_player_score(Board &board, uint8_t player_num)
+int get_eliminate_player_score(MoveBoard &move_board, uint8_t player_num)
 {
     int value = 0;
-    for (uint8_t i = 0; i < board.get_player_count(); i++)
+    for (uint8_t i = 0; i < move_board.get_player_count(); i++)
     {
-        if (i != player_num && board.player_sets[i].count() == 0)
+        if (i != player_num && move_board.get_player_set(i).count() == 0)
             value += 10000;
     }
     return value;
 }
 
-int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Timer &timer)
+int get_evaluation(MoveBoard &move_board, uint8_t player_num, MoveGenerator &move_gen, Timer &timer)
 {
-    uint16_t border_set_size = board.border_sets.size();
+    uint16_t border_set_size = move_board.get_border_set_size();
     int score = 0;
 
-    for (uint8_t i = 0; i < board.get_player_count(); i++)
+    for (uint8_t i = 0; i < move_board.get_player_count(); i++)
     {
-        if (!board.disqualified[i])
-            move_gen.calculate_valid_moves(board, i, timer);
+        if (!move_board.is_disqualified(i))
+            move_gen.calculate_valid_moves(move_board, i, timer);
         else
-            board.valid_moves[i].reset();
+            move_board.get_valid_moves(i).reset();
         if (i != player_num)
-            score -= board.player_sets[i].count() * 100;
+            score -= move_board.get_player_set(i).count() * 100;
     }
     for (uint16_t j = 0; j < border_set_size; j++)
     {
         if (j == 0)
-            score += get_wall_value(board, player_num);
+            score += get_wall_value(move_board, player_num);
         else if (j == 1)
-            score -= (border_set_size) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
+            score -= (border_set_size) * 10 * (move_board.get_border_set(j) & move_board.get_player_set(player_num)).count();
         else
-            score += (border_set_size - j) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
+            score += (border_set_size - j) * 10 * (move_board.get_border_set(j) & move_board.get_player_set(player_num)).count();
     }
-    if (board.is_overwrite_move(player_num))
+    if (move_board.is_overwrite_move(player_num))
         score -= 100000;
-    return score + board.player_sets[player_num].count() * 10 + board.valid_moves[player_num].count() * 100;
+    return score + move_board.get_player_set(player_num).count() * 10 + move_board.get_valid_moves(player_num).count() * 100;
 }

@@ -12,6 +12,8 @@
 class Map;
 class Board;
 class Timer;
+class BombBoard;
+class MoveBoard;
 
 class MoveGenerator
 {
@@ -25,14 +27,14 @@ public:
     uint16_t get_num_of_fields();
     uint8_t get_num_of_players();
     uint8_t get_player_num();
-    bool check_if_valid_move(Board &, uint16_t, uint8_t, Timer &);
-    void calculate_valid_no_overwrite_moves_from_player(Board &, uint8_t, uint16_t);
-    void calculate_valid_overwrite_moves_from_player(Board &, uint8_t, uint16_t);
-    void calculate_moves_from_player(Board &, uint8_t, Timer &);
-    void calculate_moves_from_frame(Board &, uint8_t, Timer &);
-    void calculate_valid_moves(Board &, uint8_t, Timer &);
-    uint32_t generate_move(Board &, Map &, Timer &, uint8_t, bool);
-    uint32_t generate_bomb(Board &, Map &, Timer &, uint8_t, bool);
+    bool check_if_valid_move(MoveBoard &, uint16_t, uint8_t, Timer &);
+    void calculate_valid_no_overwrite_moves_from_player(MoveBoard &, uint8_t, uint16_t);
+    void calculate_valid_overwrite_moves_from_player(MoveBoard &, uint8_t, uint16_t);
+    void calculate_moves_from_player(MoveBoard &, uint8_t, Timer &);
+    void calculate_moves_from_frame(MoveBoard &, uint8_t, Timer &);
+    void calculate_valid_moves(MoveBoard &, uint8_t, Timer &);
+    uint32_t generate_move(MoveBoard &, Map &, Timer &, uint8_t, bool);
+    uint32_t generate_bomb(BombBoard &, Map &, Timer &, uint8_t, bool);
 
 private:
     std::vector<uint16_t> m_transitions;
