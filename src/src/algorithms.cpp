@@ -90,7 +90,7 @@ std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Ti
 
 void MiniMax::init_best_board(Board &board)
 {
-    for (uint16_t c = 0; c < board.get_num_of_fields(); c++)
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
     {
         if (board.valid_moves[m_move_exec.get_player_num()].test(c))
         {
