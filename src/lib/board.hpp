@@ -25,37 +25,39 @@ class Board
 {
 public:
     Board(Map &);
-    Board(const Board &);
-    Board(Board &&) noexcept;
-    Board&operator=(const Board &);
-    Board&operator=(Board &&) noexcept;
+    Board(Board &, uint16_t, uint8_t);
+    Board(Board &, std::vector<std::bitset<2501>> &);
     ~Board();
 
     void set_coord(uint16_t);
-    void set_disqualified(uint8_t);
+    void set_spec(uint8_t);
+    void set_overwrite_stones(uint8_t, uint16_t);
+    void set_bombs(uint8_t, uint16_t);
+    void set_overwrite_move(uint8_t);
     uint8_t get_player_count();
     uint16_t get_num_of_fields();
     uint8_t get_width();
     uint8_t get_height();
+    uint16_t get_overwrite_stones(uint8_t);
     uint16_t get_bombs(uint8_t);
-    std::vector<uint16_t> &get_all_bombs();
     uint16_t get_coord();
-    uint8_t get_player_num();
+    uint8_t get_spec();
     int get_evaluation();
-    std::vector<bool> &get_disqualified();
-    std::bitset<2501> &get_board_set(uint8_t);
-    std::array<std::bitset<2501>, 7> &get_board_sets();
-    std::bitset<2501> &get_player_set(uint8_t);
-    std::vector<std::bitset<2501>> &get_player_sets();
-    bool is_disqualified(uint8_t);
+    void increment_overwrite_stones(uint8_t);
+    void increment_bombs(uint8_t);
+    void decrement_overwrite_stones(uint8_t);
+    void decrement_bombs(uint8_t);
+    bool has_overwrite_stones(uint8_t);
+    bool is_overwrite_move(uint8_t);
+    void reset_overwrite_moves();
     void one_dimension_2_second_dimension(uint16_t, uint8_t &, uint8_t &);
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
     std::string get_color_string(Colors);
     void print_upper_outlines();
-    bool print_m_board_sets(uint16_t);
+    bool print_board_sets(uint16_t);
+    void print(uint8_t, bool);
     void print_bitset(std::bitset<2501> &);
 
-protected:
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
     // boards[2] = i board
@@ -63,17 +65,29 @@ protected:
     // boards[4] = b board
     // boards[5] = x board
     // boards[6] = border around occupied fields
-    std::array<std::bitset<2501>, 7> m_board_sets;
-    std::vector<std::bitset<2501>> m_player_sets;
-    std::vector<uint16_t> m_overwrite_stones;
-    std::vector<uint16_t> m_bombs;
-    std::vector<bool> m_disqualified;
-    uint8_t m_our_player;
+    std::vector<std::bitset<2501>> board_sets;
+    std::vector<std::bitset<2501>> player_sets;
+    std::vector<std::bitset<2501>> valid_moves;
+    // first 8 sets for 1 to 8 walls next to field
+    std::array<std::bitset<2501>, 8> wall_sets;
+    std::vector<std::bitset<2501>> border_sets;
+    std::vector<std::bitset<2501>> protected_fields;
+
+    std::vector<std::bitset<2501>> fields_to_remove;
+
+    std::vector<uint16_t> overwrite_stones;
+    std::vector<uint16_t> bombs;
+
+    std::vector<bool> disqualified;
+
+private:
     uint8_t m_player_count;
     uint16_t m_num_of_fields;
     uint8_t m_width;
     uint8_t m_height;
     uint16_t m_coord;
+    uint8_t m_spec;    
+    std::vector<bool> m_overwrite_move;
     int evaluation;
 };
 

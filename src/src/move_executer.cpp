@@ -3,8 +3,6 @@
 #include "board.hpp"
 #include "move_generator.hpp"
 #include "timer.hpp"
-#include "bomb_board.hpp"
-#include "move_board.hpp"
 
 MoveExecuter::MoveExecuter() {}
 
@@ -43,20 +41,20 @@ uint8_t MoveExecuter::get_player_num()
     return m_player_num;
 }
 
-void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, MoveBoard &move_board, Timer &timer)
+void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, Board &board, Timer &timer)
 {
-    for (auto &bitset : move_board.get_board_sets())
+    for (auto &bitset : board.board_sets)
     {
         bitset &= ~to_color;
     }
-    for (auto &bitset : move_board.get_player_sets())
+    for (auto &bitset : board.player_sets)
     {
         bitset &= ~to_color;
     }
-    move_board.get_player_set(player) |= to_color;
+    board.player_sets[player] |= to_color;
     for (uint16_t c = 1; c < get_num_of_fields(); c++)
     {
-        if (timer.return_rest_time() < timer.get_exception_time())
+        if (timer.return_rest_time() < timer.exception_time)
         {
             throw TimeLimitExceededException();
         }
@@ -65,18 +63,18 @@ void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, Move
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
-                if (next_coord != 0 && move_board.get_board_set(1).test(next_coord))
+                if (next_coord != 0 && board.board_sets[1].test(next_coord))
                 {
-                    move_board.get_board_set(6).set(next_coord);
+                    board.board_sets[6].set(next_coord);
                 }
             }
         }
     }
 }
 
-std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, MoveBoard &move_board, Timer &timer)
+std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, Board &board, Timer &timer)
 {
-    uint16_t coord = move_board.get_coord();
+    uint16_t coord = board.get_coord();
     std::bitset<2501> to_color;
     to_color.set(coord);
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
@@ -84,13 +82,13 @@ std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, MoveBoard &mo
         uint16_t temp_transition = get_transition(coord, d);
         uint8_t temp_direction = get_direction(coord, d);
         std::bitset<2501> temp;
-        if (timer.return_rest_time() < timer.get_exception_time())
+        if (timer.return_rest_time() < timer.exception_time)
         {
             throw TimeLimitExceededException();
         }
-        while (temp_transition != 0 && temp_transition != coord && !move_board.get_board_set(1).test(temp_transition))
+        while (temp_transition != 0 && temp_transition != coord && !board.board_sets[1].test(temp_transition))
         {
-            if (move_board.get_player_set(player).test(temp_transition))
+            if (board.player_sets[player].test(temp_transition))
             {
                 to_color |= temp;
                 break;
@@ -108,131 +106,119 @@ std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, MoveBoard &mo
     return to_color;
 }
 
-void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, MoveBoard &move_board, Timer &timer)
+void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, Timer &timer)
 {
-    uint16_t coord = move_board.get_coord();
+    uint16_t coord = board.get_coord();
     bool inversion = false;
-    if (move_board.get_board_set(2).test(coord))
+    if (board.board_sets[2].test(coord))
     {
-        move_board.get_board_set(1).reset(coord);
-        move_board.get_board_set(2).reset(coord);
+        board.board_sets[1].reset(coord);
+        board.board_sets[2].reset(coord);
         inversion = true;
     }
-    if (timer.return_rest_time() < timer.get_exception_time())
+    if (timer.return_rest_time() < timer.exception_time)
     {
         throw TimeLimitExceededException();
     }
-    std::bitset<2501> to_color = get_bits_to_update(player, move_board, timer);
-    update_bits(to_color, player, move_board, timer);
+    std::bitset<2501> to_color = get_bits_to_update(player, board, timer);
+    update_bits(to_color, player, board, timer);
     if (inversion)
     {
-        uint16_t player_count = move_board.get_player_count();
-        std::bitset<2501> temp_board = move_board.get_player_set(player_count - 1);
+        uint16_t player_count = board.get_player_count();
+        std::bitset<2501> temp_board = board.player_sets[player_count - 1];
         for (uint8_t i = player_count - 1; i > 0; i--)
         {
-            move_board.get_player_set(i) = move_board.get_player_set(i - 1);
+            board.player_sets[i] = board.player_sets[i - 1];
         }
-        move_board.get_player_set(0) = temp_board;
+        board.player_sets[0] = temp_board;
     }
     else if (change_stones)
     {
-        std::bitset<2501> temp_board = move_board.get_player_set(player);
-        move_board.get_player_set(player) = move_board.get_player_set(change_stones - 1);
-        move_board.get_player_set(change_stones - 1) = temp_board;
+        std::bitset<2501> temp_board = board.player_sets[player];
+        board.player_sets[player] = board.player_sets[change_stones - 1];
+        board.player_sets[change_stones - 1] = temp_board;
     }
 }
 
-MoveBoard MoveExecuter::exec_move(uint8_t player, MoveBoard move_board, Timer &timer)
+// void MoveExecuter::adjust_protected_fields(Board &board, uint8_t player)
+// {
+//     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+//     {
+//         if (board.protected_fields[player].test(c))
+//         {
+//             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+//             {
+//                 uint16_t next_coord = get_transition(c, d);
+//                 if (next_coord == 0 || board.protected_fields[player].test(next_coord))
+//                 {
+//                     uint16_t trans1 = get_transition(c, (d + 3) % NUM_OF_DIRECTIONS);
+//                     uint16_t trans2 = get_transition(c, (d + 4) % NUM_OF_DIRECTIONS);
+//                     uint16_t trans3 = get_transition(c, (d + 5) % NUM_OF_DIRECTIONS);
+//                     bool found_proteceted = false;
+//                     if (test_if_protected(board, player, trans1))
+//                     {
+//                         found_proteceted = true;
+//                         board.protected_fields[player].set(trans1);
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
+
+Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
 {
-    uint16_t coord = move_board.get_coord();
-    uint8_t spec = move_board.get_spec();
+    uint16_t coord = board.get_coord();
+    uint8_t spec = board.get_spec();
     uint8_t change_stones = 0;
     bool overwrite_move = false;
-    if (!move_board.get_player_set(1).test(coord))
+    if (!board.board_sets[1].test(coord))
     {
-        move_board.decrement_overwrite_stones(player);
+        board.decrement_overwrite_stones(player);
         overwrite_move = true;
     }
     if (spec == 20)
     {
-        move_board.get_board_set(1).reset(coord);
-        move_board.get_board_set(4).reset(coord);
-        move_board.increment_bombs(player);
+        board.board_sets[1].reset(coord);
+        board.board_sets[4].reset(coord);
+        board.increment_bombs(player);
     }
     else if (spec == 21)
     {
-        move_board.get_board_set(1).reset(coord);
-        move_board.get_board_set(4).reset(coord);
-        move_board.increment_overwrite_stones(player);
+        board.board_sets[1].reset(coord);
+        board.board_sets[4].reset(coord);
+        board.increment_overwrite_stones(player);
     }
     else if (spec != 0)
     {
-        move_board.get_board_set(1).reset(coord);
-        move_board.get_board_set(3).reset(coord);
+        board.board_sets[1].reset(coord);
+        board.board_sets[3].reset(coord);
         change_stones = spec;
     }
-    update_boards(player, change_stones, move_board, timer);
-    return move_board;
+    update_boards(player, change_stones, board, timer);
+    // if (overwrite_move)
+    //     board.protected_fields[player] = board.player_sets[player] & (board.wall_sets[3] | board.wall_sets[4] | board.wall_sets[5] | board.wall_sets[6] | board.wall_sets[7]);
+    // adjust_protected_fields(board, player);
+    return board;
 }
 
-void MoveExecuter::get_bomb_coords(uint16_t coord, BombBoard &bomb_board, uint8_t strength, std::bitset<2501> &mask)
+Board MoveExecuter::exec_bomb(uint8_t player, Board board, Timer &timer)
 {
-    if (strength >= 0 && bomb_board.get_fields_to_remove(coord) != mask)
+    std::cout << "exec" << std::endl;
+    uint16_t coord = board.get_coord();
+    board.decrement_bombs(player);
+    for (uint8_t i = 0; i < board.board_sets.size(); i++)
     {
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-        {
-            uint16_t t = get_transition(coord, d);
-            if (t != 0)
-            {
-                bomb_board.get_transitions_to_remove(coord).set((coord - 1) * 8 + d);
-                bomb_board.get_transitions_to_remove(coord).set((coord - 1) * 8 + (d + 4) % 8);
-            }
-            if (uint8_t strength = bomb_board.get_strength() > 0)
-            {
-                get_bomb_coords(t, bomb_board, strength - 1, mask);
-            }
-        }
+        board.board_sets[i] |= board.fields_to_remove[coord];
+        board.board_sets[i] &= ~board.fields_to_remove[coord];
     }
-    else
+    for (uint8_t i = 0; i < board.player_sets.size(); i++)
     {
-        return;
+        board.player_sets[i] |= board.fields_to_remove[coord];
+        board.player_sets[i] &= ~board.fields_to_remove[coord];
     }
+    board.board_sets[0] |= board.fields_to_remove[coord];
+    return board;
 }
 
-BombBoard MoveExecuter::exec_bomb(uint8_t player, BombBoard bomb_board, Timer &timer)
-{
-    std::bitset<2501> mask;
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        if (!bomb_board.get_board_set(0).test(c))
-            mask.set(c);
-    }
-    uint16_t coord = bomb_board.get_coord();
-    bomb_board.get_fields_to_remove(coord).set(coord);
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-    {
-        uint16_t t = get_transition(coord, d);
-        if (t != 0)
-        {
-            bomb_board.get_transitions_to_remove(coord).set((coord - 1) * 8 + d);
-            bomb_board.get_transitions_to_remove(coord).set((coord - 1) * 8 + (d + 4) % 8);
-        }
-        if (uint8_t strength = bomb_board.get_strength() > 0)
-        {
-            get_bomb_coords(t, bomb_board, strength - 1, mask);
-        }
-    }
-    bomb_board.decrement_bombs(player);
-    for (uint8_t i = 0; i < bomb_board.get_board_sets().size(); i++)
-    {
-        bomb_board.get_board_set(i) |= bomb_board.get_fields_to_remove(coord);
-        bomb_board.get_board_set(i) &= ~bomb_board.get_fields_to_remove(coord);
-    }
-    for (uint8_t i = 0; i < bomb_board.get_player_sets().size(); i++)
-    {
-        bomb_board.get_player_set(i) |= bomb_board.get_fields_to_remove(coord);
-        bomb_board.get_player_set(i) &= ~bomb_board.get_fields_to_remove(coord);
-    }
-    bomb_board.get_board_set(0) |= bomb_board.get_fields_to_remove(coord);
-    return bomb_board;
-}
+

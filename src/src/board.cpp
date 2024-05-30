@@ -2,116 +2,61 @@
 #include "map.hpp"
 
 Board::Board(Map &map)
-    : m_board_sets(),
-      m_player_sets(map.get_player_count()),
-      m_overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
-      m_bombs(map.get_player_count(), map.get_initial_bombs()),
-      m_disqualified(map.get_player_count(), false),
-      m_our_player(0),
-      m_player_count(map.get_player_count()),
-      m_num_of_fields(map.get_num_of_fields()),
-      m_width(map.get_width()),
-      m_height(map.get_height()),
-      m_coord(0),
-      evaluation(-INT32_MAX) {}
-
-Board::Board(const Board &other)
-    : m_board_sets(other.m_board_sets),
-      m_player_sets(other.m_player_sets),
-      m_overwrite_stones(other.m_overwrite_stones),
-      m_bombs(other.m_bombs),
-      m_disqualified(other.m_disqualified),
-      m_our_player(other.m_our_player),
-      m_player_count(other.m_player_count),
-      m_num_of_fields(other.m_num_of_fields),
-      m_width(other.m_width),
-      m_height(other.m_height),
-      m_coord(other.m_coord),
-      evaluation(other.evaluation) {}
-
-Board::Board(Board &&other) noexcept
-    : m_board_sets(std::move(other.m_board_sets)),
-      m_player_sets(std::move(other.m_player_sets)),
-      m_overwrite_stones(std::move(other.m_overwrite_stones)),
-      m_bombs(std::move(other.m_bombs)),
-      m_disqualified(std::move(other.m_disqualified)),
-      m_our_player(other.m_our_player),
-      m_player_count(other.m_player_count),
-      m_num_of_fields(other.m_num_of_fields),
-      m_width(other.m_width),
-      m_height(other.m_height),
-      m_coord(other.m_coord),
-      evaluation(other.evaluation)
 {
-    // Setze andere auf gültige Zustände zurück
-    other.m_our_player = 0;
-    other.m_player_count = 0;
-    other.m_num_of_fields = 0;
-    other.m_width = 0;
-    other.m_height = 0;
-    other.m_coord = 0;
-    other.evaluation = -INT32_MAX;
+    m_player_count = map.get_player_count();
+    m_num_of_fields = map.get_num_of_fields();
+    m_width = map.get_width();
+    m_height = map.get_height();
+    m_overwrite_move = std::vector<bool>(m_player_count, false);
+    board_sets = std::vector<std::bitset<2501>>(7);
+    player_sets = std::vector<std::bitset<2501>>(m_player_count);
+    valid_moves = std::vector<std::bitset<2501>>(m_player_count);
+    wall_sets = std::array<std::bitset<2501>, 8>();
+    border_sets = std::vector<std::bitset<2501>>(1);
+    protected_fields = std::vector<std::bitset<2501>>(m_player_count);
+    overwrite_stones = std::vector<uint16_t>(m_player_count, map.get_initial_overwrite_stones());
+    bombs = std::vector<uint16_t>(m_player_count, map.get_initial_bombs());
+    disqualified = std::vector<bool>(m_player_count, false);
 }
 
-Board &Board::operator=(const Board &other)
+Board::Board(Board &board, std::vector<std::bitset<2501>> &to_remove)
 {
-    if (this != &other)
-    {
-        m_board_sets = other.m_board_sets;
-        m_player_sets = other.m_player_sets;
-        m_overwrite_stones = other.m_overwrite_stones;
-        m_bombs = other.m_bombs;
-        m_disqualified = other.m_disqualified;
-        m_our_player = other.m_our_player;
-        m_player_count = other.m_player_count;
-        m_num_of_fields = other.m_num_of_fields;
-        m_width = other.m_width;
-        m_height = other.m_height;
-        m_coord = other.m_coord;
-        evaluation = other.evaluation;
-    }
-    return *this;
+    *this = board;
+    fields_to_remove = to_remove;
 }
 
-Board &Board::operator=(Board &&other) noexcept
+Board::Board(Board &board, uint16_t coord, uint8_t spec)
 {
-    if (this != &other)
-    {
-        m_board_sets = std::move(other.m_board_sets);
-        m_player_sets = std::move(other.m_player_sets);
-        m_overwrite_stones = std::move(other.m_overwrite_stones);
-        m_bombs = std::move(other.m_bombs);
-        m_disqualified = std::move(other.m_disqualified);
-        m_our_player = other.m_our_player;
-        m_player_count = other.m_player_count;
-        m_num_of_fields = other.m_num_of_fields;
-        m_width = other.m_width;
-        m_height = other.m_height;
-        m_coord = other.m_coord;
-        evaluation = other.evaluation;
-
-        // Setze andere auf gültige Zustände zurück
-        other.m_our_player = 0;
-        other.m_player_count = 0;
-        other.m_num_of_fields = 0;
-        other.m_width = 0;
-        other.m_height = 0;
-        other.m_coord = 0;
-        other.evaluation = -INT32_MAX;
-    }
-    return *this;
+    *this = board;
+    m_coord = coord;
+    m_spec = spec;
 }
 
-Board::~Board() = default;
+Board::~Board() {}
 
 void Board::set_coord(uint16_t coord)
 {
     m_coord = coord;
 }
 
-void Board::set_disqualified(uint8_t player)
+void Board::set_spec(uint8_t spec)
 {
-    m_disqualified[player] = true;
+    m_spec = spec;
+}
+
+void Board::set_overwrite_stones(uint8_t player, uint16_t _overwrite_stones)
+{
+    overwrite_stones[player] = _overwrite_stones;
+}
+
+void Board::set_bombs(uint8_t player, uint16_t _bombs)
+{
+    bombs[player] = _bombs;
+}
+
+void Board::set_overwrite_move(uint8_t player)
+{
+    m_overwrite_move[player] = true;
 }
 
 uint8_t Board::get_player_count()
@@ -134,14 +79,14 @@ uint8_t Board::get_height()
     return m_height;
 }
 
-uint16_t Board::get_bombs(uint8_t player)
+uint16_t Board::get_overwrite_stones(uint8_t player)
 {
-    return m_bombs[player];
+    return overwrite_stones[player];
 }
 
-std::vector<uint16_t> &Board::get_all_bombs()
+uint16_t Board::get_bombs(uint8_t player)
 {
-    return m_bombs;
+    return bombs[player];
 }
 
 uint16_t Board::get_coord()
@@ -149,9 +94,9 @@ uint16_t Board::get_coord()
     return m_coord;
 }
 
-uint8_t Board::get_player_num()
+uint8_t Board::get_spec()
 {
-    return m_our_player;
+    return m_spec;
 }
 
 int Board::get_evaluation()
@@ -159,34 +104,39 @@ int Board::get_evaluation()
     return evaluation;
 }
 
-std::vector<bool> &Board::get_disqualified()
+void Board::increment_overwrite_stones(uint8_t player)
 {
-    return m_disqualified;
+    overwrite_stones[player]++;
 }
 
-std::bitset<2501> &Board::get_board_set(uint8_t set)
+void Board::increment_bombs(uint8_t player)
 {
-    return m_board_sets[set];
+    bombs[player]++;
 }
 
-std::array<std::bitset<2501>, 7> &Board::get_board_sets()
+void Board::decrement_overwrite_stones(uint8_t player)
 {
-    return m_board_sets;
+    overwrite_stones[player]--;
 }
 
-std::bitset<2501> &Board::get_player_set(uint8_t player)
+void Board::decrement_bombs(uint8_t player)
 {
-    return m_player_sets[player];
+    bombs[player]--;
 }
 
-std::vector<std::bitset<2501>> &Board::get_player_sets()
+bool Board::has_overwrite_stones(uint8_t player)
 {
-    return m_player_sets;
+    return overwrite_stones[player] > 0;
 }
 
-bool Board::is_disqualified(uint8_t player)
+bool Board::is_overwrite_move(uint8_t player)
 {
-    return m_disqualified[player];
+    return m_overwrite_move[player];
+}
+
+void Board::reset_overwrite_moves()
+{
+    m_overwrite_move = std::vector<bool>(m_player_count, false);
 }
 
 void Board::one_dimension_2_second_dimension(uint16_t _1D_coord, uint8_t &x, uint8_t &y)
@@ -245,41 +195,78 @@ void Board::print_upper_outlines()
     std::cout << std::endl;
 }
 
-bool Board::print_m_board_sets(uint16_t c)
+bool Board::print_board_sets(uint16_t c)
 {
-    if (m_board_sets[0].test(c))
+    if (board_sets[0].test(c))
     {
         std::cout << "-";
         return true;
     }
-    else if (m_board_sets[2].test(c))
+    else if (board_sets[2].test(c))
     {
         std::cout << "i";
         return true;
     }
-    else if (m_board_sets[3].test(c))
+    else if (board_sets[3].test(c))
     {
         std::cout << "c";
         return true;
     }
-    else if (m_board_sets[4].test(c))
+    else if (board_sets[4].test(c))
     {
         std::cout << "b";
         return true;
     }
     // boards[1] is printed after i, c, b, because these fields are also 0 fields
     // and otherwise the i, c, b values would be overwritten
-    else if (m_board_sets[1].test(c))
+    else if (board_sets[1].test(c))
     {
         std::cout << "0";
         return true;
     }
-    else if (m_board_sets[5].test(c))
+    else if (board_sets[5].test(c))
     {
         std::cout << "x";
         return true;
     }
     return false;
+}
+
+void Board::print(uint8_t player, bool our_player)
+{
+    print_upper_outlines();
+    for (uint16_t y = 0; y < get_height(); y++)
+    {
+        std::cout << " " << std::setw(2) << y << " | ";
+        for (uint16_t x = 0; x < get_width(); x++)
+        {
+            uint16_t c = two_dimension_2_one_dimension(x, y);
+            if (!print_board_sets(c))
+            {
+                for (uint16_t i = 0; i < m_player_count; i++)
+                {
+                    if (player_sets[i].test(c))
+                    {
+                        std::cout << get_color_string(Colors(i + 1)) << i + 1;
+#ifdef COLOR
+                        std::cout << "\033[0m";
+#endif
+                    }
+                }
+            }
+            if (our_player && valid_moves[player].test(c))
+            {
+                std::cout << "'";
+            }
+            else
+            {
+                std::cout << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "Calculated valid moves: " << valid_moves[player].count() << std::endl;
+    std::cout << std::endl;
 }
 
 // For visualization of a bitset. Can probably be removed

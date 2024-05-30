@@ -13,7 +13,6 @@
 #include <iomanip>
 
 class Board;
-class MoveBoard;
 
 class Map
 {
@@ -37,29 +36,31 @@ public:
     uint16_t get_initial_bombs();
     std::vector<uint16_t> get_transitions();
     std::vector<std::bitset<2501>> get_fields_to_remove();
-    std::vector<std::bitset<20000>> get_transitions_to_remove();
     void read_map(std::stringstream);
     void one_dimension_2_second_dimension(uint16_t, uint8_t &, uint8_t &);
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
     bool check_players(char);
     void set_values(Board &, uint16_t);
-    void init_wall_values(MoveBoard &);
-    bool get_walls(MoveBoard &, std::bitset<2501> &);
-    std::bitset<2501> get_inside_of_walls(MoveBoard &, std::bitset<2501> &, uint16_t);
-    bool set_player_border_sets(MoveBoard &, std::bitset<2501>);
-    void init_evaluation(MoveBoard &);
-    MoveBoard init_boards_and_players();
+    void init_protected_fields(Board &);
+    void init_wall_values(Board &);
+    bool get_walls(Board &, std::bitset<2501> &);
+    std::bitset<2501> get_inside_of_walls(Board &, std::bitset<2501> &, uint16_t);
+    bool set_player_border_sets(Board &, std::bitset<2501>);
+    void init_evaluation(Board &);
+    Board init_boards_and_players();
+    void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &);
+    void init_bomb_phase_boards();
+
+    std::vector<std::bitset<2501>> fields_to_remove;
 
 private:
-    std::vector<std::bitset<2501>> m_fields_to_remove;
-    std::vector<std::bitset<20000>> m_transitions_to_remove;
     std::vector<char> m_numbers;
     std::vector<uint16_t> m_transitions;
     uint16_t m_height;
     uint16_t m_width;
     uint16_t m_player_count;
     uint16_t m_strength;
-    uint16_t m_initial_m_overwrite_stones;
+    uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
     uint16_t m_num_of_fields;
     uint8_t player_number;

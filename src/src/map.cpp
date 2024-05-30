@@ -1,7 +1,6 @@
 #include "map.hpp"
 #include "board.hpp"
 #include "move_generator.hpp"
-#include "move_board.hpp" 
 
 /**
  * @brief map.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships
@@ -115,7 +114,7 @@ uint16_t Map::get_num_of_fields()
 
 uint16_t Map::get_initial_overwrite_stones()
 {
-    return m_initial_m_overwrite_stones;
+    return m_initial_overwrite_stones;
 }
 
 uint16_t Map::get_initial_bombs()
@@ -128,14 +127,9 @@ std::vector<uint16_t> Map::get_transitions()
     return m_transitions;
 }
 
-std::vector<std::bitset<20000>> Map::get_transitions_to_remove()
-{
-    return m_transitions_to_remove;
-}
-
 std::vector<std::bitset<2501>> Map::get_fields_to_remove()
 {
-    return m_fields_to_remove;
+    return fields_to_remove;
 }
 
 /**
@@ -146,7 +140,7 @@ std::vector<std::bitset<2501>> Map::get_fields_to_remove()
 void Map::read_map(std::stringstream mapfile)
 {
     char temp;
-    mapfile >> m_player_count >> m_initial_m_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
+    mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     m_num_of_fields = m_height * m_width + 1;
     m_transitions = std::vector<uint16_t>((m_num_of_fields - 1) * 8 + 1, 0);
     m_numbers = std::vector<char>(m_num_of_fields, 0);
@@ -209,42 +203,50 @@ void Map::set_values(Board &board, uint16_t c)
 {
     if (get_symbol(c) == '0')
     {
-        board.get_board_set(1).set(c);
+        board.board_sets[1].set(c);
     }
     else if (get_symbol(c) == '-')
     {
-        board.get_board_set(0).set(c);
+        board.board_sets[0].set(c);
     }
     else if (get_symbol(c) == 'i')
     {
-        board.get_board_set(1).set(c);
-        board.get_board_set(2).set(c);
+        board.board_sets[1].set(c);
+        board.board_sets[2].set(c);
     }
     else if (get_symbol(c) == 'c')
     {
-        board.get_board_set(1).set(c);
-        board.get_board_set(3).set(c);
+        board.board_sets[1].set(c);
+        board.board_sets[3].set(c);
     }
     else if (get_symbol(c) == 'b')
     {
-        board.get_board_set(1).set(c);
-        board.get_board_set(4).set(c);
+        board.board_sets[1].set(c);
+        board.board_sets[4].set(c);
     }
     else if (get_symbol(c) == 'x')
     {
-        board.get_board_set(5).set(c);
+        board.board_sets[5].set(c);
     }
     else if (check_players(get_symbol(c)))
     {
-        board.get_player_set(get_symbol(c) - '0' - 1).set(c);
+        board.player_sets[get_symbol(c) - '0' - 1].set(c);
     }
 }
 
-void Map::init_wall_values(MoveBoard &move_board)
+void Map::init_protected_fields(Board &board)
 {
-    for (uint16_t c = 1; c < move_board.get_num_of_fields(); c++)
+    for (uint8_t i = 0; i < board.get_player_count(); i++)
     {
-        if (move_board.get_board_set(0).test(c))
+        board.protected_fields[i] = board.player_sets[i] & (board.wall_sets[3] | board.wall_sets[4] | board.wall_sets[5] | board.wall_sets[6] | board.wall_sets[7]);
+    }
+}
+
+void Map::init_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+    {
+        if (board.border_sets[0].test(c))
         {
             uint8_t counter = 0;
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
@@ -255,18 +257,19 @@ void Map::init_wall_values(MoveBoard &move_board)
                     counter++;
                 }
             }
-            move_board.get_wall_set(counter - 1).set(c);
+            board.wall_sets[counter - 1].set(c);
         }
     }
+    init_protected_fields(board);
 }
 
-bool Map::get_walls(MoveBoard &move_board, std::bitset<2501> &checked)
+bool Map::get_walls(Board &board, std::bitset<2501> &checked)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            if (get_transition(c, d) == 0 && !move_board.get_board_set(0).test(c))
+            if (get_transition(c, d) == 0 && !board.board_sets[0].test(c))
             {
                 checked.set(c);
                 break;
@@ -277,18 +280,18 @@ bool Map::get_walls(MoveBoard &move_board, std::bitset<2501> &checked)
         return false;
     else
     {
-        move_board.get_border_set(0) = checked;
+        board.border_sets[0] = checked;
         return true;
     }
-    void init_wall_values(Board & move_board);
+    void init_wall_values(Board & board);
 }
 
-std::bitset<2501> Map::get_inside_of_walls(MoveBoard &move_board, std::bitset<2501> &checked, uint16_t counter)
+std::bitset<2501> Map::get_inside_of_walls(Board &board, std::bitset<2501> &checked, uint16_t counter)
 {
     std::bitset<2501> set;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
-        if (move_board.get_board_set(counter).test(c))
+        if (board.border_sets[counter].test(c))
         {
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
@@ -320,47 +323,95 @@ std::bitset<2501> Map::get_inside_of_walls(MoveBoard &move_board, std::bitset<25
     return set;
 }
 
-bool Map::set_player_border_sets(MoveBoard &move_board, std::bitset<2501> set)
+bool Map::set_player_border_sets(Board &board, std::bitset<2501> set)
 {
     if (set.count() == 0)
         return false;
-    move_board.get_border_sets().push_back(set);
+    board.border_sets.push_back(set);
     return true;
 }
 
-void Map::init_evaluation(MoveBoard &move_board)
+void Map::init_evaluation(Board &board)
 {
     std::bitset<2501> checked;
-    if (get_walls(move_board, checked))
+    if (get_walls(board, checked))
     {
         uint16_t counter = 0;
-        while (set_player_border_sets(move_board, get_inside_of_walls(move_board, checked, counter)))
+        while (set_player_border_sets(board, get_inside_of_walls(board, checked, counter)))
             counter++;
     }
 }
 
-MoveBoard Map::init_boards_and_players()
+Board Map::init_boards_and_players()
 {
-    Board board(*this);
-    MoveBoard ret_board = MoveBoard(board);
+    fields_to_remove = std::vector<std::bitset<2501>>(m_num_of_fields);
+    Board ret_board(*this);
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         set_values(ret_board, c);
     }
+    for (uint8_t i = 0; i < get_player_count(); i++)
+    {
+        ret_board.set_overwrite_stones(i, m_initial_overwrite_stones);
+        ret_board.set_bombs(i, m_initial_bombs);
+    }
     for (uint16_t c = 1; c < get_num_of_fields(); c++)
     {
-        if (!ret_board.get_board_set(1).test(c))
+        if (!ret_board.board_sets[1].test(c))
         {
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
-                if (next_coord != 0 && ret_board.get_board_set(1).test(next_coord))
+                if (next_coord != 0 && ret_board.board_sets[1].test(next_coord))
                 {
-                    ret_board.get_board_set(6).set(next_coord);
+                    ret_board.board_sets[6].set(next_coord);
                 }
             }
         }
     }
     init_evaluation(ret_board);
     return ret_board;
+}
+
+void Map::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask)
+{
+    if (strength == 0 || fields_to_remove[start_coord] == mask)
+    {
+        return;
+    }
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0 && next_coord != start_coord)
+        {
+            fields_to_remove[start_coord].set(next_coord);
+            get_bomb_coords(start_coord, next_coord, strength - 1, mask);
+        }
+    }
+}
+
+void Map::init_bomb_phase_boards()
+{
+    std::bitset<2501> mask;
+    for(uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        mask.set(c);
+    }
+    uint8_t strength = m_strength;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        fields_to_remove[c].set(c);
+        if (strength > 0)
+        {
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && next_coord != c)
+                {
+                    fields_to_remove[c].set(next_coord);
+                    get_bomb_coords(c, next_coord, strength - 1, mask);
+                }
+            }
+        }
+    }
 }
