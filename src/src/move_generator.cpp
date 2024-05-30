@@ -197,12 +197,10 @@ void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, T
     board.valid_moves[player_number].reset();
     if (2 * board.player_sets[player_number].count() < board.board_sets[6].count())
     {
-        std::cout << "calculating move from player" << std::endl;
         calculate_moves_from_player(board, player_number, timer);
     }
     else
     {
-        std::cout << "calculating move from frame" << std::endl;
         calculate_moves_from_frame(board, player_number, timer);
     }
 }
@@ -233,57 +231,111 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
     return move;
 }
 
+void MoveGenerator::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask, Board &board)
+{
+    if (strength == 0 || board.fields_to_remove[start_coord] == mask)
+    {
+        return;
+    }
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0 && next_coord != start_coord)
+        {
+            board.fields_to_remove[start_coord].set(next_coord);
+            get_bomb_coords(start_coord, next_coord, strength - 1, mask, board);
+        }
+    }
+}
+
+void MoveGenerator::init_bomb_phase_boards(Board &board, uint8_t strength, uint8_t player)
+{
+    std::bitset<2501> mask;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        if (!board.board_sets[0].test(c))
+            mask.set(c);
+    }
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        board.fields_to_remove[c].set(c);
+        if (strength > 0)
+        {
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && next_coord != c)
+                {
+                    board.fields_to_remove[c].set(next_coord);
+                    get_bomb_coords(c, next_coord, strength - 1, mask, board);
+                }
+            }
+        }
+    }
+}
+
 uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
 {
     std::cout << "gen" << std::endl;
     uint8_t x, y;
     uint16_t coord;
-    uint16_t affected_by_bomb = 1;
-    if (map.get_strength() > 0)
-        affected_by_bomb = map.get_strength() * 8;
-    // Sort players by number of stones in ascending order
-    std::vector<std::pair<uint8_t, uint16_t>> player_stones;
-    for (uint8_t i = 0; i < m_num_of_players; i++)
+    // uint16_t affected_by_bomb = 1;
+    // if (map.get_strength() > 0)
+    //     affected_by_bomb = map.get_strength() * 8;
+    // // Sort players by number of stones in ascending order
+    // std::vector<std::pair<uint8_t, uint16_t>> player_stones;
+    // for (uint8_t i = 0; i < m_num_of_players; i++)
+    // {
+    //     player_stones.push_back(std::make_pair(i, board.player_sets[i].count()));
+    // }
+    // std::sort(player_stones.begin(), player_stones.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
+    //           { return a.second > b.second; });
+    // uint8_t target_player = (map.get_player_number() + 1) % map.get_player_count();
+    // uint8_t player_index;
+    // for (uint8_t i = 0; i < player_stones.size(); ++i)
+    // {
+    //     if (player_stones[i].first == map.get_player_number())
+    //     {
+    //         player_index = i;
+    //         if (i > 0)
+    //         {
+    //             target_player = player_stones[i - 1].first;
+    //         }
+    //         else
+    //         {
+    //             target_player = player_stones[i + 1].first;
+    //         }
+    //         break;
+    //     }
+    // }
+    // if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * board.get_bombs(map.get_player_number()) && (player_index + 1) < player_stones.size())
+    //     target_player = player_stones[player_index + 1].first;
+    // if ((player_index + 1) < player_stones.size())
+    // {
+    //     target_player = map.get_player_number();
+    // }
+    // uint16_t most_deleted_stones = 0;
+    // for (uint16_t c = 1; c < m_num_of_fields; c++)
+    // {
+    //     if (board.board_sets[0].test(c))
+    //         continue;
+    //     uint16_t target_deleted_stones = (board.player_sets[target_player] & board.fields_to_remove[c]).count();
+    //     uint16_t current_player_deleted_stones = (board.player_sets[map.get_player_number()] & board.fields_to_remove[c]).count();
+    //     if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (board.player_sets[map.get_player_number()] & board.fields_to_remove[c]).count()))
+    //     {
+    //         most_deleted_stones = target_deleted_stones;
+    //         coord = c;
+    //     }
+    // }
+    // if (coord = 0)
     {
-        player_stones.push_back(std::make_pair(i, board.player_sets[i].count()));
-    }
-    std::sort(player_stones.begin(), player_stones.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
-              { return a.second > b.second; });
-    uint8_t target_player = (map.get_player_number() + 1) % map.get_player_count();
-    uint8_t player_index;
-    for (uint8_t i = 0; i < player_stones.size(); ++i)
-    {
-        if (player_stones[i].first == map.get_player_number())
+        for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
-            player_index = i;
-            if (i > 0)
+            if (!board.board_sets[0].test(c) && !board.player_sets[map.get_player_number()].test(c))
             {
-                target_player = player_stones[i - 1].first;
+                coord = c;
+                break;
             }
-            else
-            {
-                target_player = player_stones[i + 1].first;
-            }
-            break;
-        }
-    }
-    if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * board.get_bombs(map.get_player_number()) && (player_index + 1) < player_stones.size())
-        target_player = player_stones[player_index + 1].first;
-    if ((player_index + 1) < player_stones.size())
-    {
-        target_player = map.get_player_number();
-    }
-    uint16_t most_deleted_stones = 0;
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        if (board.board_sets[0].test(c))
-            continue;
-        uint16_t target_deleted_stones = (board.player_sets[target_player] & board.fields_to_remove[c]).count();
-        uint16_t current_player_deleted_stones = (board.player_sets[map.get_player_number()] & board.fields_to_remove[c]).count();
-        if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (board.player_sets[map.get_player_number()] & board.fields_to_remove[c]).count()))
-        {
-            most_deleted_stones = target_deleted_stones;
-            coord = c;
         }
     }
     map.one_dimension_2_second_dimension(coord, x, y);

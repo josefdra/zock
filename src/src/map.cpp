@@ -127,11 +127,6 @@ std::vector<uint16_t> Map::get_transitions()
     return m_transitions;
 }
 
-std::vector<std::bitset<2501>> Map::get_fields_to_remove()
-{
-    return fields_to_remove;
-}
-
 /**
  * @brief reads the input and sets all the information required for the game map
  *
@@ -344,7 +339,6 @@ void Map::init_evaluation(Board &board)
 
 Board Map::init_boards_and_players()
 {
-    fields_to_remove = std::vector<std::bitset<2501>>(m_num_of_fields);
     Board ret_board(*this);
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
@@ -373,45 +367,3 @@ Board Map::init_boards_and_players()
     return ret_board;
 }
 
-void Map::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask)
-{
-    if (strength == 0 || fields_to_remove[start_coord] == mask)
-    {
-        return;
-    }
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-    {
-        uint16_t next_coord = get_transition(c, d);
-        if (next_coord != 0 && next_coord != start_coord)
-        {
-            fields_to_remove[start_coord].set(next_coord);
-            get_bomb_coords(start_coord, next_coord, strength - 1, mask);
-        }
-    }
-}
-
-void Map::init_bomb_phase_boards()
-{
-    std::bitset<2501> mask;
-    for(uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        mask.set(c);
-    }
-    uint8_t strength = m_strength;
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        fields_to_remove[c].set(c);
-        if (strength > 0)
-        {
-            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-            {
-                uint16_t next_coord = get_transition(c, d);
-                if (next_coord != 0 && next_coord != c)
-                {
-                    fields_to_remove[c].set(next_coord);
-                    get_bomb_coords(c, next_coord, strength - 1, mask);
-                }
-            }
-        }
-    }
-}

@@ -32,6 +32,8 @@ public:
     void calculate_moves_from_frame(Board &, uint8_t, Timer &);
     void calculate_valid_moves(Board &, uint8_t, Timer &);
     uint32_t generate_move(Board &, Map &, Timer &, uint8_t, bool);
+    void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &, Board &);
+    void init_bomb_phase_boards(Board &, uint8_t, uint8_t);
     uint32_t generate_bomb(Board &, Map &, Timer &, uint8_t, bool);
 
 private:

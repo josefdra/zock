@@ -106,7 +106,7 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     {
         std::cout << "Bombs: " << board.get_bombs(player) << std::endl;
         std::cout << "Player " << (int)player + 1 << " threw bomb at " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
-        board = move_exec.exec_bomb(player, board, timer);
+        board = move_exec.exec_bomb(player, board, timer, map.get_strength());
     }
     board.print(player, (map.get_player_number() == player));
 }
@@ -116,7 +116,6 @@ void Game::run(Network &net, bool sorting)
     Map map;
     map.read_map(net.receive_map());
     Board board = map.init_boards_and_players();
-    map.init_bomb_phase_boards();
     board.print(0, false);
 
     while (!is_game_over() && !board.disqualified[map.get_player_number()])
@@ -146,7 +145,7 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_PHASE1_END:
         {
-            board = Board(board, map.fields_to_remove);
+            // board = Board(board, map.fields_to_remove);
             set_bomb_phase();
             break;
         }

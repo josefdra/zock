@@ -202,10 +202,51 @@ Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
     return board;
 }
 
-Board MoveExecuter::exec_bomb(uint8_t player, Board board, Timer &timer)
+void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask, Board &board)
+{
+    if (strength == 0 || board.fields_to_remove[start_coord] == mask)
+    {
+        return;
+    }
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0 && !board.board_sets[0].test(next_coord) && next_coord != start_coord)
+        {
+            board.fields_to_remove[start_coord].set(next_coord);
+            get_bomb_coords(start_coord, next_coord, strength - 1, mask, board);
+        }
+    }
+}
+
+void MoveExecuter::init_bomb_phase_boards(Board &board, uint16_t coord, uint8_t strength)
+{
+    std::bitset<2501> mask;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        if (!board.board_sets[0].test(c))
+            mask.set(c);
+    }
+    board.fields_to_remove[coord].set(coord);
+    if (strength > 0)
+    {
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            uint16_t next_coord = get_transition(coord, d);
+            if (next_coord != 0 && !board.board_sets[0].test(next_coord) && next_coord != coord)
+            {
+                board.fields_to_remove[coord].set(next_coord);
+                get_bomb_coords(coord, next_coord, strength - 1, mask, board);
+            }
+        }
+    }
+}
+
+Board MoveExecuter::exec_bomb(uint8_t player, Board board, Timer &timer, uint8_t strength)
 {
     std::cout << "exec" << std::endl;
     uint16_t coord = board.get_coord();
+    init_bomb_phase_boards(board, coord, strength);
     board.decrement_bombs(player);
     for (uint8_t i = 0; i < board.board_sets.size(); i++)
     {
@@ -220,5 +261,3 @@ Board MoveExecuter::exec_bomb(uint8_t player, Board board, Timer &timer)
     board.board_sets[0] |= board.fields_to_remove[coord];
     return board;
 }
-
-

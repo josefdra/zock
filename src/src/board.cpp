@@ -14,6 +14,7 @@ Board::Board(Map &map)
     wall_sets = std::array<std::bitset<2501>, 8>();
     border_sets = std::vector<std::bitset<2501>>(1);
     protected_fields = std::vector<std::bitset<2501>>(m_player_count);
+    fields_to_remove = std::vector<std::bitset<2501>>(m_num_of_fields);
     overwrite_stones = std::vector<uint16_t>(m_player_count, map.get_initial_overwrite_stones());
     bombs = std::vector<uint16_t>(m_player_count, map.get_initial_bombs());
     disqualified = std::vector<bool>(m_player_count, false);

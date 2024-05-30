@@ -35,7 +35,6 @@ public:
     uint16_t get_initial_overwrite_stones();
     uint16_t get_initial_bombs();
     std::vector<uint16_t> get_transitions();
-    std::vector<std::bitset<2501>> get_fields_to_remove();
     void read_map(std::stringstream);
     void one_dimension_2_second_dimension(uint16_t, uint8_t &, uint8_t &);
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
@@ -48,10 +47,6 @@ public:
     bool set_player_border_sets(Board &, std::bitset<2501>);
     void init_evaluation(Board &);
     Board init_boards_and_players();
-    void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &);
-    void init_bomb_phase_boards();
-
-    std::vector<std::bitset<2501>> fields_to_remove;
 
 private:
     std::vector<char> m_numbers;
