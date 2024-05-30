@@ -29,7 +29,7 @@ public:
     std::bitset<2501> get_bits_to_update(uint8_t, MoveBoard &, Timer &);
     void update_boards(uint8_t, uint8_t, MoveBoard &, Timer &);
     MoveBoard exec_move(uint8_t, MoveBoard, Timer &);
-    void get_bomb_coords(uint16_t, BombBoard &, uint8_t);
+    void get_bomb_coords(uint16_t, BombBoard &, uint8_t, std::bitset<2501> &);
     BombBoard exec_bomb(uint8_t, BombBoard, Timer &);
 
 private:

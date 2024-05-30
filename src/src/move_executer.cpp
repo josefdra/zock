@@ -175,9 +175,9 @@ MoveBoard MoveExecuter::exec_move(uint8_t player, MoveBoard move_board, Timer &t
     return move_board;
 }
 
-void MoveExecuter::get_bomb_coords(uint16_t coord, BombBoard &bomb_board, uint8_t strength)
+void MoveExecuter::get_bomb_coords(uint16_t coord, BombBoard &bomb_board, uint8_t strength, std::bitset<2501> &mask)
 {
-    if (strength >= 0)
+    if (strength >= 0 && bomb_board.get_fields_to_remove(coord) != mask)
     {
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
@@ -189,7 +189,7 @@ void MoveExecuter::get_bomb_coords(uint16_t coord, BombBoard &bomb_board, uint8_
             }
             if (uint8_t strength = bomb_board.get_strength() > 0)
             {
-                get_bomb_coords(t, bomb_board, strength - 1);
+                get_bomb_coords(t, bomb_board, strength - 1, mask);
             }
         }
     }
@@ -201,6 +201,12 @@ void MoveExecuter::get_bomb_coords(uint16_t coord, BombBoard &bomb_board, uint8_
 
 BombBoard MoveExecuter::exec_bomb(uint8_t player, BombBoard bomb_board, Timer &timer)
 {
+    std::bitset<2501> mask;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        if (!bomb_board.get_board_set(0).test(c))
+            mask.set(c);
+    }
     uint16_t coord = bomb_board.get_coord();
     bomb_board.get_fields_to_remove(coord).set(coord);
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
@@ -213,7 +219,7 @@ BombBoard MoveExecuter::exec_bomb(uint8_t player, BombBoard bomb_board, Timer &t
         }
         if (uint8_t strength = bomb_board.get_strength() > 0)
         {
-            get_bomb_coords(t, bomb_board, strength - 1);
+            get_bomb_coords(t, bomb_board, strength - 1, mask);
         }
     }
     bomb_board.decrement_bombs(player);
