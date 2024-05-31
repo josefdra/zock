@@ -205,13 +205,9 @@ void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, T
     }
 }
 
-uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
+uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool sorting)
 {
-    if (search_depth == 1)
-    {
-        search_depth = 4;
-        timer.exception_time = (search_depth + 1) * timer.exception_time;
-    }
+
     MoveExecuter move_exec(map);
     MoveGenerator move_gen(map);
     MiniMax minimax(move_exec, move_gen);
@@ -224,7 +220,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint
     catch (TimeLimitExceededException &e)
     {
     }
-    Board res = minimax.get_best_coord(board, timer, search_depth, sorting);
+    Board res = minimax.get_best_coord(board, timer, sorting);
     if (board.board_sets[3].test(res.get_coord()))
     {
         res.set_spec(res.get_spec() + 1);
@@ -280,7 +276,7 @@ void MoveGenerator::init_bomb_phase_boards(Board &board, uint8_t strength, uint8
     }
 }
 
-uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
+uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool sorting)
 {
     std::cout << "gen" << std::endl;
     uint8_t x, y;

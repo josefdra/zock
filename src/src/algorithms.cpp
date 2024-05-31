@@ -4,6 +4,8 @@
 #include "board.hpp"
 #include "evaluator.hpp"
 
+#define MAX_SEARCH_DEPTH 15
+
 MiniMax::MiniMax(MoveExecuter &move_exec, MoveGenerator &move_gen) : m_move_exec(move_exec), m_move_gen(move_gen) {}
 
 MiniMax::~MiniMax() {}
@@ -45,7 +47,13 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
     {
         throw TimeLimitExceededException();
     }
+    if (sorting)
+    {
+        board.valid_moves = sort_valid_moves(board, player_num, timer, player_num == m_move_exec.get_player_num());
+    }
+
     std::vector<Board> boards = generate_boards(board, player_num, timer);
+
     int best_eval;
     if (player_num == m_move_exec.get_player_num())
         best_eval = -INT32_MAX;
@@ -70,6 +78,42 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
         }
     }
     return best_eval;
+}
+
+/// @brief sorts the valid moves of a player and needs already the calculated valid moves in the board
+/// @param board
+/// @param player_num
+/// @param timer
+/// @param maximizer
+/// @return sorted valid moves as vector
+std::vector<std::bitset<2501>> MiniMax::sort_valid_moves(Board &board, uint8_t player_num, Timer &timer, bool maximizer)
+{
+    std::vector<std::bitset<2501>> sorted_valid_moves;
+    std::vector<std::pair<int, uint16_t>> evals;
+    std::vector<std::bitset<2501>> valid_moves = board.valid_moves;
+
+    std::vector<Board> boards = generate_boards(board, player_num, timer);
+
+    for (Board &b : boards)
+    {
+        evals.push_back(std::make_pair(get_evaluation(b, player_num, m_move_gen, timer), b.get_coord()));
+    }
+    if (maximizer)
+    {
+        std::sort(evals.begin(), evals.end(), [](const std::pair<int, uint16_t> &a, const std::pair<int, uint16_t> &b)
+                  { return a.first > b.first; });
+    }
+    else
+    {
+        std::sort(evals.begin(), evals.end(), [](const std::pair<int, uint16_t> &a, const std::pair<int, uint16_t> &b)
+                  { return a.first < b.first; });
+    }
+    sorted_valid_moves.clear();
+    for (const auto &eval : evals)
+    {
+        sorted_valid_moves.push_back(valid_moves[eval.second]);
+    }
+    return sorted_valid_moves;
 }
 
 std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Timer &timer)
@@ -131,7 +175,7 @@ void MiniMax::init_best_board(Board &board)
     }
 }
 
-Board MiniMax::get_best_coord(Board &board, Timer &timer, uint8_t depth, bool sorting)
+Board MiniMax::get_best_coord(Board &board, Timer &timer, bool sorting)
 {
     int best_eval = -INT32_MAX;
     Board best_board(board);
@@ -139,13 +183,16 @@ Board MiniMax::get_best_coord(Board &board, Timer &timer, uint8_t depth, bool so
     try
     {
         std::vector<Board> boards = generate_boards(board, m_move_exec.get_player_num(), timer);
-        for (auto &b : boards)
+        for (uint8_t search_depth = 1; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
-            int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, depth, m_move_exec.get_player_num(), sorting, timer);
-            if (eval > best_eval)
+            for (auto &b : boards)
             {
-                best_eval = eval;
-                best_board = b;
+                int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
+                if (eval > best_eval)
+                {
+                    best_eval = eval;
+                    best_board = b;
+                }
             }
         }
     }

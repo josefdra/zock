@@ -81,12 +81,13 @@ void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bo
         m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF);
     }
     Timer timer(m_initial_time_limit);
-    uint8_t search_depth = data & 0xFF;
+    // uint8_t search_depth = data & 0xFF;
     MoveGenerator move_gen(map);
+
     if (!bomb_phase)
-        net.send_move(move_gen.generate_move(board, map, timer, search_depth, sorting));
+        net.send_move(move_gen.generate_move(board, map, timer, sorting));
     else
-        net.send_move(move_gen.generate_bomb(board, map, timer, search_depth, sorting));
+        net.send_move(move_gen.generate_bomb(board, map, timer, sorting));
 }
 
 void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
