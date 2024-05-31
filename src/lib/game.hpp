@@ -1,35 +1,34 @@
-#ifndef GAME_HPP
-#define GAME_HPP
+#ifndef GAME_H
+#define GAME_H
 
-#include <random>
-#include <chrono>
+#include <stdint.h>
+#include <vector>
 
-#include "map.hpp"
-#include "player.hpp"
-#include "algorithms.hpp"
-#include "helper.hpp"
-#include "process_moves.hpp"
-#include "own_exceptions.hpp"
+class Network;
+class Map;
+class Board;
 
 class Game
 {
 public:
     Game();
     ~Game();
-    void init_map(std::stringstream &);
-    void init_players();
-    void init_sorting(const bool);
-    uint16_t get_turn(uint8_t &, uint8_t &, uint8_t &, double &);
-    uint16_t get_bomb_throw();
-    void check_winner();
-    // end coord          //special field(0-4)       //coords of the way
 
-    Map m_map;
-    std::vector<Player> m_players;
-    uint8_t m_player_number;
-    uint8_t m_winner = 0;
-    uint8_t m_choice_value = 0;
-    bool m_toSort = true;
+    bool is_game_over();
+    bool is_bomb_phase();
+    void set_game_over();
+    void set_disqualified(Board &, uint8_t);
+    void set_bomb_phase();
+    void calculate_winner(Board &);
+    void end(Board &, uint8_t);
+    void turn_request(Network &, uint64_t &, Map &, Board &, bool, bool);
+    void receive_turn(Map &, uint64_t &, Board &, bool);
+    void run(Network &, bool);
+
+private:
+    bool m_game_over = false;
+    bool m_bomb_phase = false;
+    uint32_t m_initial_time_limit = 1000000;
 };
 
-#endif // GAME_HPP
+#endif // GAME_H

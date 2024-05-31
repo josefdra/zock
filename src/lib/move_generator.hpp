@@ -1,0 +1,46 @@
+#ifndef MOVE_GENERATOR_HPP
+#define MOVE_GENERATOR_HPP
+
+#include <stdint.h>
+#include <vector>
+#include <chrono>
+#include <iostream>
+#include <bitset>
+#include <tuple>
+#include <algorithm>
+
+class Map;
+class Board;
+class Timer;
+
+class MoveGenerator
+{
+public:
+    MoveGenerator();
+    MoveGenerator(Map &);
+    ~MoveGenerator();
+
+    uint16_t get_transition(uint16_t, uint8_t);
+    uint8_t get_direction(uint16_t, uint8_t);
+    uint16_t get_num_of_fields();
+    uint8_t get_num_of_players();
+    uint8_t get_player_num();
+    bool check_if_valid_move(Board &, uint16_t, uint8_t, Timer &);
+    void calculate_valid_no_overwrite_moves_from_player(Board &, uint8_t, uint16_t);
+    void calculate_valid_overwrite_moves_from_player(Board &, uint8_t, uint16_t);
+    void calculate_moves_from_player(Board &, uint8_t, Timer &);
+    void calculate_moves_from_frame(Board &, uint8_t, Timer &);
+    void calculate_valid_moves(Board &, uint8_t, Timer &);
+    uint32_t generate_move(Board &, Map &, Timer &, uint8_t, bool);
+    void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &, Board &);
+    void init_bomb_phase_boards(Board &, uint8_t, uint8_t);
+    uint32_t generate_bomb(Board &, Map &, Timer &, uint8_t, bool);
+
+private:
+    std::vector<uint16_t> m_transitions;
+    uint16_t m_num_of_fields;
+    uint8_t m_num_of_players;
+    uint8_t m_player_num;
+};
+
+#endif // MOVE_GENERATOR_HPP

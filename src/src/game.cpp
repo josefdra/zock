@@ -1,232 +1,166 @@
 #include "game.hpp"
-#define TIME_LIMIT 200
-#define MAX_DEPTH 10
-#define MIL 1000
-// initialize Game
-Game::Game()
-{
-    Map m_map;
-    Player m_player;
-}
+#include "map.hpp"
+#include "network.hpp"
+#include "move_generator.hpp"
+#include "move_executer.hpp"
+#include "board.hpp"
+#include "timer.hpp"
+
+Game::Game() {}
 
 Game::~Game() {}
 
-void Game::init_map(std::stringstream &ss)
+bool Game::is_game_over()
 {
-    m_map.read_hash_map(ss);
-}
-void Game::init_sorting(const bool toSort)
-{
-    m_toSort = toSort;
+    return m_game_over;
 }
 
-void Game::init_players()
+bool Game::is_bomb_phase()
 {
-    for (uint8_t p = 0; p < m_map.m_player_count; p++)
-    {
-        Player player;
-        player.init(m_map.m_initial_overwrite_stones, m_map.m_initial_bombs, (p + 1 + '0'));
-        m_players.push_back(player);
-    }
+    return m_bomb_phase;
 }
 
-//////////////////////// NETWORK GAMES ////////////////////////
-
-/**
- * @brief Maybe add something like this for network games:
- *
- * Process of a network game:
- * 1. establish TCP connection
- * 2. send groupnumber to server (type 1)
- * 3. receive Map (type 2)
- * 4. receive Playernumber (type 3)
- * 5. while (!type 8)
- * {
- *      receive turn notification (type 4)
- *      send turn (type 5)
- *      receive Players turn (type 6)
- *      (Maybe) receive disqualification of player (type 7)
- * }
- *
- *
- */
-
-uint16_t Game::get_turn(uint8_t &spec, uint8_t &depth, uint8_t &game_phase, double &delta)
+void Game::set_game_over()
 {
-    bool panic = delta < 100;
-    auto start_time = std::chrono::high_resolution_clock::now();
-    if (panic)
+    m_game_over = true;
+}
+
+void Game::set_disqualified(Board &board, uint8_t player_number)
+{
+    board.disqualified[player_number] = true;
+}
+
+void Game::set_bomb_phase()
+{
+    std::cout << std::endl
+              << "bomb phase starting" << std::endl
+              << std::endl;
+    m_bomb_phase = true;
+}
+
+void Game::calculate_winner(Board &board)
+{
+    uint16_t max = 0;
+    uint16_t winner = 0;
+    std::cout << "Scores:" << std::endl;
+
+    for (uint16_t i = 0; i < board.get_player_count(); i++)
     {
-        std::unordered_set<uint16_t> valid_moves;
-        calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols, valid_moves);
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(0, valid_moves.size() - 1);
-        auto it = valid_moves.begin();
-        std::advance(it, dis(gen));
-        return *it;
-    }
-
-    int bestEval = std::numeric_limits<int>::min();
-    uint16_t bestCoord = 0;
-    uint16_t tried_turns = 0;
-    uint8_t nextPlayer = (m_player_number + 1) % m_map.m_player_count;
-    std::unordered_set<uint16_t> valid_moves;
-    calculate_valid_moves(m_map, m_players[m_player_number], m_map.m_symbols, valid_moves);
-    double duration_last_depth_search_milli = 0;
-
-    for (uint8_t i = 1; i <= MAX_DEPTH; i++)
-    {
-        auto begin_depth_iteration = std::chrono::high_resolution_clock::now();
-        std::cout << "depth: " << static_cast<int>(i) << std::endl;
-        std::cout << "delta: " << delta << std::endl;
-        std::cout << "last depth evaluation took: " << duration_last_depth_search_milli << " milliseconds" << std::endl;
-
-        if (duration_last_depth_search_milli * 2 < delta)
-        {
-            try
-            {
-                double remaining_time = delta;
-                for (auto &possibleMove : valid_moves)
-                {
-                    auto begin_move_iteration = std::chrono::high_resolution_clock::now();
-
-                    std::vector<char> next_map = temp_color(possibleMove, m_players[m_player_number].m_symbol, m_map, m_map.m_symbols);
-
-                    if (m_map.m_symbols[possibleMove] == 'c')
-                    {
-                        for (auto &p : m_players)
-                        {
-                            if (p.m_symbol != m_players[m_player_number].m_symbol)
-                            {
-                                change_players(next_map, m_players[m_player_number].m_symbol, p.m_symbol);
-                                int currEval = minimaxOrParanoidWithPruning(m_map, m_players, i - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns, m_toSort, begin_move_iteration, remaining_time);
-                                if (currEval > bestEval)
-                                {
-                                    m_choice_value = p.m_symbol - '0';
-                                    bestEval = currEval;
-                                    bestCoord = possibleMove;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        int currEval = minimaxOrParanoidWithPruning(m_map, m_players, i - 1, -INT32_MAX, INT32_MAX, next_map, nextPlayer, game_phase, tried_turns, m_toSort, begin_move_iteration, remaining_time);
-                        if (currEval > bestEval)
-                        {
-                            m_choice_value = 0;
-                            bestEval = currEval;
-                            bestCoord = possibleMove;
-                        }
-                    }
-
-                    auto end_move_iteration = std::chrono::high_resolution_clock::now();
-                    auto iteration_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_move_iteration - begin_move_iteration).count();
-                    remaining_time -= iteration_time;
-                    std::cout << "remaining time from game: " << remaining_time << std::endl;
-                }
-
-                auto end_depth_iteration = std::chrono::high_resolution_clock::now();
-                auto depth_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_depth_iteration - begin_depth_iteration).count();
-                duration_last_depth_search_milli = depth_duration;
-                delta -= depth_duration;
-                std::cout << "time left after last depth search: " << delta << std::endl;
-
-                if (delta < TIME_LIMIT)
-                {
-                    throw TimeoutException("TIMES UP IN EVALUATING MOVE! RETURNING LAST BEST MOVE!");
-                }
-            }
-            catch (const TimeoutException &e)
-            {
-                std::cerr << "Timeout Exception! " << e.what() << std::endl;
-                switch (m_map.m_symbols[bestCoord])
-                {
-                case 'c':
-                    spec = m_choice_value;
-                    break;
-                case 'b':
-                    spec = 20;
-                    break;
-                default:
-                    spec = 0;
-                    break;
-                }
-                return bestCoord;
-            }
-        }
+        std::cout << "Player " << i + 1 << ": ";
+        if (board.disqualified[i])
+            std::cout << "disqualified" << std::endl;
         else
         {
+            std::cout << board.player_sets[i].count() << " points" << std::endl;
+        }
+        if (board.player_sets[i].count() > max)
+        {
+            max = board.player_sets[i].count();
+            winner = i + 1;
+        }
+    }
+    std::cout << "The winner is player " << winner << " with " << max << " points" << std::endl;
+}
+
+void Game::end(Board &board, uint8_t player_number)
+{
+    if (board.disqualified[player_number])
+    {
+        std::cout << "We are disqualified" << std::endl;
+    }
+    else
+    {
+        calculate_winner(board);
+    }
+}
+
+void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
+{
+    if (((data >> 8) & 0xFFFFFFFF) != 0)
+    {
+        m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF);
+    }
+    Timer timer(m_initial_time_limit);
+    uint8_t search_depth = data & 0xFF;
+    MoveGenerator move_gen(map);
+    if (!bomb_phase)
+        net.send_move(move_gen.generate_move(board, map, timer, search_depth, sorting));
+    else
+        net.send_move(move_gen.generate_bomb(board, map, timer, search_depth, sorting));
+}
+
+void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
+{
+    board.set_coord(map.two_dimension_2_one_dimension((data >> 32) & 0xFF, (data >> 16) & 0xFF));
+    board.set_spec((data >> 8) & 0xFF);
+    uint8_t player = (data & 0xFF) - 1;
+    MoveExecuter move_exec(map);
+    Timer timer(m_initial_time_limit);
+    if (!bomb_phase)
+    {
+        std::cout << "Overwrites: " << board.get_overwrite_stones(player) << " | Bombs: " << board.get_bombs(player) << std::endl;
+        std::cout << "Player " << (int)player + 1 << " moved to " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
+        board = move_exec.exec_move(player, board, timer);
+    }
+    else
+    {
+        std::cout << "Bombs: " << board.get_bombs(player) << std::endl;
+        std::cout << "Player " << (int)player + 1 << " threw bomb at " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
+        board = move_exec.exec_bomb(player, board, timer, map.get_strength());
+    }
+    board.print(player, (map.get_player_number() == player));
+}
+
+void Game::run(Network &net, bool sorting)
+{
+    Map map;
+    map.read_map(net.receive_map());
+    Board board = map.init_boards_and_players();
+    board.print(0, false);
+
+    while (!is_game_over() && !board.disqualified[map.get_player_number()])
+    {
+        uint64_t data = net.receive_data();
+        switch (data >> 56)
+        {
+        case TYPE_RECEIVE_PLAYERNUM:
+        {
+            map.set_player_number(data & 0xFF);
             break;
         }
-    }
-
-    std::cout << "valid positions: " << m_players[m_player_number].m_valid_moves.size() << std::endl;
-    auto end_time = std::chrono::high_resolution_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
-
-#ifdef RELEASING
-    std::cout << "minimax/paranoid: tried " << tried_turns << " turns" << std::endl;
-    std::cout << "Elapsed time: " << elapsed_time.count() << " microseconds" << std::endl;
-#endif
-
-    switch (m_map.m_symbols[bestCoord])
-    {
-    case 'c':
-        spec = m_choice_value;
-        break;
-    case 'b':
-        spec = 20;
-        break;
-    default:
-        spec = 0;
-        break;
-    }
-    return bestCoord;
-}
-
-uint16_t Game::get_bomb_throw()
-{
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
-    {
-        if (check_players(m_map.m_symbols[c]) && m_map.m_symbols[c] != m_map.m_player_number + 1 + '0')
+        case TYPE_RECEIVE_TURN_REQUEST:
         {
-            return c;
+            turn_request(net, data, map, board, sorting, m_bomb_phase);
+            break;
+        }
+        case TYPE_RECEIVE_PLAYER_TURN:
+        {
+            receive_turn(map, data, board, m_bomb_phase);
+            break;
+        }
+        case TYPE_DISQUALIFICATION:
+        {
+            set_disqualified(board, (data & 0xFF) - 1);
+            break;
+        }
+        case TYPE_PHASE1_END:
+        {
+            // board = Board(board, map.fields_to_remove);
+            set_bomb_phase();
+            break;
+        }
+        case TYPE_GAME_END:
+        {
+            set_game_over();
+            break;
+        }
+        default:
+        {
+            std::cout << "Unknown message type" << std::endl;
+            std::cout << "Data: " << data << std::endl;
+            exit(1);
+        }
         }
     }
-    std::cout << "something went wrong in bomb throw" << std::endl;
-    return 0;
-}
-
-void Game::check_winner()
-{
-    for (auto &p : m_players)
-    {
-        p.m_points = 0;
-    }
-    for (uint16_t c = 1; c < m_map.m_num_of_fields; c++)
-    {
-        if (check_players(m_map.m_symbols[c]))
-        {
-            m_players[m_map.m_symbols[c] - '0' - 1].m_points = m_players[m_map.m_symbols[c] - '0' - 1].m_points + 1;
-        }
-    }
-    uint16_t most_points = 0;
-    char winner;
-    for (auto &p : m_players)
-    {
-        std::cout << "Player " << p.m_symbol << " has " << p.m_points << " Points" << std::endl;
-        if (p.m_points > most_points)
-        {
-            winner = p.m_symbol;
-            most_points = p.m_points;
-        }
-    }
-    std::cout << "\nThe Winner is: Player " << winner << "!" << std::endl;
-    if (winner == m_players[m_player_number].m_symbol)
-    {
-        m_winner = 1;
-    }
-    return;
+    end(board, map.get_player_number());
 }
