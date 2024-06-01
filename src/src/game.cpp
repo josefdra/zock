@@ -108,7 +108,9 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
         std::cout << "Player " << (int)player + 1 << " threw bomb at " << (int)((data >> 32) & 0xFF) << ", " << (int)((data >> 16) & 0xFF) << std::endl;
         board = move_exec.exec_bomb(player, board, timer, map.get_strength());
     }
+    #ifdef DEBUG
     board.print(player, (map.get_player_number() == player));
+    #endif //DEBUG
 }
 
 void Game::run(Network &net, bool sorting)
@@ -140,6 +142,7 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_DISQUALIFICATION:
         {
+            board.print(0, false);
             set_disqualified(board, (data & 0xFF) - 1);
             break;
         }
