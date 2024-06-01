@@ -49,7 +49,8 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
     }
     if (sorting)
     {
-        board.valid_moves = sort_valid_moves(board, player_num, timer, player_num == m_move_exec.get_player_num());
+        std::cout << "sorting" << std::endl;
+        std::vector<std::bitset<2501>> new_valid_moves = sort_valid_moves(board, player_num, timer, player_num == m_move_exec.get_player_num());
     }
 
     std::vector<Board> boards = generate_boards(board, player_num, timer);
