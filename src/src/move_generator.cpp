@@ -4,6 +4,7 @@
 #include "move_executer.hpp"
 #include "timer.hpp"
 #include "board.hpp"
+#include "logging.hpp"
 
 MoveGenerator::MoveGenerator() {}
 
@@ -44,123 +45,168 @@ uint8_t MoveGenerator::get_player_num()
 
 bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player_number, Timer &timer)
 {
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    try
     {
-        uint16_t next_coord = get_transition(c, d);
-        uint8_t next_direction = get_direction(c, d);
-        uint16_t prev_coord = c;
-        uint8_t prev_direction = d;
-        if (timer.return_rest_time() < timer.exception_time)
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            throw TimeLimitExceededException();
-        }
-        while (next_coord != 0 && next_coord != c && !board.board_sets[1].test(next_coord) && !board.player_sets[player_number].test(next_coord))
-        {
-            prev_coord = next_coord;
-            prev_direction = next_direction;
-            next_coord = get_transition(prev_coord, prev_direction);
-            if (next_coord == 0)
-                break;
-            if (board.player_sets[player_number].test(next_coord))
+            uint16_t next_coord = get_transition(c, d);
+            uint8_t next_direction = get_direction(c, d);
+            uint16_t prev_coord = c;
+            uint8_t prev_direction = d;
+            if (timer.return_rest_time() < timer.exception_time)
             {
-                return true;
+                throw TimeLimitExceededException("check_if_valid_move");
             }
-            next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
+            while (next_coord != 0 && next_coord != c && !board.board_sets[1].test(next_coord) && !board.player_sets[player_number].test(next_coord))
             {
-                break;
+                prev_coord = next_coord;
+                prev_direction = next_direction;
+                next_coord = get_transition(prev_coord, prev_direction);
+                if (next_coord == 0)
+                    break;
+                if (board.player_sets[player_number].test(next_coord))
+                {
+                    return true;
+                }
+                next_direction = get_direction(prev_coord, prev_direction);
+                if ((prev_direction + 4) % 8 == next_direction)
+                {
+                    break;
+                }
             }
         }
+    }
+    catch (TimeLimitExceededException &e)
+    {
+        throw;
     }
     return false;
 }
 
-void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c)
+void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c, Timer &timer)
 {
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    try
     {
-        uint16_t next_coord = get_transition(c, d);
-        uint8_t next_direction = get_direction(c, d);
-        uint16_t prev_coord = c;
-        uint8_t prev_direction = d;
-        while (next_coord != 0 && next_coord != c && !board.board_sets[1].test(next_coord) && !board.player_sets[player_number].test(next_coord))
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            prev_coord = next_coord;
-            prev_direction = next_direction;
-            next_coord = get_transition(prev_coord, prev_direction);
-            if (next_coord == 0)
-                break;
-            if (board.board_sets[1].test(next_coord))
+            if (timer.return_rest_time() < timer.exception_time)
             {
-                board.valid_moves[player_number].set(next_coord);
+                throw TimeLimitExceededException(("calculate_valid_no_overwrite_moves_from_player 1"));
             }
-            next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
+            uint16_t next_coord = get_transition(c, d);
+            uint8_t next_direction = get_direction(c, d);
+            uint16_t prev_coord = c;
+            uint8_t prev_direction = d;
+            while (next_coord != 0 && next_coord != c && !board.board_sets[1].test(next_coord) && !board.player_sets[player_number].test(next_coord))
             {
-                break;
+                if (timer.return_rest_time() < timer.exception_time)
+                {
+                    throw TimeLimitExceededException(("calculate_valid_no_overwrite_moves_from_player 2"));
+                }
+                prev_coord = next_coord;
+                prev_direction = next_direction;
+                next_coord = get_transition(prev_coord, prev_direction);
+                if (next_coord == 0)
+                    break;
+                if (board.board_sets[1].test(next_coord))
+                {
+                    board.valid_moves[player_number].set(next_coord);
+                }
+                next_direction = get_direction(prev_coord, prev_direction);
+                if ((prev_direction + 4) % 8 == next_direction)
+                {
+                    break;
+                }
             }
         }
     }
+    catch (TimeLimitExceededException &e)
+    {
+        throw;
+    }
 }
 
-void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c)
+void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c, Timer &timer)
 {
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    try
     {
-        uint16_t next_coord = get_transition(c, d);
-        uint8_t next_direction = get_direction(c, d);
-        uint16_t prev_coord = c;
-        uint8_t prev_direction = d;
-        if (next_coord == 0 || board.player_sets[player_number].test(next_coord))
-            continue;
-        while (!board.board_sets[1].test(next_coord) && next_coord != c && !board.player_sets[player_number].test(next_coord))
+
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
         {
-            prev_coord = next_coord;
-            prev_direction = next_direction;
-            next_coord = get_transition(prev_coord, prev_direction);
-            if (next_coord == 0 || board.board_sets[1].test(next_coord))
-                break;
-            board.valid_moves[player_number].set(next_coord);
-            next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
+
+            uint16_t next_coord = get_transition(c, d);
+            uint8_t next_direction = get_direction(c, d);
+            uint16_t prev_coord = c;
+            uint8_t prev_direction = d;
+            if (next_coord == 0 || board.player_sets[player_number].test(next_coord))
+                continue;
+            while (!board.board_sets[1].test(next_coord) && next_coord != c && !board.player_sets[player_number].test(next_coord))
             {
-                break;
+                if (timer.return_rest_time() < timer.exception_time)
+                {
+                    throw TimeLimitExceededException(("calculate_valid_overwrite_moves_from_player"));
+                }
+                prev_coord = next_coord;
+                prev_direction = next_direction;
+                next_coord = get_transition(prev_coord, prev_direction);
+                if (next_coord == 0 || board.board_sets[1].test(next_coord))
+                    break;
+                board.valid_moves[player_number].set(next_coord);
+                next_direction = get_direction(prev_coord, prev_direction);
+                if ((prev_direction + 4) % 8 == next_direction)
+                {
+                    break;
+                }
             }
         }
+    }
+    catch (TimeLimitExceededException &e)
+    {
+        throw;
     }
 }
 
 void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_number, Timer &timer)
 {
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    try
     {
-        if (board.player_sets[player_number].test(c))
-        {
-            if (timer.return_rest_time() < timer.exception_time)
-            {
-                throw TimeLimitExceededException();
-            }
-            calculate_valid_no_overwrite_moves_from_player(board, player_number, c);
-        }
-    }
-    if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
-    {
-        board.set_overwrite_move(player_number);
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
+
+            if (timer.return_rest_time() < timer.exception_time)
+            {
+                throw TimeLimitExceededException("calculate_moves_from_player 1");
+            }
             if (board.player_sets[player_number].test(c))
             {
-                if (timer.return_rest_time() < timer.exception_time)
-                {
-                    throw TimeLimitExceededException();
-                }
-                calculate_valid_overwrite_moves_from_player(board, player_number, c);
-            }
-            if (board.board_sets[5].test(c))
-            {
-                board.valid_moves[player_number].set(c);
+                calculate_valid_no_overwrite_moves_from_player(board, player_number, c, timer);
             }
         }
+        if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
+        {
+
+            board.set_overwrite_move(player_number);
+            for (uint16_t c = 1; c < m_num_of_fields; c++)
+            {
+
+                if (timer.return_rest_time() < timer.exception_time)
+                {
+                    throw TimeLimitExceededException("calculate_moves_from_player 2");
+                }
+                if (board.player_sets[player_number].test(c))
+                {
+                    calculate_valid_overwrite_moves_from_player(board, player_number, c, timer);
+                }
+                if (board.board_sets[5].test(c))
+                {
+                    board.valid_moves[player_number].set(c);
+                }
+            }
+        }
+    }
+    catch (TimeLimitExceededException &e)
+    {
+        throw;
     }
 }
 
@@ -219,6 +265,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     }
     catch (TimeLimitExceededException &e)
     {
+        LOG_WARNING(e.what());
     }
     Board res = minimax.get_best_coord(board, timer, sorting);
     if (board.board_sets[3].test(res.get_coord()))
@@ -226,8 +273,6 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
         res.set_spec(res.get_spec() + 1);
     }
     board.reset_overwrite_moves();
-    std::cout << "Debug print, to see valid moves, before move executed" << std::endl;
-    // board.print(player, true);
     map.one_dimension_2_second_dimension(res.get_coord(), x, y);
     uint32_t move = (uint32_t)x << 16 | (uint32_t)y << 8 | (uint32_t)res.get_spec();
     return move;
@@ -278,7 +323,6 @@ void MoveGenerator::init_bomb_phase_boards(Board &board, uint8_t strength, uint8
 
 uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool sorting)
 {
-    std::cout << "gen" << std::endl;
     uint8_t x, y;
     uint16_t coord;
     // uint16_t affected_by_bomb = 1;

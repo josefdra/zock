@@ -1,5 +1,6 @@
 #include "board.hpp"
 #include "map.hpp"
+#include "logging.hpp"
 
 Board::Board(Map &map)
 {
@@ -266,7 +267,7 @@ void Board::print(uint8_t player, bool our_player)
         }
         std::cout << std::endl;
     }
-    std::cout << "Calculated valid moves: " << valid_moves[player].count() << std::endl;
+    LOG_INFO("Calculated valid moves: " + std::to_string(valid_moves[player].count()));
     std::cout << std::endl;
 }
 

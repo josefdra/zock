@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <timer.hpp>
 
 class Network;
 class Map;

@@ -26,8 +26,8 @@ public:
     uint8_t get_num_of_players();
     uint8_t get_player_num();
     bool check_if_valid_move(Board &, uint16_t, uint8_t, Timer &);
-    void calculate_valid_no_overwrite_moves_from_player(Board &, uint8_t, uint16_t);
-    void calculate_valid_overwrite_moves_from_player(Board &, uint8_t, uint16_t);
+    void calculate_valid_no_overwrite_moves_from_player(Board &, uint8_t, uint16_t, Timer &);
+    void calculate_valid_overwrite_moves_from_player(Board &, uint8_t, uint16_t, Timer &);
     void calculate_moves_from_player(Board &, uint8_t, Timer &);
     void calculate_moves_from_frame(Board &, uint8_t, Timer &);
     void calculate_valid_moves(Board &, uint8_t, Timer &);

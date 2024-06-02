@@ -3,15 +3,23 @@
 
 #include <chrono>
 #include <stdint.h>
+#include <string>
+#include <thread>
+#include <iostream>
 
 class TimeLimitExceededException : public std::exception
 {
+public:
+    explicit TimeLimitExceededException(const std::string &message) : m_message(message) {}
+
     const char *what() const throw()
     {
-        return "Time limit exceeded";
+        return m_message.c_str();
     }
-};
 
+private:
+    std::string m_message;
+};
 class Timer
 {
 public:
