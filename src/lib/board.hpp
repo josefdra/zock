@@ -24,9 +24,8 @@ enum Colors
 class Board
 {
 public:
-    Board(Map &);
+    Board(Map &);    
     Board(Board &, uint16_t, uint8_t);
-    Board(Board &, std::vector<std::bitset<2501>> &);
     ~Board();
 
     void set_coord(uint16_t);

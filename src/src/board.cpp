@@ -21,17 +21,25 @@ Board::Board(Map &map)
     disqualified = std::vector<bool>(m_player_count, false);
 }
 
-Board::Board(Board &board, std::vector<std::bitset<2501>> &to_remove)
-{
-    *this = board;
-    fields_to_remove = to_remove;
-}
-
 Board::Board(Board &board, uint16_t coord, uint8_t spec)
+    : m_player_count(board.m_player_count),
+      m_num_of_fields(board.m_num_of_fields),
+      m_width(board.m_width),
+      m_height(board.m_height),
+      m_overwrite_move(board.m_overwrite_move),
+      board_sets(board.board_sets),
+      player_sets(board.player_sets),
+      valid_moves(board.valid_moves),
+      wall_sets(board.wall_sets),
+      border_sets(board.border_sets),
+      protected_fields(board.protected_fields),
+      fields_to_remove(board.fields_to_remove),
+      overwrite_stones(board.overwrite_stones),
+      bombs(board.bombs),
+      disqualified(board.disqualified),
+      m_coord(coord),
+      m_spec(spec)
 {
-    *this = board;
-    m_coord = coord;
-    m_spec = spec;
 }
 
 Board::~Board() {}

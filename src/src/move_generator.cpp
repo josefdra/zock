@@ -76,7 +76,7 @@ bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player
             }
         }
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }
@@ -120,7 +120,7 @@ void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board,
             }
         }
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }
@@ -160,7 +160,7 @@ void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, ui
             }
         }
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }
@@ -196,7 +196,7 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
             }
         }
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }

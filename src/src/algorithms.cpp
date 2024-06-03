@@ -99,7 +99,7 @@ int Algorithms::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, 
 
         return best_eval;
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }
@@ -169,7 +169,7 @@ int Algorithms::BRS(Board &board, int alpha, int beta, int8_t depth, uint8_t pla
             {
                 throw TimeLimitExceededException(("Timeout in minimax after generating boards and iterating over them."));
             }
-            int eval = minimaxOrParanoidWithPruning(b, alpha, beta, depth - 1, next_player, sorting, timer);
+            int eval = BRS(b, alpha, beta, depth - 1, next_player, timer);
             if (player_num == m_move_exec.get_player_num())
             {
                 best_eval = std::max(best_eval, eval);
@@ -188,7 +188,7 @@ int Algorithms::BRS(Board &board, int alpha, int beta, int8_t depth, uint8_t pla
 
         return best_eval;
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }
@@ -236,7 +236,7 @@ std::vector<Board> Algorithms::sort_valid_moves(Board &board, uint8_t player_num
         }
         return boards;
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }
@@ -321,8 +321,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         {
             for (auto &b : boards)
             {
-                // int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth - 1, m_move_exec.get_player_num(), sorting, timer);
-                int eval = BRS(b, -INT32_MAX, INT32_MAX, search_depth - 1, m_move_exec.get_player_num(), timer);
+                int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth - 1, m_move_exec.get_player_num(), sorting, timer);
+                // int eval = BRS(b, -INT32_MAX, INT32_MAX, search_depth - 1, m_move_exec.get_player_num(), timer);
                 if (eval > best_eval)
                 {
                     best_eval = eval;

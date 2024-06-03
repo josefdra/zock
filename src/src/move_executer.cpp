@@ -74,7 +74,7 @@ void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, Boar
             }
         }
     }
-    catch (const std::exception &e)
+    catch (const std::exception)
     {
         throw;
     }
@@ -115,7 +115,7 @@ std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, Board &board,
         }
         return to_color;
     }
-    catch (const std::exception &e)
+    catch (const std::exception)
     {
         throw;
     }

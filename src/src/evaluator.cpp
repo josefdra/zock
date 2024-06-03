@@ -65,7 +65,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
             score -= 100000;
         return score + board.player_sets[player_num].count() * 10 + board.valid_moves[player_num].count() * 100;
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }
