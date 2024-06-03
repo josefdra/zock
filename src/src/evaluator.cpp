@@ -30,28 +30,43 @@ int get_eliminate_player_score(Board &board, uint8_t player_num)
 
 int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Timer &timer)
 {
-    uint16_t border_set_size = board.border_sets.size();
-    int score = 0;
+    try
+    {
+        uint16_t border_set_size = board.border_sets.size();
+        int score = 0;
 
-    for (uint8_t i = 0; i < board.get_player_count(); i++)
-    {
-        if (!board.disqualified[i])
-            move_gen.calculate_valid_moves(board, i, timer);
-        else
-            board.valid_moves[i].reset();
-        if (i != player_num)
-            score -= board.player_sets[i].count() * 100;
+        for (uint8_t i = 0; i < board.get_player_count(); i++)
+        {
+            if (timer.return_rest_time() < timer.exception_time)
+            {
+                throw TimeLimitExceededException("Timeout while evaluating moves for players.");
+            }
+            if (!board.disqualified[i])
+                move_gen.calculate_valid_moves(board, i, timer);
+            else
+                board.valid_moves[i].reset();
+            if (i != player_num)
+                score -= board.player_sets[i].count() * 100;
+        }
+        for (uint16_t j = 0; j < border_set_size; j++)
+        {
+            if (timer.return_rest_time() < timer.exception_time)
+            {
+                throw TimeLimitExceededException("Timeout while evaluating border sets.");
+            }
+            if (j == 0)
+                score += get_wall_value(board, player_num);
+            else if (j == 1)
+                score -= (border_set_size) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
+            else
+                score += (border_set_size - j) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
+        }
+        if (board.is_overwrite_move(player_num))
+            score -= 100000;
+        return score + board.player_sets[player_num].count() * 10 + board.valid_moves[player_num].count() * 100;
     }
-    for (uint16_t j = 0; j < border_set_size; j++)
+    catch (TimeLimitExceededException &e)
     {
-        if (j == 0)
-            score += get_wall_value(board, player_num);
-        else if (j == 1)
-            score -= (border_set_size) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
-        else
-            score += (border_set_size - j) * 10 * (board.border_sets[j] & board.player_sets[player_num]).count();
+        throw;
     }
-    if (board.is_overwrite_move(player_num))
-        score -= 100000;
-    return score + board.player_sets[player_num].count() * 10 + board.valid_moves[player_num].count() * 100;
 }

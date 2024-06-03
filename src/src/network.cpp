@@ -1,5 +1,5 @@
 #include "network.hpp"
-
+#include "logging.hpp"
 Network::Network(const char *ip, int port) : m_ip(ip), m_port(port) {}
 
 Network::~Network()
@@ -27,7 +27,7 @@ void Network::init_socket()
      */
     if ((m_csocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        std::cout << "Socket creation error" << std::endl;
+        LOG_ERROR("Socket creation error");
         return;
     }
 }
@@ -39,7 +39,7 @@ bool Network::init_server()
     m_server_addr.sin_port = htons(m_port);
     if (inet_pton(AF_INET, m_ip, &m_server_addr.sin_addr) <= 0)
     {
-        std::cout << "Invalid address/ Address not supported" << std::endl;
+        LOG_ERROR("Invalid address/ Address not supported");
         return false;
     }
     return true;
@@ -50,7 +50,7 @@ bool Network::connect_to_server()
     if ((connect(m_csocket, (struct sockaddr *)&m_server_addr,
                  sizeof(m_server_addr))) < 0)
     {
-        std::cout << "Connection Failed" << std::endl;
+        LOG_ERROR("Connection Failed");
         return false;
     }
     return true;
@@ -60,7 +60,7 @@ void Network::close_socket()
 {
     if (close(m_csocket) < 0)
     {
-        std::cout << "Failed to close connection" << std::endl;
+        LOG_ERROR("Failed to close connection");
         return;
     }
 }
@@ -130,7 +130,7 @@ std::stringstream Network::receive_map()
     recv(m_csocket, message.data(), actual_message_length, 0);
     message[actual_message_length] = '\0';
     std::stringstream ss(message.data());
-    std::cout << "Received map" << std::endl;
+    LOG_INFO("Received map");
     return ss;
 }
 

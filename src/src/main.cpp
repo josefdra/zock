@@ -2,32 +2,33 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <logging.hpp>
 
 #include "game.hpp"
 #include "network.hpp"
 
 void init_print(bool quietMode, const char *ip, int port, bool sorting)
 {
-    std::cout << "Gruppe01 | Dräxl, Koch, Kuhn" << std::endl;
+    LOG_INFO("Gruppe01 | Dräxl, Koch, Kuhn");
     if (sorting)
     {
-        std::cout << "Zugsortierung aktiviert" << std::endl;
+        LOG_INFO("Zugsortierung aktiviert");
     }
     else
     {
-        std::cout << "Zugsortierung deaktiviert" << std::endl;
+        LOG_INFO("Zugsortierung deaktiviert");
     }
     if (quietMode)
     {
-        std::cout << "Quiet mode aktiviert" << std::endl;
+        LOG_INFO("Quiet mode aktiviert");
     }
     if (ip != nullptr)
     {
-        std::cout << "IP-Adresse: " << ip << std::endl;
+        LOG_INFO(std::string("IP-Adresse: ") + ip);
     }
     if (port != -1)
     {
-        std::cout << "Port: " << port << std::endl;
+        LOG_INFO("Port: " + std::to_string(port));
     }
     if (quietMode)
     {
@@ -69,17 +70,17 @@ bool read_args(int argc, char *argv[], const char *&ip, int &port, bool &sorting
             }
             else if (key == "h")
             {
-                std::cout << "Parameter:\n"
-                             "-i <ip>: Enter server ip\n"
-                             "-p <port>: Enter server port\n"
-                             "-n: Disable move sorting\n"
-                             "-q: Disable console output (quiet mode)\n"
-                             "-h: Print help\n"
-                             "Standard values:\n"
-                             "Move sorting: "
-                          << (sorting ? "enabled" : "disabled") << "\n"
-                                                                   "Quiet mode: "
-                          << (quietMode ? "enabled" : "disabled") << std::endl;
+                LOG_INFO("Parameter:\n"
+                         "-i <ip>: Enter server ip\n"
+                         "-p <port>: Enter server port\n"
+                         "-n: Disable move sorting\n"
+                         "-q: Disable console output (quiet mode)\n"
+                         "-h: Print help\n"
+                         "Standard values:\n"
+                         "Move sorting: " +
+                         std::string(sorting ? "enabled" : "disabled") + "\n"
+                                                                         "Quiet mode: " +
+                         std::string(quietMode ? "enabled" : "disabled"));
                 return true;
             }
         }
