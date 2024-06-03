@@ -248,7 +248,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
 
     MoveExecuter move_exec(map);
     MoveGenerator move_gen(map);
-    MiniMax minimax(move_exec, move_gen);
+    Algorithms algorithms(move_exec, move_gen);
     uint8_t x, y, player;
     player = map.get_player_number();
     try
@@ -259,7 +259,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     {
         LOG_WARNING(e.what());
     }
-    Board res = minimax.get_best_coord(board, timer, sorting);
+    Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[3].test(res.get_coord()))
     {
         res.set_spec(res.get_spec() + 1);
