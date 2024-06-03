@@ -131,9 +131,7 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
         board.board_sets[2].reset(coord);
         inversion = true;
     }
-
     std::bitset<2501> to_color = get_bits_to_update(player, board, timer);
-
     update_bits(to_color, player, board, timer);
     if (inversion)
     {
@@ -195,7 +193,7 @@ Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
         board.board_sets[1].reset(coord);
         board.board_sets[4].reset(coord);
         board.increment_bombs(player);
-    }
+    }    
     else if (spec == 21)
     {
         board.board_sets[1].reset(coord);
@@ -209,7 +207,6 @@ Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
         change_stones = spec;
     }
     update_boards(player, change_stones, board, timer);
-
     // if (overwrite_move)
     //     board.protected_fields[player] = board.player_sets[player] & (board.wall_sets[3] | board.wall_sets[4] | board.wall_sets[5] | board.wall_sets[6] | board.wall_sets[7]);
     // adjust_protected_fields(board, player);
