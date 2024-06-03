@@ -90,7 +90,7 @@ bool read_args(int argc, char *argv[], const char *&ip, int &port, bool &sorting
 
 int main(int argc, char *argv[])
 {
-    const char *ip = "127.0.0.1";
+    const char *ip = "127.0.0.1\0";
     int port = 7777;
     bool sorting = true;
     bool quietMode = false;

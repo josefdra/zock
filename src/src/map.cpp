@@ -8,7 +8,19 @@
  *
  */
 
-Map::Map(){};
+Map::Map()
+{
+    m_numbers = std::vector<char>();
+    m_transitions = std::vector<uint16_t>();
+    m_height = 0;
+    m_width = 0;
+    m_player_count = 0;
+    m_strength = 0;
+    m_initial_overwrite_stones = 0;
+    m_initial_bombs = 0;
+    m_num_of_fields = 0;
+    m_player_number = 0;
+};
 
 Map::~Map(){};
 
@@ -65,12 +77,12 @@ void Map::set_transition(uint16_t c, uint8_t d, uint16_t t)
 
 void Map::set_player_number(uint8_t n)
 {
-    player_number = n - 1;
+    m_player_number = n - 1;
 }
 
 uint8_t Map::get_player_number()
 {
-    return player_number;
+    return m_player_number;
 }
 
 char Map::get_symbol(uint16_t c)
@@ -139,8 +151,8 @@ void Map::read_map(std::stringstream mapfile)
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
     LOG_INFO("m_height: " + std::to_string(m_height) + " m_width: " + std::to_string(m_width));
     m_num_of_fields = m_height * m_width + 1;
-    m_transitions = std::vector<uint16_t>((m_num_of_fields - 1) * 8 + 1, 0);
-    m_numbers = std::vector<char>(m_num_of_fields, 0);
+    m_transitions.resize((m_num_of_fields - 1) * 8 + 1, 0);
+    m_numbers.resize(m_num_of_fields, 0);
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields; c++)
     {

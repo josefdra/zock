@@ -27,9 +27,9 @@ public:
     void run(Network &, bool);
 
 private:
-    bool m_game_over = false;
-    bool m_bomb_phase = false;
-    uint32_t m_initial_time_limit = 1000000;
+    bool m_game_over;
+    bool m_bomb_phase;
+    uint32_t m_initial_time_limit;
 };
 
 #endif // GAME_H

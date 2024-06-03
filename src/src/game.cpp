@@ -7,7 +7,11 @@
 #include "timer.hpp"
 #include "logging.hpp"
 
-Game::Game() {}
+Game::Game() {
+    m_game_over = false;
+    m_bomb_phase = false;
+    m_initial_time_limit = 1000000;
+}
 
 Game::~Game() {}
 

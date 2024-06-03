@@ -58,7 +58,7 @@ private:
     uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
     uint16_t m_num_of_fields;
-    uint8_t player_number;
+    uint8_t m_player_number;
 };
 
 #endif // MAP_HPP

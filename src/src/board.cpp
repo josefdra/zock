@@ -4,11 +4,6 @@
 
 Board::Board(Map &map)
 {
-    m_player_count = map.get_player_count();
-    m_num_of_fields = map.get_num_of_fields();
-    m_width = map.get_width();
-    m_height = map.get_height();
-    m_overwrite_move = std::vector<bool>(m_player_count, false);
     board_sets = std::vector<std::bitset<2501>>(7);
     player_sets = std::vector<std::bitset<2501>>(m_player_count);
     valid_moves = std::vector<std::bitset<2501>>(m_player_count);
@@ -19,6 +14,14 @@ Board::Board(Map &map)
     overwrite_stones = std::vector<uint16_t>(m_player_count, map.get_initial_overwrite_stones());
     bombs = std::vector<uint16_t>(m_player_count, map.get_initial_bombs());
     disqualified = std::vector<bool>(m_player_count, false);
+    m_player_count = map.get_player_count();
+    m_num_of_fields = map.get_num_of_fields();
+    m_width = map.get_width();
+    m_height = map.get_height();
+    m_coord = 0;
+    m_spec = 0;
+    m_overwrite_move = std::vector<bool>(m_player_count, false);
+    evaluation = 0;
 }
 
 Board::Board(Board &board, uint16_t coord, uint8_t spec)
