@@ -20,15 +20,14 @@ public:
 
     int minimaxOrParanoidWithPruning(Board &, int, int, int8_t, uint8_t, bool, Timer &);
     int BRS(Board &, int, int, int8_t, uint8_t, Timer &);
-    void generate_boards(Board &, uint8_t, Timer &);
+    void generate_boards(Board &, uint8_t, Timer &, std::vector<Board> &);
     void init_best_board(Board &);
     Board get_best_coord(Board &, Timer &, bool);
-    void sort_valid_moves(Board &, uint8_t, Timer &, bool maximizer);
+    void sort_valid_moves(Board &, uint8_t, Timer &, bool maximizer, std::vector<Board> &);
 
 private:
     MoveExecuter m_move_exec;
     MoveGenerator m_move_gen;
-    std::vector<Board> m_boards;
 };
 
 #endif // ALGORITHMS_HPP

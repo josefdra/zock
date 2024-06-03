@@ -7,10 +7,7 @@
 
 #define MAX_SEARCH_DEPTH 15
 
-Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : m_move_exec(move_exec), m_move_gen(move_gen)
-{
-    m_boards.reserve(3000);
-}
+Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : m_move_exec(move_exec), m_move_gen(move_gen) {}
 
 Algorithms::~Algorithms() {}
 
@@ -64,10 +61,12 @@ int Algorithms::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, 
         {
             throw TimeLimitExceededException(("Timeout in minimax after calculating valid moves."));
         }
+        std::vector<Board> boards;
+        boards.reserve(3000);
         if (sorting)
-            sort_valid_moves(board, player_num, timer, player_num == m_move_exec.get_player_num());
+            sort_valid_moves(board, player_num, timer, player_num == m_move_exec.get_player_num(), boards);
         else
-            generate_boards(board, player_num, timer);
+            generate_boards(board, player_num, timer, boards);
 
         int best_eval;
         if (player_num == m_move_exec.get_player_num())
@@ -75,7 +74,7 @@ int Algorithms::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, 
         else
             best_eval = INT32_MAX;
 
-        for (auto &b : m_boards)
+        for (auto &b : boards)
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
@@ -131,9 +130,7 @@ int Algorithms::BRS(Board &board, int alpha, int beta, int8_t depth, uint8_t pla
         {
             next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         }
-
         m_move_gen.calculate_valid_moves(board, player_num, timer);
-
         uint8_t prev_player = player_num;
         while (board.valid_moves[player_num].count() == 0 || board.disqualified[player_num])
         {
@@ -155,16 +152,16 @@ int Algorithms::BRS(Board &board, int alpha, int beta, int8_t depth, uint8_t pla
         {
             throw TimeLimitExceededException(("Timeout in minimax after calculating valid moves."));
         }
-
-        sort_valid_moves(board, player_num, timer, player_num == m_move_exec.get_player_num());
-
+        std::vector<Board> boards;
+        boards.reserve(3000);
+        sort_valid_moves(board, player_num, timer, player_num == m_move_exec.get_player_num(), boards);
         int best_eval;
         if (player_num == m_move_exec.get_player_num())
             best_eval = -INT32_MAX;
         else
             best_eval = INT32_MAX;
 
-        for (auto &b : m_boards)
+        for (auto &b : boards)
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
@@ -182,7 +179,7 @@ int Algorithms::BRS(Board &board, int alpha, int beta, int8_t depth, uint8_t pla
             else
             {
                 uint8_t player_after_us = (player_num + 1) % m_move_exec.get_num_of_players();
-                while (board.valid_moves[player_after_us].count() == 0 || board.disqualified[player_after_us])
+                while ((board.valid_moves[player_after_us].count() == 0 || board.disqualified[player_after_us]) && player_after_us != player_num)
                 {
                     player_after_us = (player_num + 1) % m_move_exec.get_num_of_players();
                     m_move_gen.calculate_valid_moves(board, player_after_us, timer);
@@ -221,18 +218,14 @@ int Algorithms::BRS(Board &board, int alpha, int beta, int8_t depth, uint8_t pla
 /// @param timer
 /// @param maximizer
 /// @return sorted valid moves as vector
-void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, Timer &timer, bool maximizer)
+void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, Timer &timer, bool maximizer, std::vector<Board> &boards)
 {
     try
     {
         std::vector<std::pair<int, Board>> evals;
         evals.reserve(3000);
-        std::cout << "creating boards"
-                  << " time left: " << timer.return_rest_time() << std::endl;
-        generate_boards(board, player_num, timer);
-        std::cout << "boards returned"
-                  << " time left: " << timer.return_rest_time() << std::endl;
-        for (Board &b : m_boards)
+        generate_boards(board, player_num, timer, boards);
+        for (Board &b : boards)
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
@@ -254,10 +247,10 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, Timer &timer
         {
             throw TimeLimitExceededException(("Timeout in sort_valid_moves after sorting"));
         }
-        m_boards.clear();
+        boards.clear();
         for (auto &e : evals)
         {
-            m_boards.push_back(e.second);
+            boards.push_back(e.second);
         }
     }
     catch (TimeLimitExceededException)
@@ -266,9 +259,8 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, Timer &timer
     }
 }
 
-void Algorithms::generate_boards(Board &board, uint8_t player_num, Timer &timer)
+void Algorithms::generate_boards(Board &board, uint8_t player_num, Timer &timer, std::vector<Board> &boards)
 {
-    m_boards.clear();
     uint16_t counter = 0;
     for (uint16_t i = 1; i < m_move_exec.get_num_of_fields(); i++)
     {
@@ -280,7 +272,6 @@ void Algorithms::generate_boards(Board &board, uint8_t player_num, Timer &timer)
         {
             throw TimeLimitExceededException("Timeout in generate_boards in first for loop.");
         }
-        Board test_board(board);
         if (board.valid_moves[player_num].test(i))
         {
             if (board.board_sets[3].test(i))
@@ -294,24 +285,22 @@ void Algorithms::generate_boards(Board &board, uint8_t player_num, Timer &timer)
                     {
                         throw TimeLimitExceededException("Timeout in generate_boards in second for loop.");
                     }
-                    m_boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, j), timer));
+                    boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, j), timer));
                     counter++;
                 }
             }
             else if (board.board_sets[4].test(i))
             {
-                m_boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 20), timer));
+                boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 20), timer));
                 counter++;
             }
             else
             {
-                m_boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 0), timer));
+                boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, 0), timer));
                 counter++;
             }
         }
     }
-    std::cout << "returning boards"
-              << " time left: " << timer.return_rest_time() << std::endl;
 }
 
 void Algorithms::init_best_board(Board &board)
@@ -343,16 +332,14 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     int best_eval = -INT32_MAX;
     Board best_board(board);
     init_best_board(best_board);
+    std::vector<Board> boards;
+    boards.reserve(3000);
     try
     {
-        std::cout << "creating boards"
-                  << " time left: " << timer.return_rest_time() << std::endl;
-        generate_boards(board, m_move_exec.get_player_num(), timer);
-        std::cout << "boards returned"
-                  << " time left: " << timer.return_rest_time() << std::endl;
+        generate_boards(board, m_move_exec.get_player_num(), timer, boards);
         for (uint8_t search_depth = 1; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
-            for (auto &b : m_boards)
+            for (auto &b : boards)
             {
                 // int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
                 int eval = BRS(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), timer);
