@@ -41,16 +41,16 @@ int Algorithms::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, 
         m_move_gen.calculate_valid_moves(board, player_num, timer);
 
         uint8_t prev_player = player_num;
-        while (board.valid_moves[player_num].count() == 0 || board.disqualified[player_num])
+        while (board.valid_moves[player_num].count() == 0)
         {
             player_num = (player_num + 1) % m_move_exec.get_num_of_players();
-            next_player = (next_player + 1) % m_move_exec.get_num_of_players();
             while (board.disqualified[next_player])
             {
                 next_player = (next_player + 1) % m_move_exec.get_num_of_players();
             }
             if (player_num == prev_player)
-                return get_evaluation(board, player_num, m_move_gen, timer);            
+                return get_evaluation(board, player_num, m_move_gen, timer);
+            next_player = (next_player + 1) % m_move_exec.get_num_of_players();
             if (timer.return_rest_time() < timer.exception_time)
             {
                 throw TimeLimitExceededException("Timeout in minimax calculating next player with valid moves.");
@@ -321,8 +321,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         {
             for (auto &b : boards)
             {
-                int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth - 1, m_move_exec.get_player_num(), sorting, timer);
-                // int eval = BRS(b, -INT32_MAX, INT32_MAX, search_depth - 1, m_move_exec.get_player_num(), timer);
+                // int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
+                int eval = BRS(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), timer);
                 if (eval > best_eval)
                 {
                     best_eval = eval;
