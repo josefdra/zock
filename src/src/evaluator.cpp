@@ -39,7 +39,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
-                throw TimeLimitExceededException("get_evaluation 0");
+                throw TimeLimitExceededException("Timeout while evaluating moves for players.");
             }
             if (!board.disqualified[i])
                 move_gen.calculate_valid_moves(board, i, timer);
@@ -52,7 +52,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
-                throw TimeLimitExceededException("get_evaluation 1");
+                throw TimeLimitExceededException("Timeout while evaluating border sets.");
             }
             if (j == 0)
                 score += get_wall_value(board, player_num);

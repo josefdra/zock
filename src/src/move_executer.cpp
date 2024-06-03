@@ -59,7 +59,7 @@ void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, Boar
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
-                throw TimeLimitExceededException("update_bits");
+                throw TimeLimitExceededException("Timeout in function update_bits.");
             }
             if (to_color.test(c))
             {
@@ -210,7 +210,7 @@ Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
     }
     update_boards(player, change_stones, board, timer);
 
-        // if (overwrite_move)
+    // if (overwrite_move)
     //     board.protected_fields[player] = board.player_sets[player] & (board.wall_sets[3] | board.wall_sets[4] | board.wall_sets[5] | board.wall_sets[6] | board.wall_sets[7]);
     // adjust_protected_fields(board, player);
     return board;

@@ -18,13 +18,15 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
     {
         static int call_count = 0;
         call_count++;
+#ifdef DEBUG
         if (call_count % 1 == 0)
         {
             LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
         }
+#endif
         if (timer.return_rest_time() < timer.exception_time)
         {
-            throw TimeLimitExceededException("minimax 0");
+            throw TimeLimitExceededException("Timeout at beginning of minimax recursion.");
         }
         if (depth == 0)
         {
@@ -35,10 +37,7 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
         {
             next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         }
-        if (timer.return_rest_time() < timer.exception_time)
-        {
-            throw TimeLimitExceededException("minimax 1");
-        }
+
         m_move_gen.calculate_valid_moves(board, player_num, timer);
 
         uint8_t prev_player = player_num;
@@ -54,13 +53,13 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
             next_player = (next_player + 1) % m_move_exec.get_num_of_players();
             if (timer.return_rest_time() < timer.exception_time)
             {
-                throw TimeLimitExceededException("minimax 2");
+                throw TimeLimitExceededException("Timeout in minimax calculating next player with valid moves.");
             }
             m_move_gen.calculate_valid_moves(board, player_num, timer);
         }
         if (timer.return_rest_time() < timer.exception_time)
         {
-            throw TimeLimitExceededException(("minimax 3"));
+            throw TimeLimitExceededException(("Timeout in minimax after calculating valid moves."));
         }
 
         if (sorting)
@@ -80,7 +79,7 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
-                throw TimeLimitExceededException(("minimax 4"));
+                throw TimeLimitExceededException(("Timeout in minimax after generating boards and iterating over them."));
             }
             int eval = minimaxOrParanoidWithPruning(b, alpha, beta, depth - 1, next_player, sorting, timer);
             if (player_num == m_move_exec.get_player_num())
@@ -127,7 +126,7 @@ std::vector<std::bitset<2501>> MiniMax::sort_valid_moves(Board &board, uint8_t p
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
-                throw TimeLimitExceededException(("sorting"));
+                throw TimeLimitExceededException(("Timeout in sort_valid_moves after generating boards and iterating over them."));
             }
             evals.push_back(std::make_pair(get_evaluation(b, player_num, m_move_gen, timer), b.get_coord()));
         }
@@ -143,14 +142,14 @@ std::vector<std::bitset<2501>> MiniMax::sort_valid_moves(Board &board, uint8_t p
         }
         if (timer.return_rest_time() < timer.exception_time)
         {
-            throw TimeLimitExceededException(("sorting 2"));
+            throw TimeLimitExceededException(("Timeout in sort_valid_moves after sorting"));
         }
         sorted_valid_moves.clear();
         for (const auto &eval : evals)
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
-                throw TimeLimitExceededException(("sorting 3"));
+                throw TimeLimitExceededException(("Timeout in sort_valid_moves while appending sorted valid moves to vector."));
             }
             sorted_valid_moves.push_back(valid_moves[eval.second]);
         }
@@ -165,15 +164,15 @@ std::vector<std::bitset<2501>> MiniMax::sort_valid_moves(Board &board, uint8_t p
 std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Timer &timer)
 {
     std::vector<Board> boards;
-    LOG_INFO("valid moves: " + std::to_string(board.valid_moves[player_num].count()));
     for (uint16_t i = 1; i < m_move_exec.get_num_of_fields(); i++)
     {
+#ifdef DEBUG
         if (i > 1000)
             LOG_INFO("time left: " + std::to_string(timer.return_rest_time()) + " i = " + std::to_string(i) + " coord: " + std::to_string(board.get_coord()));
-
+#endif // DEBUG
         if (timer.return_rest_time() < timer.exception_time)
         {
-            throw TimeLimitExceededException("generate Boards 1");
+            throw TimeLimitExceededException("Timeout in generate_boards in first for loop.");
         }
         if (board.valid_moves[player_num].test(i))
         {
@@ -181,10 +180,12 @@ std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Ti
             {
                 for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
                 {
+#ifdef DEBUG
                     LOG_INFO("time left: " + std::to_string(timer.return_rest_time()) + " j = " + std::to_string(j));
+#endif // DEBUG
                     if (timer.return_rest_time() < timer.exception_time)
                     {
-                        throw TimeLimitExceededException("generate Boards 2");
+                        throw TimeLimitExceededException("Timeout in generate_boards in second for loop.");
                     }
                     boards.push_back(m_move_exec.exec_move(player_num, Board(board, i, j), timer));
                 }

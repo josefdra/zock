@@ -91,7 +91,7 @@ void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board,
         {
             if (timer.return_rest_time() < timer.exception_time)
             {
-                throw TimeLimitExceededException(("calculate_valid_no_overwrite_moves_from_player 1"));
+                throw TimeLimitExceededException(("Timeout in function calculate_valid_no_overwrite_moves_from_player in for loop."));
             }
             uint16_t next_coord = get_transition(c, d);
             uint8_t next_direction = get_direction(c, d);
@@ -101,7 +101,7 @@ void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board,
             {
                 if (timer.return_rest_time() < timer.exception_time)
                 {
-                    throw TimeLimitExceededException(("calculate_valid_no_overwrite_moves_from_player 2"));
+                    throw TimeLimitExceededException(("Timeout in function calculate_valid_no_overwrite_moves_from_player in while loop."));
                 }
                 prev_coord = next_coord;
                 prev_direction = next_direction;
@@ -144,7 +144,7 @@ void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, ui
             {
                 if (timer.return_rest_time() < timer.exception_time)
                 {
-                    throw TimeLimitExceededException(("calculate_valid_overwrite_moves_from_player"));
+                    throw TimeLimitExceededException(("Timeout in function calculate_valid_overwrite_moves_from_player"));
                 }
                 prev_coord = next_coord;
                 prev_direction = next_direction;
@@ -173,10 +173,6 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
 
-            if (timer.return_rest_time() < timer.exception_time)
-            {
-                throw TimeLimitExceededException("calculate_moves_from_player 1");
-            }
             if (board.player_sets[player_number].test(c))
             {
                 calculate_valid_no_overwrite_moves_from_player(board, player_number, c, timer);
@@ -189,10 +185,6 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
             for (uint16_t c = 1; c < m_num_of_fields; c++)
             {
 
-                if (timer.return_rest_time() < timer.exception_time)
-                {
-                    throw TimeLimitExceededException("calculate_moves_from_player 2");
-                }
                 if (board.player_sets[player_number].test(c))
                 {
                     calculate_valid_overwrite_moves_from_player(board, player_number, c, timer);
