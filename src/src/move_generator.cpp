@@ -366,17 +366,16 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool
     //     }
     // }
     // if (coord = 0)
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
-        for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if (!board.board_sets[0].test(c) && !board.player_sets[map.get_player_number()].test(c))
         {
-            if (!board.board_sets[0].test(c) && !board.player_sets[map.get_player_number()].test(c))
-            {
-                coord = c;
-                break;
-            }
+            coord = c;
+            break;
         }
     }
-    if(coord = 0){
+    if (coord = 0)
+    {
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
             if (!board.board_sets[0].test(c))
@@ -386,6 +385,7 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool
             }
         }
     }
+    std::cout << "Bombing at " << coord << std::endl;
     map.one_dimension_2_second_dimension(coord, x, y);
     uint32_t bomb = (uint32_t)x << 16 | (uint32_t)y << 8;
     return bomb;
