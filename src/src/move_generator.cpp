@@ -374,7 +374,7 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool
             break;
         }
     }
-    if (coord = 0)
+    if (coord == 0)
     {
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
