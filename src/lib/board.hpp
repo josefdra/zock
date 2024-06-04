@@ -24,7 +24,7 @@ enum Colors
 class Board
 {
 public:
-    Board(Map &);    
+    Board(Map &);
     Board(Board &, uint16_t, uint8_t);
     ~Board();
 

@@ -19,7 +19,7 @@ public:
     ~Algorithms();
 
     int minimaxOrParanoidWithPruning(Board &, int, int, int8_t, uint8_t, bool, Timer &);
-    int BRS(Board &, int, int, int8_t, uint8_t, Timer &);
+    int BRS(Board &, int, int, int8_t, uint8_t, Timer &, uint8_t);
     void generate_boards(Board &, uint8_t, Timer &, std::vector<Board> &);
     void init_best_board(Board &);
     Board get_best_coord(Board &, Timer &, bool);
