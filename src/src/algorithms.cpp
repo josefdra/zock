@@ -284,11 +284,11 @@ Board MiniMax::get_best_coord(Board &board, Timer &timer, bool sorting)
             }
 
             double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
-            // #ifdef DEBUG
+#ifdef DEBUG
             LOG_INFO("search depth: " + std::to_string(search_depth) + " took " + std::to_string(measure_depth_search.get_elapsed_time()) + " [ms]");
             LOG_INFO("estimated runtime next depth: " + std::to_string(estimated_runtime) + " [ms]");
             LOG_INFO("time left: " + std::to_string(timer.return_rest_time()) + " [ms]");
-            // #endif // DEBUG
+#endif // DEBUG
             if (estimated_runtime > timer.return_rest_time())
             {
                 LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
