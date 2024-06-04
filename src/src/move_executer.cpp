@@ -193,7 +193,7 @@ Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
         board.board_sets[1].reset(coord);
         board.board_sets[4].reset(coord);
         board.increment_bombs(player);
-    }    
+    }
     else if (spec == 21)
     {
         board.board_sets[1].reset(coord);

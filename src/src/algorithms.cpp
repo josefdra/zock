@@ -341,8 +341,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         {
             for (auto &b : boards)
             {
-                // int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
-                int eval = BRS(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), timer);
+                int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
+                // int eval = BRS(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), timer);
                 if (eval > best_eval)
                 {
                     best_eval = eval;

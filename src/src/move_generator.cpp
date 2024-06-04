@@ -316,7 +316,7 @@ void MoveGenerator::init_bomb_phase_boards(Board &board, uint8_t strength, uint8
 uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool sorting)
 {
     uint8_t x, y;
-    uint16_t coord;
+    uint16_t coord = 0;
     // uint16_t affected_by_bomb = 1;
     // if (map.get_strength() > 0)
     //     affected_by_bomb = map.get_strength() * 8;
@@ -370,6 +370,16 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
             if (!board.board_sets[0].test(c) && !board.player_sets[map.get_player_number()].test(c))
+            {
+                coord = c;
+                break;
+            }
+        }
+    }
+    if(coord = 0){
+        for (uint16_t c = 1; c < m_num_of_fields; c++)
+        {
+            if (!board.board_sets[0].test(c))
             {
                 coord = c;
                 break;
