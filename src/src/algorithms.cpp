@@ -3,6 +3,7 @@
 #include "timer.hpp"
 #include "board.hpp"
 #include "evaluator.hpp"
+#include "math.h"
 #include "logging.hpp"
 
 #define MAX_SEARCH_DEPTH 15
@@ -16,8 +17,7 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
 
     try
     {
-        static int call_count = 0;
-        call_count++;
+
 #ifdef DEBUG
         if (call_count % 1 == 0)
         {
@@ -28,17 +28,21 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
         {
             throw TimeLimitExceededException("Timeout at beginning of minimax recursion.");
         }
+
         if (depth == 0)
         {
+
             return get_evaluation(board, player_num, m_move_gen, timer);
         }
+        uint32_t call_count = track_number_of_nodes(false);
         uint8_t next_player = (player_num + 1) % m_move_exec.get_num_of_players();
         while (board.disqualified[next_player])
         {
             next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         }
-
         m_move_gen.calculate_valid_moves(board, player_num, timer);
+        uint16_t num_val_moves = board.valid_moves[player_num].count();
+        average_branching_factor = calculate_average_branching_factor(num_val_moves, call_count, false);
 
         uint8_t prev_player = player_num;
         while (board.valid_moves[player_num].count() == 0)
@@ -57,17 +61,17 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
             }
             m_move_gen.calculate_valid_moves(board, player_num, timer);
         }
+
         if (timer.return_rest_time() < timer.exception_time)
         {
             throw TimeLimitExceededException(("Timeout in minimax after calculating valid moves."));
         }
 
+        std::vector<Board> boards = generate_boards(board, player_num, timer);
         if (sorting)
         {
-            std::vector<std::bitset<2501>> new_valid_moves = sort_valid_moves(board, player_num, timer, player_num == m_move_exec.get_player_num());
+            board.valid_moves = sort_valid_moves(board, player_num, timer, boards, player_num == m_move_exec.get_player_num());
         }
-
-        std::vector<Board> boards = generate_boards(board, player_num, timer);
 
         int best_eval;
         if (player_num == m_move_exec.get_player_num())
@@ -112,15 +116,13 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
 /// @param timer
 /// @param maximizer
 /// @return sorted valid moves as vector
-std::vector<std::bitset<2501>> MiniMax::sort_valid_moves(Board &board, uint8_t player_num, Timer &timer, bool maximizer)
+std::vector<std::bitset<2501>> MiniMax::sort_valid_moves(Board &board, uint8_t player_num, Timer &timer, std::vector<Board> &boards, bool maximizer)
 {
     try
     {
         std::vector<std::bitset<2501>> sorted_valid_moves;
         std::vector<std::pair<int, uint16_t>> evals;
         std::vector<std::bitset<2501>> valid_moves = board.valid_moves;
-
-        std::vector<Board> boards = generate_boards(board, player_num, timer);
 
         for (Board &b : boards)
         {
@@ -155,10 +157,42 @@ std::vector<std::bitset<2501>> MiniMax::sort_valid_moves(Board &board, uint8_t p
         }
         return sorted_valid_moves;
     }
-    catch (TimeLimitExceededException &e)
+    catch (TimeLimitExceededException)
     {
         throw;
     }
+}
+
+double MiniMax::calculate_average_branching_factor(uint16_t num_of_valid_moves, uint32_t count, bool reset)
+{
+
+    static uint32_t sum = 0;
+
+    if (!reset)
+    {
+        sum += num_of_valid_moves;
+    }
+    else
+    {
+        sum = 0;
+    }
+    // LOG_INFO("call_count = " + std::to_string(count) + " sum = " + std::to_string(sum));
+    return static_cast<double>(sum) / static_cast<double>(count);
+}
+
+uint32_t MiniMax::track_number_of_nodes(bool reset)
+{
+
+    static uint32_t count = 0;
+    if (!reset)
+    {
+        count++;
+    }
+    else
+    {
+        count = 0;
+    }
+    return count;
 }
 
 std::vector<Board> MiniMax::generate_boards(Board &board, uint8_t player_num, Timer &timer)
@@ -238,6 +272,7 @@ Board MiniMax::get_best_coord(Board &board, Timer &timer, bool sorting)
         std::vector<Board> boards = generate_boards(board, m_move_exec.get_player_num(), timer);
         for (uint8_t search_depth = 1; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
+            Timer measure_depth_search(timer.return_rest_time());
             for (auto &b : boards)
             {
                 int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
@@ -246,6 +281,18 @@ Board MiniMax::get_best_coord(Board &board, Timer &timer, bool sorting)
                     best_eval = eval;
                     best_board = b;
                 }
+            }
+
+            double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
+            // #ifdef DEBUG
+            LOG_INFO("search depth: " + std::to_string(search_depth) + " took " + std::to_string(measure_depth_search.get_elapsed_time()) + " [ms]");
+            LOG_INFO("estimated runtime next depth: " + std::to_string(estimated_runtime) + " [ms]");
+            LOG_INFO("time left: " + std::to_string(timer.return_rest_time()) + " [ms]");
+            // #endif // DEBUG
+            if (estimated_runtime > timer.return_rest_time())
+            {
+                LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                break;
             }
         }
     }
@@ -256,4 +303,27 @@ Board MiniMax::get_best_coord(Board &board, Timer &timer, bool sorting)
     }
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
+}
+
+double MiniMax::estimate_runtime_next_depth(uint8_t &current_depth, Timer &timer)
+{
+    if (average_branching_factor != -1.0)
+    {
+        uint32_t no_nodes = track_number_of_nodes(false);
+        double elapsed_time = timer.get_elapsed_time();
+        double time_per_node = elapsed_time / (static_cast<double>(no_nodes)); // times 2 because nodes at depth 0 aren't counted
+        // LOG_INFO("elapsed time: " + std::to_string(elapsed_time) + " no_nodes: " + std::to_string(no_nodes) + " time per node: " + std::to_string(time_per_node));
+        // LOG_INFO("branching average: " + std::to_string(average_branching_factor / 1.5));
+        double estimated_nodes_next_depth = pow(static_cast<double>(average_branching_factor / 1.5), static_cast<double>((current_depth + 1)));
+        // LOG_INFO("estimated nodes next depth: " + std::to_string(estimated_nodes_next_depth));
+        // LOG_INFO("caculating: " + std::to_string(estimated_nodes_next_depth) + " * " + std::to_string(time_per_node));
+        track_number_of_nodes(true);
+        calculate_average_branching_factor(0, 0, true);
+        average_branching_factor = 1;
+        return ((estimated_nodes_next_depth * time_per_node) / 1.75);
+    }
+    else
+    {
+        return -1.0;
+    }
 }

@@ -22,11 +22,15 @@ public:
     std::vector<Board> generate_boards(Board &, uint8_t, Timer &);
     void init_best_board(Board &);
     Board get_best_coord(Board &, Timer &, bool);
-    std::vector<std::bitset<2501>> sort_valid_moves(Board &, uint8_t, Timer &, bool maximizer);
+    std::vector<std::bitset<2501>> sort_valid_moves(Board &, uint8_t, Timer &, std::vector<Board> &, bool maximizer);
+    double calculate_average_branching_factor(uint16_t, uint32_t, bool);
+    double estimate_runtime_next_depth(uint8_t &, Timer &);
+    uint32_t track_number_of_nodes(bool);
 
 private:
     MoveExecuter m_move_exec;
     MoveGenerator m_move_gen;
+    double average_branching_factor = 0;
 };
 
 #endif // ALGORITHMS_HPP
