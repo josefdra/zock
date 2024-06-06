@@ -258,15 +258,20 @@ void Map::init_wall_values(Board &board)
         if (board.border_sets[0].test(c))
         {
             uint8_t counter = 0;
+            uint8_t most = 0;
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
                 if (next_coord == 0)
                 {
                     counter++;
+                    if (counter > most)
+                        most = counter;
                 }
+                else
+                    counter = 0;
             }
-            board.wall_sets[counter - 1].set(c);
+            board.wall_sets[most - 1].set(c);
         }
     }
     init_protected_fields(board);

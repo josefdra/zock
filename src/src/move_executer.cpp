@@ -129,32 +129,6 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     }
 }
 
-// void MoveExecuter::adjust_protected_fields(Board &board, uint8_t player)
-// {
-//     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-//     {
-//         if (board.protected_fields[player].test(c))
-//         {
-//             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-//             {
-//                 uint16_t next_coord = get_transition(c, d);
-//                 if (next_coord == 0 || board.protected_fields[player].test(next_coord))
-//                 {
-//                     uint16_t trans1 = get_transition(c, (d + 3) % NUM_OF_DIRECTIONS);
-//                     uint16_t trans2 = get_transition(c, (d + 4) % NUM_OF_DIRECTIONS);
-//                     uint16_t trans3 = get_transition(c, (d + 5) % NUM_OF_DIRECTIONS);
-//                     bool found_proteceted = false;
-//                     if (test_if_protected(board, player, trans1))
-//                     {
-//                         found_proteceted = true;
-//                         board.protected_fields[player].set(trans1);
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
-
 void MoveExecuter::exec_move(uint8_t player, Board &board, Timer &timer)
 {
     uint16_t coord = board.get_coord();

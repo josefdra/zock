@@ -33,15 +33,8 @@ int Algorithms::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, 
         static int call_count = 0;
         call_count++;
 #ifdef DEBUG
-        if (call_count % 1 == 0)
-        {
-            LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
-        }
+        LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
 #endif
-        if (timer.return_rest_time() < timer.exception_time)
-        {
-            throw TimeLimitExceededException("Timeout at beginning of minimax recursion.");
-        }
         uint8_t next_player = get_next_player(player_num, board, timer);
         if (depth == 0 || next_player == player_num)
         {
@@ -196,10 +189,15 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     try
     {
         set_up_moves(board, player_num, moves);
+        sort_valid_moves(board, player_num, moves, timer);
         for (uint8_t search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
             for (auto &m : moves)
             {
+                if (timer.return_rest_time() < timer.exception_time)
+                {
+                    throw TimeLimitExceededException(("Timeout in get_best_coord"));
+                }
                 board.set_coord(std::get<1>(m));
                 board.set_spec(std::get<2>(m));
                 m_move_exec.exec_move(player_num, board, timer);
