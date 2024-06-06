@@ -196,7 +196,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     try
     {
         set_up_moves(board, player_num, moves);
-        for (uint8_t search_depth = 1; search_depth < MAX_SEARCH_DEPTH; search_depth++)
+        for (uint8_t search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
             for (auto &m : moves)
             {
@@ -216,6 +216,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     }
     catch (TimeLimitExceededException &e)
     {
+        board = prev_board;
         LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }

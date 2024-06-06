@@ -79,10 +79,6 @@ std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, Board &board,
         uint16_t temp_transition = get_transition(coord, d);
         uint8_t temp_direction = get_direction(coord, d);
         std::bitset<2501> temp;
-        if (timer.return_rest_time() < timer.exception_time)
-        {
-            throw TimeLimitExceededException("get_bits_to_update");
-        }
         while (temp_transition != 0 && temp_transition != coord && !board.board_sets[1].test(temp_transition))
         {
             if (board.player_sets[player].test(temp_transition))
