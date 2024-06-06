@@ -204,6 +204,14 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     Algorithms algorithms(move_exec, move_gen);
     uint8_t x, y, player;
     player = map.get_player_number();
+    if (2 * board.player_sets[player].count() < board.board_sets[6].count())
+    {
+        LOG_INFO("Calculating moves from player");
+    }
+    else
+    {
+        LOG_INFO("Calculating moves from frame");
+    }
     calculate_valid_moves(board, player, timer);
     Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[3].test(res.get_coord()))
