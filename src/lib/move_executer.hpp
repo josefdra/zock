@@ -27,7 +27,7 @@ public:
     std::bitset<2501> get_bits_to_update(uint8_t, Board &, Timer &);
     void update_boards(uint8_t, uint8_t, Board &, Timer &);
     // void adjust_protected_fields(Board &, uint8_t);
-    Board exec_move(uint8_t, Board, Timer &);
+    void exec_move(uint8_t, Board &, Timer &);
     void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &, Board &);
     void init_bomb_phase_boards(Board &, uint16_t, uint8_t);
     Board exec_bomb(uint8_t, Board, Timer &, uint8_t);

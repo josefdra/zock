@@ -44,81 +44,63 @@ uint8_t MoveExecuter::get_player_num()
 
 void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, Board &board, Timer &timer)
 {
-    try
+    for (auto &bitset : board.board_sets)
     {
-        for (auto &bitset : board.board_sets)
+        bitset &= ~to_color;
+    }
+    for (auto &bitset : board.player_sets)
+    {
+        bitset &= ~to_color;
+    }
+    board.player_sets[player] |= to_color;
+    for (uint16_t c = 1; c < get_num_of_fields(); c++)
+    {
+        if (to_color.test(c))
         {
-            bitset &= ~to_color;
-        }
-        for (auto &bitset : board.player_sets)
-        {
-            bitset &= ~to_color;
-        }
-        board.player_sets[player] |= to_color;
-        for (uint16_t c = 1; c < get_num_of_fields(); c++)
-        {
-            if (timer.return_rest_time() < timer.exception_time)
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
-                throw TimeLimitExceededException("Timeout in function update_bits.");
-            }
-            if (to_color.test(c))
-            {
-                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && board.board_sets[1].test(next_coord))
                 {
-                    uint16_t next_coord = get_transition(c, d);
-                    if (next_coord != 0 && board.board_sets[1].test(next_coord))
-                    {
-                        board.board_sets[6].set(next_coord);
-                    }
+                    board.board_sets[6].set(next_coord);
                 }
             }
         }
-    }
-    catch (const std::exception)
-    {
-        throw;
     }
 }
 
 std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, Board &board, Timer &timer)
 {
-    try
+    uint16_t coord = board.get_coord();
+    std::bitset<2501> to_color;
+    to_color.set(coord);
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
-        uint16_t coord = board.get_coord();
-        std::bitset<2501> to_color;
-        to_color.set(coord);
-        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        uint16_t temp_transition = get_transition(coord, d);
+        uint8_t temp_direction = get_direction(coord, d);
+        std::bitset<2501> temp;
+        if (timer.return_rest_time() < timer.exception_time)
         {
-            uint16_t temp_transition = get_transition(coord, d);
-            uint8_t temp_direction = get_direction(coord, d);
-            std::bitset<2501> temp;
-            if (timer.return_rest_time() < timer.exception_time)
+            throw TimeLimitExceededException("get_bits_to_update");
+        }
+        while (temp_transition != 0 && temp_transition != coord && !board.board_sets[1].test(temp_transition))
+        {
+            if (board.player_sets[player].test(temp_transition))
             {
-                throw TimeLimitExceededException("get_bits_to_update");
+                to_color |= temp;
+                break;
             }
-            while (temp_transition != 0 && temp_transition != coord && !board.board_sets[1].test(temp_transition))
+            else
             {
-                if (board.player_sets[player].test(temp_transition))
-                {
-                    to_color |= temp;
-                    break;
-                }
-                else
-                {
-                    temp.set(temp_transition);
-                    uint16_t next_transition = get_transition(temp_transition, temp_direction);
-                    uint8_t next_direction = get_direction(temp_transition, temp_direction);
-                    temp_transition = next_transition;
-                    temp_direction = next_direction;
-                }
+                temp.set(temp_transition);
+                uint16_t next_transition = get_transition(temp_transition, temp_direction);
+                uint8_t next_direction = get_direction(temp_transition, temp_direction);
+                temp_transition = next_transition;
+                temp_direction = next_direction;
             }
         }
-        return to_color;
     }
-    catch (const std::exception)
-    {
-        throw;
-    }
+    return to_color;
 }
 
 void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, Timer &timer)
@@ -177,7 +159,7 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
 //     }
 // }
 
-Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
+void MoveExecuter::exec_move(uint8_t player, Board &board, Timer &timer)
 {
     uint16_t coord = board.get_coord();
     uint8_t spec = board.get_spec();
@@ -207,10 +189,6 @@ Board MoveExecuter::exec_move(uint8_t player, Board board, Timer &timer)
         change_stones = spec;
     }
     update_boards(player, change_stones, board, timer);
-    // if (overwrite_move)
-    //     board.protected_fields[player] = board.player_sets[player] & (board.wall_sets[3] | board.wall_sets[4] | board.wall_sets[5] | board.wall_sets[6] | board.wall_sets[7]);
-    // adjust_protected_fields(board, player);
-    return board;
 }
 
 void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask, Board &board)

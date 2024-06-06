@@ -1,5 +1,6 @@
 #include "network.hpp"
 #include "logging.hpp"
+
 Network::Network(const char *ip, int port) : m_ip(ip), m_port(port) {
     m_server_addr = {};
     m_csocket = 0;

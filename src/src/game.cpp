@@ -103,7 +103,7 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     {
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
         LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> 32) & 0xFF)) + ", " + std::to_string((int)((data >> 16) & 0xFF)));
-        board = move_exec.exec_move(player, board, timer);
+        move_exec.exec_move(player, board, timer);
     }
     else
     {
