@@ -174,10 +174,20 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
                         break;
                 }
             }
+            board.set_coord(std::get<1>(moves[0]));
+            board.set_spec(std::get<2>(moves[0]));
+            m_move_exec.exec_move(player_num, board);
             brs(board, alpha, beta, brs_m - 1, depth - 1, next_player, timer);
+            board = prev_board;
         }
         else
+        {
+            board.set_coord(std::get<1>(moves[0]));
+            board.set_spec(std::get<2>(moves[0]));
+            m_move_exec.exec_move(player_num, board);
             brs(board, alpha, beta, brs_m, depth - 1, next_player, timer);
+            board = prev_board;
+        }
         return best_eval;
     }
     catch (const TimeLimitExceededException &)
