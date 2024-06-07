@@ -159,9 +159,9 @@ void MoveExecuter::exec_move(uint8_t player, Board &board)
     update_boards(player, change_stones, board);
 }
 
-void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask, Board &board)
+void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask, Board &board, std::bitset<2501> &fields_to_remove)
 {
-    if (strength == 0 || board.fields_to_remove[start_coord] == mask)
+    if (strength == 0 || fields_to_remove == mask)
     {
         return;
     }
@@ -170,21 +170,16 @@ void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t str
         uint16_t next_coord = get_transition(c, d);
         if (next_coord != 0 && !board.board_sets[0].test(next_coord) && next_coord != start_coord)
         {
-            board.fields_to_remove[start_coord].set(next_coord);
-            get_bomb_coords(start_coord, next_coord, strength - 1, mask, board);
+            fields_to_remove.set(next_coord);
+            get_bomb_coords(start_coord, next_coord, strength - 1, mask, board, fields_to_remove);
         }
     }
 }
 
-void MoveExecuter::init_bomb_phase_boards(Board &board, uint16_t coord, uint8_t strength)
+std::bitset<2501> MoveExecuter::get_fields_to_remove(Board &board, uint16_t coord, uint8_t strength, std::bitset<2501> &mask)
 {
-    std::bitset<2501> mask;
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        if (!board.board_sets[0].test(c))
-            mask.set(c);
-    }
-    board.fields_to_remove[coord].set(coord);
+    std::bitset<2501> fields_to_remove;
+    fields_to_remove.set(coord);
     if (strength > 0)
     {
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
@@ -192,29 +187,36 @@ void MoveExecuter::init_bomb_phase_boards(Board &board, uint16_t coord, uint8_t 
             uint16_t next_coord = get_transition(coord, d);
             if (next_coord != 0 && !board.board_sets[0].test(next_coord) && next_coord != coord)
             {
-                board.fields_to_remove[coord].set(next_coord);
-                get_bomb_coords(coord, next_coord, strength - 1, mask, board);
+                fields_to_remove.set(next_coord);
+                get_bomb_coords(coord, next_coord, strength - 1, mask, board, fields_to_remove);
             }
         }
     }
+    return fields_to_remove;
 }
 
 Board MoveExecuter::exec_bomb(uint8_t player, Board board, uint8_t strength)
 {
     LOG_INFO("exec");
     uint16_t coord = board.get_coord();
-    init_bomb_phase_boards(board, coord, strength);
+    std::bitset<2501> mask;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        if (!board.board_sets[0].test(c))
+            mask.set(c);
+    }
+    std::bitset<2501> fields_to_remove(get_fields_to_remove(board, coord, strength, mask));
     board.decrement_bombs(player);
     for (uint8_t i = 0; i < board.board_sets.size(); i++)
     {
-        board.board_sets[i] |= board.fields_to_remove[coord];
-        board.board_sets[i] &= ~board.fields_to_remove[coord];
+        board.board_sets[i] |= fields_to_remove;
+        board.board_sets[i] &= ~fields_to_remove;
     }
     for (uint8_t i = 0; i < board.player_sets.size(); i++)
     {
-        board.player_sets[i] |= board.fields_to_remove[coord];
-        board.player_sets[i] &= ~board.fields_to_remove[coord];
+        board.player_sets[i] |= fields_to_remove;
+        board.player_sets[i] &= ~fields_to_remove;
     }
-    board.board_sets[0] |= board.fields_to_remove[coord];
+    board.board_sets[0] |= fields_to_remove;
     return board;
 }

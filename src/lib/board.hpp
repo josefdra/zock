@@ -72,8 +72,6 @@ public:
     std::vector<std::bitset<2501>> border_sets;
     std::vector<std::bitset<2501>> protected_fields;
 
-    std::vector<std::bitset<2501>> fields_to_remove;
-
     std::vector<uint16_t> overwrite_stones;
     std::vector<uint16_t> bombs;
 
