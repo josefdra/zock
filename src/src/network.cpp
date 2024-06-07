@@ -144,7 +144,7 @@ uint64_t Network::receive_data()
     uint32_t actual_message_length = get_actual_message_length(type);
     uint64_t game_data = 0;
     uint64_t big_type = type;
-    unsigned char message[actual_message_length];
+    unsigned char message[3000];
     recv(m_csocket, &message, actual_message_length, 0);
     for (uint32_t i = 0; i < actual_message_length; i++)
     {

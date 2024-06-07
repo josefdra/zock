@@ -42,7 +42,7 @@ uint8_t MoveExecuter::get_player_num()
     return m_player_num;
 }
 
-void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, Board &board, Timer &timer)
+void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, Board &board)
 {
     for (auto &bitset : board.board_sets)
     {
@@ -69,7 +69,7 @@ void MoveExecuter::update_bits(std::bitset<2501> &to_color, uint8_t player, Boar
     }
 }
 
-std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, Board &board, Timer &timer)
+std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, Board &board)
 {
     uint16_t coord = board.get_coord();
     std::bitset<2501> to_color;
@@ -99,7 +99,7 @@ std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, Board &board,
     return to_color;
 }
 
-void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, Timer &timer)
+void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board)
 {
     uint16_t coord = board.get_coord();
     bool inversion = false;
@@ -109,8 +109,8 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
         board.board_sets[2].reset(coord);
         inversion = true;
     }
-    std::bitset<2501> to_color = get_bits_to_update(player, board, timer);
-    update_bits(to_color, player, board, timer);
+    std::bitset<2501> to_color = get_bits_to_update(player, board);
+    update_bits(to_color, player, board);
     if (inversion)
     {
         uint16_t player_count = board.get_player_count();
@@ -129,16 +129,14 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     }
 }
 
-void MoveExecuter::exec_move(uint8_t player, Board &board, Timer &timer)
+void MoveExecuter::exec_move(uint8_t player, Board &board)
 {
     uint16_t coord = board.get_coord();
     uint8_t spec = board.get_spec();
     uint8_t change_stones = 0;
-    bool overwrite_move = false;
     if (!board.board_sets[1].test(coord))
     {
         board.decrement_overwrite_stones(player);
-        overwrite_move = true;
     }
     if (spec == 20)
     {
@@ -158,7 +156,7 @@ void MoveExecuter::exec_move(uint8_t player, Board &board, Timer &timer)
         board.board_sets[3].reset(coord);
         change_stones = spec;
     }
-    update_boards(player, change_stones, board, timer);
+    update_boards(player, change_stones, board);
 }
 
 void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask, Board &board)
@@ -201,7 +199,7 @@ void MoveExecuter::init_bomb_phase_boards(Board &board, uint16_t coord, uint8_t 
     }
 }
 
-Board MoveExecuter::exec_bomb(uint8_t player, Board board, Timer &timer, uint8_t strength)
+Board MoveExecuter::exec_bomb(uint8_t player, Board board, uint8_t strength)
 {
     LOG_INFO("exec");
     uint16_t coord = board.get_coord();

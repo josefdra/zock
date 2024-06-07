@@ -43,7 +43,7 @@ uint8_t MoveGenerator::get_player_num()
     return m_player_num;
 }
 
-bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player_number, Timer &timer)
+bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player_number)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
@@ -72,7 +72,7 @@ bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player
     return false;
 }
 
-void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c, Timer &timer)
+void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
@@ -100,7 +100,7 @@ void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board,
     }
 }
 
-void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c, Timer &timer)
+void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
@@ -128,13 +128,13 @@ void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, ui
     }
 }
 
-void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_number, Timer &timer)
+void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_number)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         if (board.player_sets[player_number].test(c))
         {
-            calculate_valid_no_overwrite_moves_from_player(board, player_number, c, timer);
+            calculate_valid_no_overwrite_moves_from_player(board, player_number, c);
         }
     }
     if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
@@ -145,7 +145,7 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
 
             if (board.player_sets[player_number].test(c))
             {
-                calculate_valid_overwrite_moves_from_player(board, player_number, c, timer);
+                calculate_valid_overwrite_moves_from_player(board, player_number, c);
             }
             if (board.board_sets[5].test(c))
             {
@@ -155,13 +155,13 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
     }
 }
 
-void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_number, Timer &timer)
+void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_number)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         if (board.board_sets[6].test(c))
         {
-            if (check_if_valid_move(board, c, player_number, timer))
+            if (check_if_valid_move(board, c, player_number))
                 board.valid_moves[player_number].set(c);
         }
     }
@@ -172,7 +172,7 @@ void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_numb
         {
             if (!board.board_sets[1].test(c))
             {
-                if (check_if_valid_move(board, c, player_number, timer))
+                if (check_if_valid_move(board, c, player_number))
                     board.valid_moves[player_number].set(c);
             }
             if (board.board_sets[5].test(c))
@@ -183,16 +183,16 @@ void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_numb
     }
 }
 
-void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, Timer &timer)
+void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number)
 {
     board.valid_moves[player_number].reset();
     if (2 * board.player_sets[player_number].count() < board.board_sets[6].count())
     {
-        calculate_moves_from_player(board, player_number, timer);
+        calculate_moves_from_player(board, player_number);
     }
     else
     {
-        calculate_moves_from_frame(board, player_number, timer);
+        calculate_moves_from_frame(board, player_number);
     }
 }
 
@@ -204,15 +204,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     Algorithms algorithms(move_exec, move_gen);
     uint8_t x, y, player;
     player = map.get_player_number();
-    if (2 * board.player_sets[player].count() < board.board_sets[6].count())
-    {
-        LOG_INFO("Calculating moves from player");
-    }
-    else
-    {
-        LOG_INFO("Calculating moves from frame");
-    }
-    calculate_valid_moves(board, player, timer);
+    calculate_valid_moves(board, player);
     Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[3].test(res.get_coord()))
     {
@@ -241,7 +233,7 @@ void MoveGenerator::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t st
     }
 }
 
-void MoveGenerator::init_bomb_phase_boards(Board &board, uint8_t strength, uint8_t player)
+void MoveGenerator::init_bomb_phase_boards(Board &board, uint8_t strength)
 {
     std::bitset<2501> mask;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
@@ -267,7 +259,7 @@ void MoveGenerator::init_bomb_phase_boards(Board &board, uint8_t strength, uint8
     }
 }
 
-uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool sorting)
+uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
 {
     uint8_t x, y;
     uint16_t coord = 0;
@@ -339,6 +331,7 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, bool
             }
         }
     }
+    std::cout << timer.return_rest_time() << std::endl;
     std::cout << "Bombing at " << coord << std::endl;
     map.one_dimension_2_second_dimension(coord, x, y);
     uint32_t bomb = (uint32_t)x << 16 | (uint32_t)y << 8;

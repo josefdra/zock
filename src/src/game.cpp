@@ -91,7 +91,7 @@ void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bo
     if (!bomb_phase)
         net.send_move(move_gen.generate_move(board, map, timer, sorting));
     else
-        net.send_move(move_gen.generate_bomb(board, map, timer, sorting));
+        net.send_move(move_gen.generate_bomb(board, map, timer));
 }
 
 void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
@@ -109,13 +109,13 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
         {
             glob = true;
         }
-        move_exec.exec_move(player, board, timer);
+        move_exec.exec_move(player, board);
     }
     else
     {
         LOG_INFO("Bombs: " + std::to_string(board.get_bombs(player)));
         LOG_INFO("Player " + std::to_string((int)player + 1) + " threw bomb at " + std::to_string((int)((data >> 32) & 0xFF)) + ", " + std::to_string((int)((data >> 16) & 0xFF)));
-        board = move_exec.exec_bomb(player, board, timer, map.get_strength());
+        board = move_exec.exec_bomb(player, board, map.get_strength());
     }
 #ifdef DEBUG
     board.print(player, (map.get_player_number() == player));

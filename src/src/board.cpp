@@ -3,34 +3,29 @@
 #include "logging.hpp"
 
 Board::Board(Map &map)
+    : board_sets(7),
+      player_sets(map.get_player_count()),
+      valid_moves(map.get_player_count()),
+      wall_sets(),
+      border_sets(1),
+      protected_fields(map.get_player_count()),
+      fields_to_remove(map.get_num_of_fields()),
+      overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
+      bombs(map.get_player_count(), map.get_initial_bombs()),
+      disqualified(map.get_player_count(), false),      
+      m_player_count(map.get_player_count()),
+      m_num_of_fields(map.get_num_of_fields()),
+      m_width(map.get_width()),
+      m_height(map.get_height()),
+      m_coord(0),
+      m_spec(0),
+      m_overwrite_move(map.get_player_count(), false),
+      evaluation(0)
 {
-    m_player_count = map.get_player_count();
-    m_num_of_fields = map.get_num_of_fields();
-    board_sets = std::vector<std::bitset<2501>>(7);
-    player_sets = std::vector<std::bitset<2501>>(m_player_count);
-    valid_moves = std::vector<std::bitset<2501>>(m_player_count);
-    wall_sets = std::array<std::bitset<2501>, 8>();
-    border_sets = std::vector<std::bitset<2501>>(1);
-    protected_fields = std::vector<std::bitset<2501>>(m_player_count);
-    fields_to_remove = std::vector<std::bitset<2501>>(m_num_of_fields);
-    overwrite_stones = std::vector<uint16_t>(m_player_count, map.get_initial_overwrite_stones());
-    bombs = std::vector<uint16_t>(m_player_count, map.get_initial_bombs());
-    disqualified = std::vector<bool>(m_player_count, false);
-    m_width = map.get_width();
-    m_height = map.get_height();
-    m_coord = 0;
-    m_spec = 0;
-    m_overwrite_move = std::vector<bool>(m_player_count, false);
-    evaluation = 0;
 }
 
 Board::Board(Board &board, uint16_t coord, uint8_t spec)
-    : m_player_count(board.m_player_count),
-      m_num_of_fields(board.m_num_of_fields),
-      m_width(board.m_width),
-      m_height(board.m_height),
-      m_overwrite_move(board.m_overwrite_move),
-      board_sets(board.board_sets),
+    : board_sets(board.board_sets),
       player_sets(board.player_sets),
       valid_moves(board.valid_moves),
       wall_sets(board.wall_sets),
@@ -40,8 +35,14 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       overwrite_stones(board.overwrite_stones),
       bombs(board.bombs),
       disqualified(board.disqualified),
+      m_player_count(board.m_player_count),
+      m_num_of_fields(board.m_num_of_fields),
+      m_width(board.m_width),
+      m_height(board.m_height),
       m_coord(coord),
-      m_spec(spec)
+      m_spec(spec),
+      m_overwrite_move(board.m_overwrite_move),
+      evaluation(board.evaluation)
 {
 }
 
@@ -169,23 +170,23 @@ std::string Board::get_color_string(Colors color)
     switch (color)
     {
     case orange:
-        return "\e[38;5;208m";
+        return "\033[38;5;208m";
     case red:
-        return "\e[91m";
+        return "\033[91m";
     case green:
-        return "\e[92m";
+        return "\033[92m";
     case yellow:
-        return "\e[93m";
+        return "\033[93m";
     case blue:
-        return "\e[94m";
+        return "\033[94m";
     case magenta:
-        return "\e[95m";
+        return "\033[95m";
     case cyan:
-        return "\e[96m";
+        return "\033[96m";
     case black:
-        return "\e[90m";
+        return "\033[90m";
     default:
-        return "\e[37m";
+        return "\033[37m";
     }
 #else
     return "";

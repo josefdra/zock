@@ -23,14 +23,14 @@ public:
     uint16_t get_num_of_fields();
     uint8_t get_num_of_players();
     uint8_t get_player_num();
-    void update_bits(std::bitset<2501> &, uint8_t, Board &, Timer &);
-    std::bitset<2501> get_bits_to_update(uint8_t, Board &, Timer &);
-    void update_boards(uint8_t, uint8_t, Board &, Timer &);
+    void update_bits(std::bitset<2501> &, uint8_t, Board &);
+    std::bitset<2501> get_bits_to_update(uint8_t, Board &);
+    void update_boards(uint8_t, uint8_t, Board &);
     // void adjust_protected_fields(Board &, uint8_t);
-    void exec_move(uint8_t, Board &, Timer &);
+    void exec_move(uint8_t, Board &);
     void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &, Board &);
     void init_bomb_phase_boards(Board &, uint16_t, uint8_t);
-    Board exec_bomb(uint8_t, Board, Timer &, uint8_t);
+    Board exec_bomb(uint8_t, Board, uint8_t);
 
 private:
     std::vector<uint16_t> m_transitions;

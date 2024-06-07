@@ -42,7 +42,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
                 throw TimeLimitExceededException("Timeout in evaluation");
             }
             if (!board.disqualified[i])
-                move_gen.calculate_valid_moves(board, i, timer);
+                move_gen.calculate_valid_moves(board, i);
             else
                 board.valid_moves[i].reset();
             if (i != player_num)
@@ -61,7 +61,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
             score -= 100000;
         return score + board.valid_moves[player_num].count() * 100;
     }
-    catch (TimeLimitExceededException)
+    catch (const TimeLimitExceededException &)
     {
         throw;
     }
