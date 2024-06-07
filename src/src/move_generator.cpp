@@ -63,7 +63,7 @@ bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player
                 return true;
             }
             next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
+            if ((prev_direction + 4) % 8 == next_direction && prev_coord == next_coord)
             {
                 break;
             }
@@ -92,7 +92,7 @@ void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board,
                 board.valid_moves[player_number].set(next_coord);
             }
             next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
+            if ((prev_direction + 4) % 8 == next_direction && prev_coord == next_coord)
             {
                 break;
             }
@@ -120,7 +120,7 @@ void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, ui
                 break;
             board.valid_moves[player_number].set(next_coord);
             next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
+            if ((prev_direction + 4) % 8 == next_direction && prev_coord == next_coord)
             {
                 break;
             }

@@ -7,6 +7,8 @@
 #include "timer.hpp"
 #include "logging.hpp"
 
+bool glob = false;
+
 Game::Game() {
     m_game_over = false;
     m_bomb_phase = false;
@@ -103,6 +105,10 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     {
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
         LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> 32) & 0xFF)) + ", " + std::to_string((int)((data >> 16) & 0xFF)));
+        if(player == 6 && board.get_coord() == 11)
+        {
+            glob = true;
+        }
         move_exec.exec_move(player, board, timer);
     }
     else
