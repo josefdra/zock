@@ -25,7 +25,7 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board)
     return next_player;
 }
 
-int Algorithms::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int8_t depth, uint8_t player_num, bool sorting, Timer &timer)
+int Algorithms::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, uint8_t depth, uint8_t player_num, bool sorting, Timer &timer)
 {
     Board prev_board = board;
     try
@@ -78,6 +78,106 @@ int Algorithms::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, 
                     break;
             }
         }
+        return best_eval;
+    }
+    catch (const TimeLimitExceededException &)
+    {
+        throw;
+    }
+}
+
+int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t depth, uint8_t player_num, Timer &timer)
+{
+    Board prev_board = board;
+    try
+    {
+        static int call_count = 0;
+        call_count++;
+#ifdef DEBUG
+        LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
+#endif
+        uint8_t next_player = get_next_player(player_num, board);
+        if (depth == 0 || next_player == player_num)
+        {
+            return get_evaluation(board, player_num, m_move_gen, timer);
+        }
+        std::vector<std::tuple<int, uint16_t, uint8_t>> moves;
+        moves.reserve(3000);
+        set_up_moves(board, next_player, moves);
+        sort_valid_moves(board, next_player, moves, timer);
+
+        int best_eval;
+        if (player_num == m_move_exec.get_player_num())
+        {
+            brs_m = 0;
+            best_eval = -INT32_MAX;
+        }
+        else
+            best_eval = INT32_MAX;
+
+        if (brs_m == 0)
+        {
+            brs_m++;
+            for (auto &m : moves)
+            {
+                if (timer.return_rest_time() < timer.exception_time)
+                {
+                    throw TimeLimitExceededException(("Timeout in minimax after generating boards and iterating over them."));
+                }
+                board.set_coord(std::get<1>(m));
+                board.set_spec(std::get<2>(m));
+                m_move_exec.exec_move(player_num, board);
+                int eval = brs(board, alpha, beta, brs_m, depth - 1, next_player, timer);
+                board = prev_board;
+                if (player_num == m_move_exec.get_player_num())
+                {
+                    best_eval = std::max(best_eval, eval);
+                    alpha = std::max(alpha, best_eval);
+                    if (beta <= alpha)
+                        break;
+                }
+                else
+                {
+                    best_eval = std::min(best_eval, eval);
+                    beta = std::min(beta, best_eval);
+                    if (beta <= alpha)
+                        break;
+                }
+            }
+        }
+        else if (brs_m == 1)
+        {
+            brs_m++;
+            for (auto &m : moves)
+            {
+                if (timer.return_rest_time() < timer.exception_time)
+                {
+                    throw TimeLimitExceededException(("Timeout in minimax after generating boards and iterating over them."));
+                }
+                board.set_coord(std::get<1>(m));
+                board.set_spec(std::get<2>(m));
+                m_move_exec.exec_move(player_num, board);
+                int eval = brs(board, alpha, beta, brs_m, depth - 1, next_player, timer);
+                board = prev_board;
+                if (player_num == m_move_exec.get_player_num())
+                {
+                    best_eval = std::max(best_eval, eval);
+                    alpha = std::max(alpha, best_eval);
+                    if (beta <= alpha)
+                        break;
+                }
+                else
+                {
+                    best_eval = std::min(best_eval, eval);
+                    beta = std::min(beta, best_eval);
+                    if (beta <= alpha)
+                        break;
+                }
+            }
+            brs(board, alpha, beta, brs_m - 1, depth - 1, next_player, timer);
+        }
+        else
+            brs(board, alpha, beta, brs_m, depth - 1, next_player, timer);
         return best_eval;
     }
     catch (const TimeLimitExceededException &)
@@ -201,8 +301,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                 board.set_coord(std::get<1>(m));
                 board.set_spec(std::get<2>(m));
                 m_move_exec.exec_move(player_num, board);
-                int eval = minimaxOrParanoidWithPruning(board, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
-                // int eval = BRS(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), timer, 0);
+                // int eval = minimaxOrParanoidWithPruning(board, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
+                int eval = brs(board, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), 0, timer);
                 if (eval > best_eval)
                 {
                     best_eval = eval;

@@ -19,7 +19,8 @@ public:
     ~Algorithms();
 
     uint8_t get_next_player(uint8_t, Board &);
-    int minimaxOrParanoidWithPruning(Board &, int, int, int8_t, uint8_t, bool, Timer &);
+    int minimaxOrParanoidWithPruning(Board &, int, int, uint8_t, uint8_t, bool, Timer &);
+    int brs(Board &, int, int, uint8_t, uint8_t, uint8_t, Timer &);
     void sort_valid_moves(Board &, uint8_t, std::vector<std::tuple<int, uint16_t, uint8_t>> &, Timer &);
     void set_up_moves(Board &, uint8_t, std::vector<std::tuple<int, uint16_t, uint8_t>> &);
     void init_best_board(Board &);
