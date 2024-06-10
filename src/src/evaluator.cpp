@@ -46,7 +46,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
             else
                 board.valid_moves[i].reset();
             if (i != player_num)
-                score -= board.valid_moves[i].count() * 50;
+                score -= board.valid_moves[i].count() * 50 + board.player_sets[i].count() * 25;
         }
         for (uint16_t j = 0; j < border_set_size; j++)
         {
@@ -59,7 +59,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
         }
         if (board.is_overwrite_move(player_num))
             score -= 100000;
-        return score + board.valid_moves[player_num].count() * 100;
+        return score + board.valid_moves[player_num].count() * 100 + board.player_sets[player_num].count() * 50;
     }
     catch (const TimeLimitExceededException &)
     {

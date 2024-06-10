@@ -70,7 +70,6 @@ public:
     // first 8 sets for 1 to 8 walls next to field
     std::array<std::bitset<2501>, 8> wall_sets;
     std::vector<std::bitset<2501>> border_sets;
-    std::vector<std::bitset<2501>> protected_fields;
 
     std::vector<uint16_t> overwrite_stones;
     std::vector<uint16_t> bombs;

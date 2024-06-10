@@ -40,7 +40,6 @@ public:
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
     bool check_players(char);
     void set_values(Board &, uint16_t);
-    void init_protected_fields(Board &);
     void init_wall_values(Board &);
     bool get_walls(Board &, std::bitset<2501> &);
     std::bitset<2501> get_inside_of_walls(Board &, std::bitset<2501> &, uint16_t);

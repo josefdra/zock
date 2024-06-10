@@ -243,14 +243,6 @@ void Map::set_values(Board &board, uint16_t c)
     }
 }
 
-void Map::init_protected_fields(Board &board)
-{
-    for (uint8_t i = 0; i < board.get_player_count(); i++)
-    {
-        board.protected_fields[i] = board.player_sets[i] & (board.wall_sets[3] | board.wall_sets[4] | board.wall_sets[5] | board.wall_sets[6] | board.wall_sets[7]);
-    }
-}
-
 void Map::init_wall_values(Board &board)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
@@ -274,7 +266,6 @@ void Map::init_wall_values(Board &board)
             board.wall_sets[most - 1].set(c);
         }
     }
-    init_protected_fields(board);
 }
 
 bool Map::get_walls(Board &board, std::bitset<2501> &checked)
@@ -352,7 +343,11 @@ void Map::init_evaluation(Board &board)
     {
         uint16_t counter = 0;
         while (set_player_border_sets(board, get_inside_of_walls(board, checked, counter)))
+        {
             counter++;
+            if (counter == 2)
+                break;
+        }
     }
 }
 
