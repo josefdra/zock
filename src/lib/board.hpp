@@ -56,6 +56,7 @@ public:
     bool print_board_sets(uint16_t);
     void print(uint8_t, bool);
     void print_bitset(std::bitset<2501> &);
+    void remove_double_communities();
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -73,6 +74,8 @@ public:
 
     std::vector<uint16_t> overwrite_stones;
     std::vector<uint16_t> bombs;
+
+    std::vector<std::bitset<2501>> communities;
 
     std::vector<bool> disqualified;
 

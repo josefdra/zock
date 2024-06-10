@@ -128,7 +128,7 @@ void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, ui
     }
 }
 
-void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_number)
+void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_number, Timer &timer)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
@@ -139,6 +139,10 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
     }
     if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
     {
+        if (timer.return_rest_time() < timer.exception_time)
+        {
+            throw TimeLimitExceededException(("Timeout in move calculation from player"));
+        }
         board.set_overwrite_move(player_number);
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
@@ -155,7 +159,7 @@ void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_num
     }
 }
 
-void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_number)
+void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_number, Timer &timer)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
@@ -167,6 +171,10 @@ void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_numb
     }
     if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
     {
+        if (timer.return_rest_time() < timer.exception_time)
+        {
+            throw TimeLimitExceededException(("Timeout in move calculation from frame"));
+        }
         board.set_overwrite_move(player_number);
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
@@ -183,16 +191,16 @@ void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_numb
     }
 }
 
-void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number)
+void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, Timer &timer)
 {
     board.valid_moves[player_number].reset();
     if (2 * board.player_sets[player_number].count() < board.board_sets[6].count())
     {
-        calculate_moves_from_player(board, player_number);
+        calculate_moves_from_player(board, player_number, timer);
     }
     else
     {
-        calculate_moves_from_frame(board, player_number);
+        calculate_moves_from_frame(board, player_number, timer);
     }
 }
 
@@ -204,7 +212,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     Algorithms algorithms(move_exec, move_gen);
     uint8_t x, y, player;
     player = map.get_player_number();
-    calculate_valid_moves(board, player);
+    calculate_valid_moves(board, player, timer);
     Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[3].test(res.get_coord()))
     {
@@ -303,6 +311,17 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
                 LOG_INFO("Bombing: " + std::to_string(c));
                 most_deleted_stones = target_deleted_stones;
                 coord = c;
+            }
+        }
+        if (coord == 0)
+        {
+            for (uint16_t c = 1; c < m_num_of_fields; c++)
+            {
+                if (board.board_sets[1].test(c))
+                {
+                    coord = c;
+                    break;
+                }
             }
         }
     }

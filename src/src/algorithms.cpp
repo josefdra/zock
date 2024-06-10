@@ -7,20 +7,20 @@
 
 #define MAX_SEARCH_DEPTH 15
 
-Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : m_move_exec(move_exec), m_move_gen(move_gen), killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields())))
+Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields()))), m_move_exec(move_exec), m_move_gen(move_gen)
 {
 }
 
 Algorithms::~Algorithms() {}
 
-uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board)
+uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &timer)
 {
     uint8_t next_player = player_num;
     do
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         if (!board.disqualified[next_player])
-            m_move_gen.calculate_valid_moves(board, next_player);
+            m_move_gen.calculate_valid_moves(board, next_player, timer);
         if (next_player == player_num)
             return player_num;
     } while (board.disqualified[next_player] || board.valid_moves[next_player].count() == 0);
@@ -92,7 +92,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
 #ifdef DEBUG
         LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
 #endif
-        uint8_t next_player = get_next_player(player_num, board);
+        uint8_t next_player = get_next_player(player_num, board, timer);
         if (depth == 0 || next_player == player_num)
         {
             return get_evaluation(board, player_num, m_move_gen, timer);
@@ -117,7 +117,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
     }
 }
 
-void Algorithms::set_up_killer(Board &board, moves &moves, uint8_t depth)
+void Algorithms::set_up_killer(moves &moves, uint8_t depth)
 {
     std::vector<std::tuple<uint16_t, uint8_t>> temp_killer;
     for (uint16_t c = 1; c < m_move_exec.get_num_of_fields(); c++)
@@ -158,7 +158,7 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves
     Board prev_board = board;
     try
     {
-        set_up_killer(board, moves, depth);
+        set_up_killer(moves, depth);
         if (player_num == m_move_exec.get_player_num())
         {
             for (auto &m : moves)

@@ -21,12 +21,12 @@ public:
     Algorithms(MoveExecuter &, MoveGenerator &);
     ~Algorithms();
 
-    uint8_t get_next_player(uint8_t, Board &);
+    uint8_t get_next_player(uint8_t, Board &, Timer &);
     int set_up_best_eval(uint8_t &, uint8_t);
     int do_move(Board &, move &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, bool);
     void get_eval(Board &, moves &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, int &, bool);
     int brs(Board &, int, int, uint8_t, uint8_t, uint8_t, Timer &, bool);
-    void set_up_killer(Board &,moves &, uint8_t );
+    void set_up_killer(moves &, uint8_t );
     void sort_valid_moves(Board &, uint8_t, moves &, Timer &, uint8_t);
     void set_up_moves(Board &, uint8_t, moves &);
     void init_best_board(Board &);

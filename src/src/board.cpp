@@ -10,6 +10,7 @@ Board::Board(Map &map)
       border_sets(1),
       overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
       bombs(map.get_player_count(), map.get_initial_bombs()),
+      communities(0),
       disqualified(map.get_player_count(), false),      
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
@@ -30,6 +31,7 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       border_sets(board.border_sets),
       overwrite_stones(board.overwrite_stones),
       bombs(board.bombs),
+      communities(board.communities),
       disqualified(board.disqualified),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
@@ -301,4 +303,20 @@ void Board::print_bitset(std::bitset<2501> &bitset)
         }
     }
     std::cout << std::endl;
+}
+
+void Board::remove_double_communities()
+{
+    std::vector<std::bitset<2501>> temp_communities;
+    for (uint16_t i = 0; i < communities.size(); i++)
+        for (uint16_t j = 0; j < communities.size(); j++)
+            if (i != j && (communities[i] & communities[j]).count() != 0)
+            {
+                communities[i] |= communities[j];
+                communities[j].reset();
+            }
+    for (auto &community : communities)
+        if (community.count() != 0)
+            temp_communities.push_back(community);
+    communities = temp_communities;
 }

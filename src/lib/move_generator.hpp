@@ -28,9 +28,9 @@ public:
     bool check_if_valid_move(Board &, uint16_t, uint8_t);
     void calculate_valid_no_overwrite_moves_from_player(Board &, uint8_t, uint16_t);
     void calculate_valid_overwrite_moves_from_player(Board &, uint8_t, uint16_t);
-    void calculate_moves_from_player(Board &, uint8_t);
-    void calculate_moves_from_frame(Board &, uint8_t);
-    void calculate_valid_moves(Board &, uint8_t);
+    void calculate_moves_from_player(Board &, uint8_t, Timer &);
+    void calculate_moves_from_frame(Board &, uint8_t, Timer &);
+    void calculate_valid_moves(Board &, uint8_t, Timer &);
     uint32_t generate_move(Board &, Map &, Timer &, bool);
     void get_affected_by_bomb(uint8_t, uint16_t &);
     void sort_players_by_stones(std::vector<std::pair<uint8_t, uint16_t>> &, Board &);

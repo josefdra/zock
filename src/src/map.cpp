@@ -351,6 +351,47 @@ void Map::init_evaluation(Board &board)
     }
 }
 
+void Map::expand_community(Board &board, std::bitset<2501> &community, uint16_t c, std::bitset<2501> &checked_fields)
+{
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0 && !board.board_sets[1].test(next_coord) && !community.test(next_coord))
+        {
+            community.set(next_coord);
+            if (checked_fields.test(next_coord))
+                continue;
+            else
+            {
+                checked_fields.set(next_coord);
+                expand_community(board, community, next_coord, checked_fields);
+            }
+        }
+    }
+}
+
+void Map::init_communities(Board &board)
+{
+    std::bitset<2501> all_players;
+    std::bitset<2501> checked_fields;
+    for (auto &player : board.player_sets)
+    {
+        all_players |= player;
+    }
+    std::vector<std::bitset<2501>> communities;
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    {
+        if (all_players.test(c) && !checked_fields.test(c))
+        {
+            communities.push_back(std::bitset<2501>(0));
+            communities.back().set(c);
+            expand_community(board, communities.back(), c, checked_fields);
+        }
+    }
+    board.communities = communities;
+    board.remove_double_communities();
+}
+
 Board Map::init_boards_and_players()
 {
     Board ret_board(*this);
@@ -381,5 +422,6 @@ Board Map::init_boards_and_players()
         }
     }
     init_evaluation(ret_board);
+    init_communities(ret_board);
     return ret_board;
 }
