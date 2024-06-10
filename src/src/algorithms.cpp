@@ -131,7 +131,6 @@ void Algorithms::set_up_killer(Board &board, moves &moves, uint8_t depth)
               { return std::get<0>(a) > std::get<0>(b); });
     uint16_t smallest_killer_coord;
     uint16_t i = 0;
-    std::cout << temp_killer.size() << std::endl;
     while (!temp_killer.empty())
     {
         smallest_killer_coord = std::get<0>(temp_killer.back());
