@@ -26,10 +26,13 @@ public:
     int do_move(Board &, move &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, bool);
     void get_eval(Board &, moves &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, int &, bool);
     int brs(Board &, int, int, uint8_t, uint8_t, uint8_t, Timer &, bool);
-    void sort_valid_moves(Board &, uint8_t, moves &, Timer &);
+    void set_up_killer(Board &,moves &, uint8_t );
+    void sort_valid_moves(Board &, uint8_t, moves &, Timer &, uint8_t);
     void set_up_moves(Board &, uint8_t, moves &);
     void init_best_board(Board &);
-    Board get_best_coord(Board &, Timer &, bool);    
+    Board get_best_coord(Board &, Timer &, bool);  
+
+    std::vector<std::vector<uint16_t>> killer_moves;
 
 private:
     MoveExecuter m_move_exec;

@@ -7,7 +7,9 @@
 
 #define MAX_SEARCH_DEPTH 15
 
-Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : m_move_exec(move_exec), m_move_gen(move_gen) {}
+Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : m_move_exec(move_exec), m_move_gen(move_gen), killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields())))
+{
+}
 
 Algorithms::~Algorithms() {}
 
@@ -62,14 +64,20 @@ void Algorithms::get_eval(Board &board, moves &moves, int alpha, int beta, uint8
             best_eval = std::max(best_eval, eval);
             alpha = std::max(alpha, best_eval);
             if (beta <= alpha)
+            {
+                killer_moves[depth][std::get<1>(m)] += 1;
                 break;
+            }
         }
         else
         {
             best_eval = std::min(best_eval, eval);
             beta = std::min(beta, best_eval);
             if (beta <= alpha)
+            {
+                killer_moves[depth][std::get<1>(m)] += 1;
                 break;
+            }
         }
     }
 }
@@ -93,7 +101,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
         moves.reserve(3000);
         set_up_moves(board, next_player, moves);
         if (sorting)
-            sort_valid_moves(board, next_player, moves, timer);
+            sort_valid_moves(board, next_player, moves, timer, depth);
         int best_eval = set_up_best_eval(brs_m, player_num);
         if (brs_m < 2)
         {
@@ -109,17 +117,59 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
     }
 }
 
+void Algorithms::set_up_killer(Board &board, moves &moves, uint8_t depth)
+{
+    std::vector<std::tuple<uint16_t, uint8_t>> temp_killer;
+    for (uint16_t c = 1; c < m_move_exec.get_num_of_fields(); c++)
+    {
+        if (killer_moves[depth][c] > 0)
+        {
+            temp_killer.push_back(std::make_tuple(c, killer_moves[depth][c]));
+        }
+    }
+    std::sort(temp_killer.begin(), temp_killer.end(), [](const std::tuple<uint16_t, uint8_t> &a, const std::tuple<uint16_t, uint8_t> &b)
+              { return std::get<0>(a) > std::get<0>(b); });
+    uint16_t smallest_killer_coord;
+    uint16_t i = 0;
+    std::cout << temp_killer.size() << std::endl;
+    while (!temp_killer.empty())
+    {
+        smallest_killer_coord = std::get<0>(temp_killer.back());
+        while (std::get<1>(moves[i]) != smallest_killer_coord && i < moves.size())
+        {
+            i++;
+        }
+        while (std::get<1>(moves[i]) == smallest_killer_coord && i < moves.size())
+        {
+            std::get<0>(moves[i]) = std::get<1>(temp_killer[temp_killer.size() - 1]) * -10000;
+            i++;
+        }
+        temp_killer.pop_back();
+    }
+}
+
 /// @brief sorts the valid moves of a player and needs already the calculated valid moves in the board
 /// @param board
 /// @param player_num
 /// @param timer
 /// @param maximizer
 /// @return sorted valid moves as vector
-void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves, Timer &timer)
+void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves, Timer &timer, uint8_t depth)
 {
     Board prev_board = board;
     try
     {
+        set_up_killer(board, moves, depth);
+        if (player_num == m_move_exec.get_player_num())
+        {
+            for (auto &m : moves)
+            {
+                if (std::get<0>(m) != 0)
+                {
+                    std::get<0>(m) = std::get<0>(m) * -1;
+                }
+            }
+        }
         for (auto &m : moves)
         {
             if (timer.return_rest_time() < timer.exception_time)
@@ -128,7 +178,7 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves
             }
             board.set_coord(std::get<1>(m));
             board.set_spec(std::get<2>(m));
-            std::get<0>(m) = m_move_exec.get_bits_to_update(player_num, board).count();
+            std::get<0>(m) += m_move_exec.get_bits_to_update(player_num, board).count();
         }
         if (player_num == m_move_exec.get_player_num())
         {
@@ -213,7 +263,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     {
         set_up_moves(board, player_num, moves);
         if (sorting)
-            sort_valid_moves(board, player_num, moves, timer);
+            sort_valid_moves(board, player_num, moves, timer, 0);
         std::cout << "number of moves: " << moves.size() << std::endl;
         for (uint8_t search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
