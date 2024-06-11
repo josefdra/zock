@@ -19,10 +19,9 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
     {
 
 #ifdef DEBUG
-        if (call_count % 1 == 0)
-        {
-            LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
-        }
+
+        LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
+
 #endif
         if (timer.return_rest_time() < timer.exception_time)
         {
@@ -41,6 +40,7 @@ int MiniMax::minimaxOrParanoidWithPruning(Board &board, int alpha, int beta, int
             next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         }
         m_move_gen.calculate_valid_moves(board, player_num, timer);
+
         uint16_t num_val_moves = board.valid_moves[player_num].count();
         average_branching_factor = calculate_average_branching_factor(num_val_moves, call_count, false);
 
@@ -267,22 +267,27 @@ Board MiniMax::get_best_coord(Board &board, Timer &timer, bool sorting)
     int best_eval = -INT32_MAX;
     Board best_board(board);
     init_best_board(best_board);
+    int beta = INT32_MAX;
+    int alpha = -INT32_MAX;
     try
     {
         std::vector<Board> boards = generate_boards(board, m_move_exec.get_player_num(), timer);
         for (uint8_t search_depth = 1; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
+            LOG_INFO("Current window a: " + std::to_string(alpha) + " b: " + std::to_string(beta));
             Timer measure_depth_search(timer.return_rest_time());
             for (auto &b : boards)
             {
-                int eval = minimaxOrParanoidWithPruning(b, -INT32_MAX, INT32_MAX, search_depth, m_move_exec.get_player_num(), sorting, timer);
+                int eval = minimaxOrParanoidWithPruning(b, alpha, beta, search_depth, m_move_exec.get_player_num(), sorting, timer);
+
                 if (eval > best_eval)
                 {
                     best_eval = eval;
                     best_board = b;
                 }
             }
-
+            set_Aspiration_window(alpha, beta, best_eval);
+            //LOG_INFO("best eval: " + std::to_string(best_eval));
             double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
 #ifdef DEBUG
             LOG_INFO("search depth: " + std::to_string(search_depth) + " took " + std::to_string(measure_depth_search.get_elapsed_time()) + " [ms]");
@@ -302,6 +307,7 @@ Board MiniMax::get_best_coord(Board &board, Timer &timer, bool sorting)
         LOG_WARNING(e.what());
     }
     LOG_INFO("best eval: " + std::to_string(best_eval));
+    LOG_INFO("best pos: " + std::to_string(best_board.get_coord()));
     return best_board;
 }
 
@@ -326,4 +332,32 @@ double MiniMax::estimate_runtime_next_depth(uint8_t &current_depth, Timer &timer
     {
         return -1.0;
     }
+}
+
+void MiniMax::set_Aspiration_window(int &alpha, int &beta, int &eval)
+{
+    static bool repeated = false;
+    LOG_INFO(std::to_string(eval));
+    if (eval <= alpha && !repeated)
+    {
+        repeated = true;
+        alpha = -INT32_MAX;
+        beta = eval + 200;
+    }
+    if (eval >= beta && !repeated)
+    {
+        repeated = true;
+        alpha = eval - 200;
+        beta = INT32_MAX;
+    }
+    if (repeated && (eval <= alpha || eval >= beta))
+    {
+        alpha = -INT32_MAX;
+        beta = INT32_MAX;
+    }
+    if(eval > 0 && eval < INT32_MAX - 20000){ alpha = eval, beta = eval + 200;}
+    if(eval < 0 && eval > -INT32_MAX+20000) {alpha = eval - 200, beta = eval;}
+    //  add window if eval is near lose or win
+    if (eval > INT32_MAX-20000) {alpha = eval - 100; beta = eval + 100;}
+    if (eval < INT32_MAX+20000){alpha = eval + 100; beta = eval - 100;} 
 }

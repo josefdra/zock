@@ -26,6 +26,7 @@ public:
     double calculate_average_branching_factor(uint16_t, uint32_t, bool);
     double estimate_runtime_next_depth(uint8_t &, Timer &);
     uint32_t track_number_of_nodes(bool);
+    void set_Aspiration_window(int &, int &, int &);
 
 private:
     MoveExecuter m_move_exec;
