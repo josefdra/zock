@@ -335,3 +335,4 @@ std::bitset<2501> Board::get_total_moves(uint8_t player)
         total_moves |= moves;
     return total_moves;
 }
+

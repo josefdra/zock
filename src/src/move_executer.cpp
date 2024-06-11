@@ -61,6 +61,7 @@ std::bitset<2501> MoveExecuter::get_bits_to_update(uint8_t player, Board &board)
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
         uint16_t temp_transition = get_transition(coord, d);
+        std::cout << "tmp transition: " << temp_transition << " coord: " << coord << std::endl;
         uint8_t temp_direction = get_direction(coord, d);
         std::bitset<2501> temp;
         while (temp_transition != 0 && temp_transition != coord && !board.board_sets[1].test(temp_transition))
