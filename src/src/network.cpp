@@ -1,7 +1,8 @@
 #include "network.hpp"
 #include "logging.hpp"
 
-Network::Network(const char *ip, int port) : m_ip(ip), m_port(port) {
+Network::Network(const char *ip, int port) : m_ip(ip), m_port(port)
+{
     m_server_addr = {};
     m_csocket = 0;
 }
@@ -16,8 +17,10 @@ bool Network::init()
     init_socket();
     if (!init_server())
         return false;
+
     if (!connect_to_server())
         return false;
+
     send_group_number();
     return true;
 }
@@ -76,13 +79,10 @@ bool Network::check_socket_acitivity()
     FD_SET(m_csocket, &read_fds);
     select(m_csocket + 1, &read_fds, NULL, NULL, NULL);
     if (FD_ISSET(m_csocket, &read_fds))
-    {
         return true;
-    }
+
     else
-    {
         return false;
-    }
 }
 
 void Network::send_group_number()
@@ -117,9 +117,8 @@ void Network::send_move(uint32_t move)
 uint32_t Network::get_actual_message_length(uint8_t &type)
 {
     while (!check_socket_acitivity())
-    {
         usleep(10);
-    }
+
     recv(m_csocket, &type, sizeof(type), 0);
     uint32_t message_length = 0;
     recv(m_csocket, &message_length, sizeof(message_length), 0);

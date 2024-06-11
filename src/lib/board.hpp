@@ -57,6 +57,8 @@ public:
     void print(uint8_t, bool);
     void print_bitset(std::bitset<2501> &);
     void remove_double_communities();
+    void reset_valid_moves(uint8_t);
+    std::bitset<2501> get_total_moves(uint8_t);
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -64,10 +66,9 @@ public:
     // boards[3] = c board
     // boards[4] = b board
     // boards[5] = x board
-    // boards[6] = border around occupied fields
-    std::vector<std::bitset<2501>> board_sets;
+    std::array<std::bitset<2501>, 6> board_sets;
     std::vector<std::bitset<2501>> player_sets;
-    std::vector<std::bitset<2501>> valid_moves;
+    std::vector<std::vector<std::bitset<2501>>> valid_moves;
     // first 8 sets for 1 to 8 walls next to field
     std::array<std::bitset<2501>, 8> wall_sets;
     std::vector<std::bitset<2501>> border_sets;
@@ -76,6 +77,8 @@ public:
     std::vector<uint16_t> bombs;
 
     std::vector<std::bitset<2501>> communities;
+    std::vector<std::vector<std::bitset<2501>>> player_communities;
+    std::vector<std::vector<std::bitset<2501>>> player_frames;
 
     std::vector<bool> disqualified;
 

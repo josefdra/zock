@@ -46,6 +46,7 @@ public:
     bool set_player_border_sets(Board &, std::bitset<2501>);
     void init_evaluation(Board &);
     void expand_community(Board &, std::bitset<2501> &, uint16_t, std::bitset<2501> &);
+    void init_frames(Board &);
     void init_communities(Board &);
     Board init_boards_and_players();
 

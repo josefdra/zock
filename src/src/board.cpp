@@ -3,7 +3,7 @@
 #include "logging.hpp"
 
 Board::Board(Map &map)
-    : board_sets(7),
+    : board_sets(),
       player_sets(map.get_player_count()),
       valid_moves(map.get_player_count()),
       wall_sets(),
@@ -11,7 +11,9 @@ Board::Board(Map &map)
       overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
       bombs(map.get_player_count(), map.get_initial_bombs()),
       communities(0),
-      disqualified(map.get_player_count(), false),      
+      player_communities(map.get_player_count()),
+      player_frames(map.get_player_count()),
+      disqualified(map.get_player_count(), false),
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
       m_width(map.get_width()),
@@ -32,6 +34,8 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       overwrite_stones(board.overwrite_stones),
       bombs(board.bombs),
       communities(board.communities),
+      player_communities(board.player_communities),
+      player_frames(board.player_frames),
       disqualified(board.disqualified),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
@@ -164,7 +168,7 @@ uint16_t Board::two_dimension_2_one_dimension(uint8_t x, uint8_t y)
 
 std::string Board::get_color_string(Colors color)
 {
-#ifdef COLOR
+    // #ifdef COLOR
     switch (color)
     {
     case orange:
@@ -186,24 +190,22 @@ std::string Board::get_color_string(Colors color)
     default:
         return "\033[37m";
     }
-#else
-    return "";
-#endif
+    // #else
+    //     return "";
+    // #endif
 }
 
 void Board::print_upper_outlines()
 {
     std::cout << "     ";
     for (uint16_t i = 0; i < get_width(); i++)
-    {
         std::cout << std::setw(2) << i;
-    }
+
     std::cout << std::endl
               << "    /";
     for (uint16_t i = 0; i < get_width(); i++)
-    {
         std::cout << "--";
-    }
+
     std::cout << std::endl;
 }
 
@@ -254,30 +256,23 @@ void Board::print(uint8_t player, bool our_player)
         {
             uint16_t c = two_dimension_2_one_dimension(x, y);
             if (!print_board_sets(c))
-            {
                 for (uint16_t i = 0; i < m_player_count; i++)
-                {
                     if (player_sets[i].test(c))
                     {
                         std::cout << get_color_string(Colors(i + 1)) << (uint16_t)(i + 1);
-#ifdef COLOR
+                        // #ifdef COLOR
                         std::cout << "\033[0m";
-#endif
+                        // #endif
                     }
-                }
-            }
-            if (our_player && valid_moves[player].test(c))
-            {
+            if (our_player && get_total_moves(player).test(c))
                 std::cout << "'";
-            }
+
             else
-            {
                 std::cout << " ";
-            }
         }
         std::cout << std::endl;
     }
-    LOG_INFO("Calculated valid moves: " + std::to_string(valid_moves[player].count()));
+    LOG_INFO("Calculated valid moves: " + std::to_string(get_total_moves(player).count()));
     std::cout << std::endl;
 }
 
@@ -289,18 +284,15 @@ void Board::print_bitset(std::bitset<2501> &bitset)
         if (bitset.test(c))
         {
             std::cout << get_color_string(yellow) << "1 ";
-#ifdef COLOR
+            // #ifdef COLOR
             std::cout << "\033[0m";
-#endif
+            // #endif
         }
         else
-        {
             std::cout << "0 ";
-        }
+
         if (c % m_width == 0)
-        {
             std::cout << std::endl;
-        }
     }
     std::cout << std::endl;
 }
@@ -308,8 +300,8 @@ void Board::print_bitset(std::bitset<2501> &bitset)
 void Board::remove_double_communities()
 {
     std::vector<std::bitset<2501>> temp_communities;
-    for (uint16_t i = 0; i < communities.size(); i++)
-        for (uint16_t j = 0; j < communities.size(); j++)
+    for (uint8_t i = 0; i < communities.size(); i++)
+        for (uint8_t j = 0; j < communities.size(); j++)
             if (i != j && (communities[i] & communities[j]).count() != 0)
             {
                 communities[i] |= communities[j];
@@ -318,5 +310,28 @@ void Board::remove_double_communities()
     for (auto &community : communities)
         if (community.count() != 0)
             temp_communities.push_back(community);
+
     communities = temp_communities;
+
+    for (uint8_t p = 0; p < m_player_count; p++)
+        player_communities[p].clear();
+
+    for (auto &community : communities)
+        for (uint8_t p = 0; p < m_player_count; p++)
+            if ((community & player_sets[p]).count() != 0)
+                player_communities[p].push_back(community);
+}
+
+void Board::reset_valid_moves(uint8_t player)
+{
+    for (auto &moves : valid_moves[player])
+        moves.reset();
+}
+
+std::bitset<2501> Board::get_total_moves(uint8_t player)
+{
+    std::bitset<2501> total_moves;
+    for (auto &moves : valid_moves[player])
+        total_moves |= moves;
+    return total_moves;
 }

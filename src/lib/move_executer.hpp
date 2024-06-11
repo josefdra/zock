@@ -25,8 +25,11 @@ public:
     uint8_t get_player_num();
     void update_bits(std::bitset<2501> &, uint8_t, Board &);
     std::bitset<2501> get_bits_to_update(uint8_t, Board &);
+    void update_communities(std::bitset<2501> &, Board &);
+    void update_frames(std::bitset<2501> &, Board &);
+    void adjust_communities(Board &);
+    void adjust_frames(Board &);
     void update_boards(uint8_t, uint8_t, Board &);
-    // void adjust_protected_fields(Board &, uint8_t);
     void exec_move(uint8_t, Board &);
     void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &, Board &, std::bitset<2501> &);
     std::bitset<2501> get_fields_to_remove(Board &, uint16_t, uint8_t, std::bitset<2501> &);

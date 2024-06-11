@@ -21,9 +21,11 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         if (!board.disqualified[next_player])
             m_move_gen.calculate_valid_moves(board, next_player, timer);
+
         if (next_player == player_num)
             return player_num;
-    } while (board.disqualified[next_player] || board.valid_moves[next_player].count() == 0);
+
+    } while (board.disqualified[next_player] || board.get_total_moves(next_player).count() == 0);
     return next_player;
 }
 
@@ -40,25 +42,24 @@ int Algorithms::set_up_best_eval(uint8_t &brs_m, uint8_t player_num)
     return best_eval;
 }
 
-int Algorithms::do_move(Board &board, move &m, int alpha, int beta, uint8_t brs_m, uint8_t depth, Timer &timer, Board &prev_board, uint8_t next_player, bool sorting)
+int Algorithms::do_move(Board &board, move &m, int alpha, int beta, uint8_t brs_m, uint8_t depth, Timer &timer, Board &prev_board, uint8_t next_player, bool sorting, uint8_t index)
 {
     board.set_coord(std::get<1>(m));
     board.set_spec(std::get<2>(m));
     m_move_exec.exec_move(next_player, board);
-    int eval = brs(board, alpha, beta, brs_m, depth - 1, next_player, timer, sorting);
+    int eval = brs(board, alpha, beta, brs_m, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
     return eval;
 }
 
-void Algorithms::get_eval(Board &board, moves &moves, int alpha, int beta, uint8_t brs_m, uint8_t depth, Timer &timer, Board &prev_board, uint8_t next_player, int &best_eval, bool sorting)
+void Algorithms::get_eval(Board &board, moves &moves, int alpha, int beta, uint8_t brs_m, uint8_t depth, Timer &timer, Board &prev_board, uint8_t next_player, int &best_eval, bool sorting, uint8_t index)
 {
-    for (auto &m : moves)
+    for (auto &m : moves[index])
     {
         if (timer.return_rest_time() < timer.exception_time)
-        {
             throw TimeLimitExceededException(("Timeout in minimax after generating boards and iterating over them."));
-        }
-        int eval = do_move(board, m, alpha, beta, brs_m + 1, depth, timer, prev_board, next_player, sorting);
+
+        int eval = do_move(board, m, alpha, beta, brs_m + 1, depth, timer, prev_board, next_player, sorting, index);
         if (next_player == m_move_exec.get_player_num())
         {
             best_eval = std::max(best_eval, eval);
@@ -82,7 +83,16 @@ void Algorithms::get_eval(Board &board, moves &moves, int alpha, int beta, uint8
     }
 }
 
-int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t depth, uint8_t player_num, Timer &timer, bool sorting)
+move Algorithms::get_first_move(moves &moves)
+{
+    for (auto &move : moves)
+        for (auto &m : move)
+            return m;
+
+    return move();
+}
+
+int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t depth, uint8_t player_num, Timer &timer, bool sorting, uint8_t index)
 {
     Board prev_board = board;
     try
@@ -94,21 +104,23 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
 #endif
         uint8_t next_player = get_next_player(player_num, board, timer);
         if (depth == 0 || next_player == player_num)
-        {
             return get_evaluation(board, player_num, m_move_gen, timer);
-        }
-        std::vector<std::tuple<int, uint16_t, uint8_t>> moves;
+
+        moves moves;
         moves.reserve(3000);
         set_up_moves(board, next_player, moves);
         if (sorting)
             sort_valid_moves(board, next_player, moves, timer, depth);
         int best_eval = set_up_best_eval(brs_m, player_num);
         if (brs_m < 2)
-        {
-            get_eval(board, moves, alpha, beta, brs_m, depth, timer, prev_board, next_player, best_eval, sorting);
-        }
+            get_eval(board, moves, alpha, beta, brs_m, depth, timer, prev_board, next_player, best_eval, sorting, index);
+
         if (brs_m > 0)
-            do_move(board, moves[0], alpha, beta, brs_m, depth, timer, prev_board, next_player, sorting);
+        {
+            move first_move = get_first_move(moves);
+            do_move(board, first_move, alpha, beta, brs_m, depth, timer, prev_board, next_player, sorting, index);
+        }
+
         return best_eval;
     }
     catch (const TimeLimitExceededException &)
@@ -117,16 +129,13 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
     }
 }
 
-void Algorithms::set_up_killer(moves &moves, uint8_t depth)
+void Algorithms::set_up_killer(moves &moves, uint8_t depth, uint8_t index)
 {
     std::vector<std::tuple<uint16_t, uint8_t>> temp_killer;
     for (uint16_t c = 1; c < m_move_exec.get_num_of_fields(); c++)
-    {
         if (killer_moves[depth][c] > 0)
-        {
             temp_killer.push_back(std::make_tuple(c, killer_moves[depth][c]));
-        }
-    }
+
     std::sort(temp_killer.begin(), temp_killer.end(), [](const std::tuple<uint16_t, uint8_t> &a, const std::tuple<uint16_t, uint8_t> &b)
               { return std::get<0>(a) > std::get<0>(b); });
     uint16_t smallest_killer_coord;
@@ -134,13 +143,12 @@ void Algorithms::set_up_killer(moves &moves, uint8_t depth)
     while (!temp_killer.empty())
     {
         smallest_killer_coord = std::get<0>(temp_killer.back());
-        while (std::get<1>(moves[i]) != smallest_killer_coord && i < moves.size())
-        {
+        while (std::get<1>(moves[index][i]) != smallest_killer_coord && i < moves.size())
             i++;
-        }
-        while (std::get<1>(moves[i]) == smallest_killer_coord && i < moves.size())
+
+        while (std::get<1>(moves[index][i]) == smallest_killer_coord && i < moves.size())
         {
-            std::get<0>(moves[i]) = std::get<1>(temp_killer[temp_killer.size() - 1]) * -10000;
+            std::get<0>(moves[index][i]) = std::get<1>(temp_killer[temp_killer.size() - 1]) * -10000;
             i++;
         }
         temp_killer.pop_back();
@@ -158,40 +166,33 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves
     Board prev_board = board;
     try
     {
-        set_up_killer(moves, depth);
-        if (player_num == m_move_exec.get_player_num())
+        for (uint8_t index = 0; index < moves.size(); index++)
         {
-            for (auto &m : moves)
+            set_up_killer(moves, depth, index);
+            if (player_num == m_move_exec.get_player_num())
+                for (auto &m : moves[index])
+                    if (std::get<0>(m) != 0)
+                        std::get<0>(m) = std::get<0>(m) * -1;
+
+            for (auto &m : moves[index])
             {
-                if (std::get<0>(m) != 0)
-                {
-                    std::get<0>(m) = std::get<0>(m) * -1;
-                }
+                if (timer.return_rest_time() < timer.exception_time)
+                    throw TimeLimitExceededException("Timeout in sort_valid_moves before sorting");
+
+                board.set_coord(std::get<1>(m));
+                board.set_spec(std::get<2>(m));
+                std::get<0>(m) += m_move_exec.get_bits_to_update(player_num, board).count();
             }
-        }
-        for (auto &m : moves)
-        {
+            if (player_num == m_move_exec.get_player_num())
+                std::sort(moves[index].begin(), moves[index].end(), [](const std::tuple<int, uint16_t, uint8_t> &a, const std::tuple<int, uint16_t, uint8_t> &b)
+                          { return std::get<0>(a) > std::get<0>(b); });
+
+            else
+                std::sort(moves[index].begin(), moves[index].end(), [](const std::tuple<int, uint16_t, uint8_t> &a, const std::tuple<int, uint16_t, uint8_t> &b)
+                          { return std::get<0>(a) < std::get<0>(b); });
+
             if (timer.return_rest_time() < timer.exception_time)
-            {
-                throw TimeLimitExceededException("Timeout in sort_valid_moves before sorting");
-            }
-            board.set_coord(std::get<1>(m));
-            board.set_spec(std::get<2>(m));
-            std::get<0>(m) += m_move_exec.get_bits_to_update(player_num, board).count();
-        }
-        if (player_num == m_move_exec.get_player_num())
-        {
-            std::sort(moves.begin(), moves.end(), [](const std::tuple<int, uint16_t, uint8_t> &a, const std::tuple<int, uint16_t, uint8_t> &b)
-                      { return std::get<0>(a) > std::get<0>(b); });
-        }
-        else
-        {
-            std::sort(moves.begin(), moves.end(), [](const std::tuple<int, uint16_t, uint8_t> &a, const std::tuple<int, uint16_t, uint8_t> &b)
-                      { return std::get<0>(a) < std::get<0>(b); });
-        }
-        if (timer.return_rest_time() < timer.exception_time)
-        {
-            throw TimeLimitExceededException(("Timeout in sort_valid_moves after sorting"));
+                throw TimeLimitExceededException(("Timeout in sort_valid_moves after sorting"));
         }
     }
     catch (const TimeLimitExceededException &)
@@ -202,51 +203,40 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves
 
 void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves)
 {
-    for (uint16_t i = 1; i < m_move_exec.get_num_of_fields(); i++)
-    {
-        if (board.valid_moves[player_num].test(i))
-        {
-            if (board.board_sets[3].test(i))
+    for (uint8_t index = 0; index < moves.size(); index++)
+        for (uint16_t i = 1; i < m_move_exec.get_num_of_fields(); i++)
+            if (board.valid_moves[player_num][index].test(i))
             {
-                for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
-                {
-                    moves.push_back(std::make_tuple(0, i, j));
-                }
+                if (board.board_sets[3].test(i))
+                    for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
+                        moves[index].push_back(std::make_tuple(0, i, j));
+
+                else if (board.board_sets[4].test(i))
+                    moves[index].push_back(std::make_tuple(0, i, 20));
+
+                else
+                    moves[index].push_back(std::make_tuple(0, i, 0));
             }
-            else if (board.board_sets[4].test(i))
-            {
-                moves.push_back(std::make_tuple(0, i, 20));
-            }
-            else
-            {
-                moves.push_back(std::make_tuple(0, i, 0));
-            }
-        }
-    }
 }
 
 void Algorithms::init_best_board(Board &board)
 {
+    std::bitset<2501> total_moves = board.get_total_moves(m_move_exec.get_player_num());
+
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-    {
-        if (board.valid_moves[m_move_exec.get_player_num()].test(c))
+        if (total_moves.test(c))
         {
             board.set_coord(c);
             if (board.board_sets[3].test(c))
-            {
                 board.set_spec(m_move_exec.get_player_num());
-            }
+
             else if (board.board_sets[4].test(c))
-            {
                 board.set_spec(20);
-            }
+
             else
-            {
                 board.set_spec(0);
-            }
             break;
         }
-    }
 }
 
 Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
@@ -254,36 +244,33 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     int best_eval = -INT32_MAX;
     Board best_board(board);
     init_best_board(best_board);
-    std::vector<std::tuple<int, uint16_t, uint8_t>> moves;
+    uint8_t player_num = m_move_exec.get_player_num();
+    std::vector<std::vector<std::tuple<int, uint16_t, uint8_t>>> moves(board.player_communities[player_num].size());
     moves.reserve(3000);
     Board prev_board = board;
-    uint8_t player_num = m_move_exec.get_player_num();
     try
     {
         set_up_moves(board, player_num, moves);
         if (sorting)
             sort_valid_moves(board, player_num, moves, timer, 0);
-        std::cout << "number of moves: " << moves.size() << std::endl;
-        for (uint8_t search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
-        {
-            for (auto &m : moves)
-            {
-                if (timer.return_rest_time() < timer.exception_time)
+        for (uint8_t index = 0; index < moves.size(); index++)
+            for (uint8_t search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
+                for (auto &m : moves[index])
                 {
-                    throw TimeLimitExceededException(("Timeout in get_best_coord"));
+                    if (timer.return_rest_time() < timer.exception_time)
+                        throw TimeLimitExceededException(("Timeout in get_best_coord"));
+
+                    board.set_coord(std::get<1>(m));
+                    board.set_spec(std::get<2>(m));
+                    m_move_exec.exec_move(player_num, board);
+                    int eval = brs(board, -INT32_MAX, INT32_MAX, 0, search_depth, m_move_exec.get_player_num(), timer, sorting, index);
+                    if (eval > best_eval)
+                    {
+                        best_eval = eval;
+                        best_board = board;
+                    }
+                    board = prev_board;
                 }
-                board.set_coord(std::get<1>(m));
-                board.set_spec(std::get<2>(m));
-                m_move_exec.exec_move(player_num, board);
-                int eval = brs(board, -INT32_MAX, INT32_MAX, 0, search_depth, m_move_exec.get_player_num(), timer, sorting);
-                if (eval > best_eval)
-                {
-                    best_eval = eval;
-                    best_board = board;
-                }
-                board = prev_board;
-            }
-        }
     }
     catch (TimeLimitExceededException &e)
     {

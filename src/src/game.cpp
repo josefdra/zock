@@ -7,8 +7,6 @@
 #include "timer.hpp"
 #include "logging.hpp"
 
-bool glob = false;
-
 Game::Game()
 {
     m_game_over = false;
@@ -54,10 +52,10 @@ void Game::calculate_winner(Board &board)
     {
         if (board.disqualified[i])
             LOG_INFO("Player " + std::to_string(i + 1) + ": disqualified");
+
         else
-        {
             LOG_INFO("Player " + std::to_string(i + 1) + ": " + std::to_string(board.player_sets[i].count()) + " points");
-        }
+
         if (board.player_sets[i].count() > max)
         {
             max = board.player_sets[i].count();
@@ -70,22 +68,18 @@ void Game::calculate_winner(Board &board)
 void Game::end(Board &board, uint8_t player_number)
 {
     if (board.disqualified[player_number])
-    {
         LOG_WARNING("We are disqualified");
-    }
+
     else
-    {
         calculate_winner(board);
-    }
 }
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
 {
 
     if (((data >> 8) & 0xFFFFFFFF) != 0)
-    {
         m_initial_time_limit = ((data >> 8) & 0xFFFFFFFF);
-    }
+
     Timer timer(m_initial_time_limit);
     // uint8_t search_depth = data & 0xFF;
     MoveGenerator move_gen(map);
@@ -106,10 +100,6 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     {
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
         LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> 32) & 0xFF)) + ", " + std::to_string((int)((data >> 16) & 0xFF)));
-        if (player == 6 && board.get_coord() == 11)
-        {
-            glob = true;
-        }
         move_exec.exec_move(player, board);
     }
     else
@@ -118,6 +108,13 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
         LOG_INFO("Player " + std::to_string((int)player + 1) + " threw bomb at " + std::to_string((int)((data >> 32) & 0xFF)) + ", " + std::to_string((int)((data >> 16) & 0xFF)));
         board = move_exec.exec_bomb(player, board, map.get_strength());
     }
+    std::cout << "Communities:" << std::endl;
+    for (auto &community : board.player_communities[player])
+        board.print_bitset(community);
+    std::cout << "Frames:" << std::endl;
+    for (auto &frame : board.player_frames[player])
+        board.print_bitset(frame);
+
 #ifdef DEBUG
     board.print(player, (map.get_player_number() == player));
 #endif // DEBUG

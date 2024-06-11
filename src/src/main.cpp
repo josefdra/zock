@@ -11,25 +11,20 @@ void init_print(bool quietMode, const char *ip, int port, bool sorting)
 {
     LOG_INFO("Gruppe01 | Dräxl, Koch, Kuhn");
     if (sorting)
-    {
         LOG_INFO("Zugsortierung aktiviert");
-    }
+
     else
-    {
         LOG_INFO("Zugsortierung deaktiviert");
-    }
+
     if (quietMode)
-    {
         LOG_INFO("Quiet mode aktiviert");
-    }
+
     if (ip != nullptr)
-    {
         LOG_INFO(std::string("IP-Adresse: ") + ip);
-    }
+
     if (port != -1)
-    {
         LOG_INFO("Port: " + std::to_string(port));
-    }
+
     if (quietMode)
     {
         std::ofstream devnull;
@@ -47,9 +42,8 @@ bool read_args(int argc, char *argv[], const char *&ip, int &port, bool &sorting
         {
             std::string key = arg.substr(1);
             if (key == "i" && (argv[i + 1] == std::string("localhost")))
-            {
                 ++i;
-            }
+
             else if (key == "i" && !(argv[i + 1] == std::string("localhost")))
             {
                 ip = argv[i + 1];
@@ -61,13 +55,11 @@ bool read_args(int argc, char *argv[], const char *&ip, int &port, bool &sorting
                 ++i;
             }
             else if (key == "n")
-            {
                 sorting = false;
-            }
+
             else if (key == "q")
-            {
                 quietMode = false;
-            }
+
             else if (key == "h")
             {
                 LOG_INFO("Parameter:\n"
@@ -97,11 +89,13 @@ int main(int argc, char *argv[])
 
     if (read_args(argc, argv, ip, port, sorting, quietMode))
         return 0;
+
     init_print(quietMode, ip, port, sorting);
 
     Network net(ip, port);
     if (!net.init())
         return 1;
+
     Game game;
     game.run(net, sorting);
 
