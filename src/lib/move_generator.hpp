@@ -1,6 +1,9 @@
 #ifndef MOVE_GENERATOR_HPP
 #define MOVE_GENERATOR_HPP
 
+#define BYTE 8
+#define TWO_BYTES 16
+
 #include <stdint.h>
 #include <vector>
 #include <chrono>
@@ -25,6 +28,7 @@ public:
     uint16_t get_num_of_fields();
     uint8_t get_num_of_players();
     uint8_t get_player_num();
+    uint8_t get_reverse_direction(uint8_t);
     bool check_if_valid_move(Board &, uint16_t, uint8_t);
     void calculate_valid_no_overwrite_moves_from_player(Board &, uint8_t, uint16_t, uint8_t);
     void calculate_valid_overwrite_moves_from_player(Board &, uint8_t, uint16_t, uint8_t);

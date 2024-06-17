@@ -1,5 +1,13 @@
 #ifndef GAME_H
-#define GAME_H
+#define GAME_
+
+#define INITIAL_TIME_LIMIT 1000000
+#define BYTE 8
+#define TWO_BYTES 16
+#define FOUR_BYTES 32
+#define SEVEN_BYTES 56
+#define ONE_SET_BYTE 0xFF
+#define FOUR_SET_BYTES 0xFFFFFFFF
 
 #include <stdint.h>
 #include <vector>
