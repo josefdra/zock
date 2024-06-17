@@ -28,6 +28,11 @@ int get_eliminate_player_score(Board &board, uint8_t player_num)
 
 int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Timer &timer)
 {
+    uint8_t end_game_multiplier = 1;
+
+    if (sqrt(board.get_num_of_fields()) > board.board_sets[EMPTY].count())
+        end_game_multiplier = 10;
+
     try
     {
         uint16_t border_set_size = board.border_sets.size();
@@ -40,9 +45,11 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
 
             if (board.disqualified[i])
                 board.reset_valid_moves(i);
-                
+
             if (i != player_num)
-                score -= board.get_total_moves(i).count() * ENEMY_MOVE_MULTIPLIER + board.player_sets[i].count() * ENEMY_STONE_MULTIPLIER;
+                score -= board.get_total_moves(i).count() * ENEMY_MOVE_MULTIPLIER + board.player_sets[i].count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier;
+            else
+                score += board.get_total_moves(player_num).count() * MOVE_MULTIPLIER + board.player_sets[player_num].count() * STONE_MULTIPLIER * end_game_multiplier;
         }
         for (uint16_t j = 0; j < border_set_size; j++)
             if (j == 0)
@@ -57,7 +64,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
         if (board.is_overwrite_move(player_num))
             score -= OVERWRITE_VALUE;
 
-        return score + board.get_total_moves(player_num).count() * MOVE_MULTIPLIER + board.player_sets[player_num].count() * STONE_MULTIPLIER;
+        return score;
     }
     catch (const TimeLimitExceededException &)
     {

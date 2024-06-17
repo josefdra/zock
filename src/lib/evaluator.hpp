@@ -29,6 +29,7 @@
 
 #include <bitset>
 #include <stdint.h>
+#include <cmath>
 
 class Board;
 class MoveGenerator;
