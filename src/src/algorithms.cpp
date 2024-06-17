@@ -221,10 +221,9 @@ void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, ui
 void Algorithms::init_best_board(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> total_moves = board.get_total_moves(m_move_exec.get_player_num());
-
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (total_moves.test(c))
-        {
+        {            
             board.set_coord(c);
             if (board.board_sets[C].test(c))
                 board.set_spec(m_move_exec.get_player_num());

@@ -109,6 +109,13 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
         LOG_INFO("Player " + std::to_string((int)player + 1) + " threw bomb at " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
         board = move_exec.exec_bomb(player, board, map.get_strength());
     }
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+    {
+        std::cout << "community" << std::endl;
+        board.print_bitset(board.communities[i]);
+        std::cout << "frame" << std::endl;
+        board.print_bitset(board.frames[i]);
+    }
 
 #ifdef DEBUG
     board.print(player, (map.get_player_number() == player));

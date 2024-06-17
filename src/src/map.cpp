@@ -350,6 +350,10 @@ void Map::init_frames(Board &board)
                     if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
                         board.frames[i].set(next_coord);
                 }
+
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+        if (board.frames[i].count() == 0)
+            board.communities[i].reset();
 }
 
 void Map::remove_double_communities(Board &board)

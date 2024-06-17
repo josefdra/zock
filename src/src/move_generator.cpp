@@ -164,7 +164,7 @@ void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, T
     board.valid_moves[player_number].resize(board.get_num_of_communities());
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
         if ((board.communities[i] & board.player_sets[player_number]).count() != 0)
-        {
+        {            
             if (2 * (board.communities[i] & board.player_sets[player_number]).count() < board.frames[i].count())
                 calculate_moves_from_player_no_ow(board, player_number, i);
 
@@ -189,6 +189,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     uint8_t x, y, player;
     player = map.get_player_number();
     calculate_valid_moves(board, player, timer);
+
     Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[C].test(res.get_coord()))
         res.set_spec(res.get_spec() + 1);
