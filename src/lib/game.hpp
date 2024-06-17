@@ -1,8 +1,17 @@
 #ifndef GAME_H
-#define GAME_H
+#define GAME_
+
+#define INITIAL_TIME_LIMIT 1000000
+#define BYTE 8
+#define TWO_BYTES 16
+#define FOUR_BYTES 32
+#define SEVEN_BYTES 56
+#define ONE_SET_BYTE 0xFF
+#define FOUR_SET_BYTES 0xFFFFFFFF
 
 #include <stdint.h>
 #include <vector>
+#include <timer.hpp>
 
 class Network;
 class Map;
@@ -26,9 +35,9 @@ public:
     void run(Network &, bool);
 
 private:
-    bool m_game_over = false;
-    bool m_bomb_phase = false;
-    uint32_t m_initial_time_limit = 1000000;
+    bool m_game_over;
+    bool m_bomb_phase;
+    uint32_t m_initial_time_limit;
 };
 
 #endif // GAME_H

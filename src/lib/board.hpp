@@ -1,6 +1,16 @@
 #ifndef BOARD_HPP
 #define BOARD_HPP
 
+#define MAX_NUM_OF_FIELDS 2501
+#define NUM_OF_BOARD_SETS 6
+#define NUM_OF_WALL_SETS 8
+#define MINUS 0
+#define EMPTY 1 
+#define I 2
+#define C 3
+#define B 4
+#define X 5
+
 #include <stdint.h>
 #include <bitset>
 #include <vector>
@@ -26,7 +36,6 @@ class Board
 public:
     Board(Map &);
     Board(Board &, uint16_t, uint8_t);
-    Board(Board &, std::vector<std::bitset<2501>> &);
     ~Board();
 
     void set_coord(uint16_t);
@@ -43,6 +52,7 @@ public:
     uint16_t get_coord();
     uint8_t get_spec();
     int get_evaluation();
+    uint8_t get_num_of_communities();
     void increment_overwrite_stones(uint8_t);
     void increment_bombs(uint8_t);
     void decrement_overwrite_stones(uint8_t);
@@ -56,7 +66,9 @@ public:
     void print_upper_outlines();
     bool print_board_sets(uint16_t);
     void print(uint8_t, bool);
-    void print_bitset(std::bitset<2501> &);
+    void print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &);
+    void reset_valid_moves(uint8_t);
+    std::bitset<MAX_NUM_OF_FIELDS> get_total_moves(uint8_t);
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -64,19 +76,18 @@ public:
     // boards[3] = c board
     // boards[4] = b board
     // boards[5] = x board
-    // boards[6] = border around occupied fields
-    std::vector<std::bitset<2501>> board_sets;
-    std::vector<std::bitset<2501>> player_sets;
-    std::vector<std::bitset<2501>> valid_moves;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_BOARD_SETS> board_sets;
+    std::vector<std::bitset<MAX_NUM_OF_FIELDS>> player_sets;
+    std::vector<std::vector<std::bitset<MAX_NUM_OF_FIELDS>>> valid_moves;
     // first 8 sets for 1 to 8 walls next to field
-    std::array<std::bitset<2501>, 8> wall_sets;
-    std::vector<std::bitset<2501>> border_sets;
-    std::vector<std::bitset<2501>> protected_fields;
-
-    std::vector<std::bitset<2501>> fields_to_remove;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> wall_sets;
+    std::vector<std::bitset<MAX_NUM_OF_FIELDS>> border_sets;
 
     std::vector<uint16_t> overwrite_stones;
     std::vector<uint16_t> bombs;
+
+    std::vector<std::bitset<MAX_NUM_OF_FIELDS>> communities;
+    std::vector<std::bitset<MAX_NUM_OF_FIELDS>> frames;
 
     std::vector<bool> disqualified;
 
@@ -86,7 +97,7 @@ private:
     uint8_t m_width;
     uint8_t m_height;
     uint16_t m_coord;
-    uint8_t m_spec;    
+    uint8_t m_spec;
     std::vector<bool> m_overwrite_move;
     int evaluation;
 };

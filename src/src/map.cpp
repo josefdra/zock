@@ -1,13 +1,26 @@
 #include "map.hpp"
 #include "board.hpp"
 #include "move_generator.hpp"
+#include "logging.hpp"
 
 /**
  * @brief map.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships
  *
  */
 
-Map::Map(){};
+Map::Map()
+{
+    m_numbers = std::vector<char>();
+    m_transitions = std::vector<uint16_t>();
+    m_height = 0;
+    m_width = 0;
+    m_player_count = 0;
+    m_strength = 0;
+    m_initial_overwrite_stones = 0;
+    m_initial_bombs = 0;
+    m_num_of_fields = 0;
+    m_player_number = 0;
+};
 
 Map::~Map(){};
 
@@ -19,37 +32,28 @@ Map::~Map(){};
 void Map::check_neighbours(uint16_t c)
 {
     if (c > m_width && get_symbol(c - m_width) != '-') // checks if there is a field above
-    {
-        set_transition(c, 0, (c - m_width) * 10);
-    }
+        set_transition(c, UP, (c - m_width) * COORD_TO_DIR_OFFSET);
+
     if (c % m_width != 0 && c > m_width && get_symbol(c - m_width + 1) != '-') // checks if there is a field top right
-    {
-        set_transition(c, 1, (c - m_width + 1) * 10 + 1);
-    }
+        set_transition(c, UPPER_RIGHT, (c - m_width + 1) * COORD_TO_DIR_OFFSET + UPPER_RIGHT);
+
     if (c % m_width != 0 && get_symbol(c + 1) != '-') // checks if there is a field to the right
-    {
-        set_transition(c, 2, (c + 1) * 10 + 2);
-    }
+        set_transition(c, RIGHT, (c + 1) * COORD_TO_DIR_OFFSET + RIGHT);
+
     if (c % m_width != 0 && c <= m_width * (m_height - 1) && get_symbol(c + m_width + 1) != '-') // checks if there is a field bottom right
-    {
-        set_transition(c, 3, (c + m_width + 1) * 10 + 3);
-    }
+        set_transition(c, LOWER_RIGHT, (c + m_width + 1) * COORD_TO_DIR_OFFSET + LOWER_RIGHT);
+
     if (c <= m_width * (m_height - 1) && get_symbol(c + m_width) != '-') // checks if there is a field below
-    {
-        set_transition(c, 4, (c + m_width) * 10 + 4);
-    }
+        set_transition(c, DOWN, (c + m_width) * COORD_TO_DIR_OFFSET + DOWN);
+
     if (c % m_width != 1 && c <= m_width * (m_height - 1) && get_symbol(c + m_width - 1) != '-') // check if there is a field bottom left
-    {
-        set_transition(c, 5, (c + m_width - 1) * 10 + 5);
-    }
+        set_transition(c, LOWER_LEFT, (c + m_width - 1) * COORD_TO_DIR_OFFSET + LOWER_LEFT);
+
     if (c % m_width != 1 && get_symbol(c - 1) != '-') // checks if there is a field to the left
-    {
-        set_transition(c, 6, (c - 1) * 10 + 6);
-    }
+        set_transition(c, LEFT, (c - 1) * COORD_TO_DIR_OFFSET + LEFT);
+
     if (c % m_width != 1 && c > m_width && get_symbol(c - m_width - 1) != '-') // checks if there is a field top left
-    {
-        set_transition(c, 7, (c - m_width - 1) * 10 + 7);
-    }
+        set_transition(c, UPPER_LEFT, (c - m_width - 1) * COORD_TO_DIR_OFFSET + UPPER_LEFT);
 }
 
 void Map::set_symbol(uint16_t c, unsigned char s)
@@ -59,17 +63,17 @@ void Map::set_symbol(uint16_t c, unsigned char s)
 
 void Map::set_transition(uint16_t c, uint8_t d, uint16_t t)
 {
-    m_transitions[(c - 1) * 8 + d] = t;
+    m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] = t;
 }
 
 void Map::set_player_number(uint8_t n)
 {
-    player_number = n - 1;
+    m_player_number = n - 1;
 }
 
 uint8_t Map::get_player_number()
 {
-    return player_number;
+    return m_player_number;
 }
 
 char Map::get_symbol(uint16_t c)
@@ -79,12 +83,12 @@ char Map::get_symbol(uint16_t c)
 
 uint16_t Map::get_transition(uint16_t c, uint8_t d)
 {
-    return m_transitions[(c - 1) * 8 + d] / 10;
+    return m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] / COORD_TO_DIR_OFFSET;
 }
 
 uint8_t Map::get_direction(uint16_t c, uint8_t d)
 {
-    return m_transitions[(c - 1) * 8 + d] % 10;
+    return m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] % COORD_TO_DIR_OFFSET;
 }
 
 uint16_t Map::get_height()
@@ -127,6 +131,11 @@ std::vector<uint16_t> Map::get_transitions()
     return m_transitions;
 }
 
+uint8_t Map::get_reverse_direction(uint8_t d)
+{
+    return (d + 4) % NUM_OF_DIRECTIONS;
+}
+
 /**
  * @brief reads the input and sets all the information required for the game map
  *
@@ -136,9 +145,10 @@ void Map::read_map(std::stringstream mapfile)
 {
     char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
+    LOG_INFO("m_height: " + std::to_string(m_height) + " m_width: " + std::to_string(m_width));
     m_num_of_fields = m_height * m_width + 1;
-    m_transitions = std::vector<uint16_t>((m_num_of_fields - 1) * 8 + 1, 0);
-    m_numbers = std::vector<char>(m_num_of_fields, 0);
+    m_transitions.resize((m_num_of_fields - 1) * NUM_OF_DIRECTIONS + 1, 0);
+    m_numbers.resize(m_num_of_fields, 0);
     // every coordinate gets a symbol and it's neighbours are being set
     for (int c = 1; c < m_num_of_fields; c++)
     {
@@ -146,12 +156,9 @@ void Map::read_map(std::stringstream mapfile)
         set_symbol(c, temp);
     }
     for (int c = 1; c < m_num_of_fields; c++)
-    {
         if (get_symbol(c) != '-')
-        {
             check_neighbours(c);
-        }
-    }
+
     uint16_t x1, y1, r1, x2, y2, r2, pos1, pos2, pos1r, pos2r;
     while (mapfile >> x1)
     {
@@ -162,8 +169,8 @@ void Map::read_map(std::stringstream mapfile)
         x2++;
         pos1 = (x1) + (y1)*m_width;
         pos2 = (x2) + (y2)*m_width;
-        pos1r = pos1 * 10 + ((r1 + 4) % 8);
-        pos2r = pos2 * 10 + ((r2 + 4) % 8);
+        pos1r = pos1 * 10 + get_reverse_direction(r1);
+        pos2r = pos2 * 10 + get_reverse_direction(r2);
         set_transition(pos1, r1, pos2r);
         set_transition(pos2, r2, pos1r);
     }
@@ -185,92 +192,75 @@ bool Map::check_players(char c)
     std::array<unsigned char, 8> player_symbols{'1', '2', '3', '4', '5', '6', '7', '8'};
     bool var = false;
     for (uint8_t i = 0; i < player_symbols.size(); i++)
-    {
         if (c == player_symbols[i])
-        {
             var = true;
-        }
-    }
+
     return var;
 }
 
 void Map::set_values(Board &board, uint16_t c)
 {
     if (get_symbol(c) == '0')
-    {
-        board.board_sets[1].set(c);
-    }
+        board.board_sets[EMPTY].set(c);
+
     else if (get_symbol(c) == '-')
-    {
-        board.board_sets[0].set(c);
-    }
+        board.board_sets[MINUS].set(c);
+
     else if (get_symbol(c) == 'i')
     {
-        board.board_sets[1].set(c);
-        board.board_sets[2].set(c);
+        board.board_sets[EMPTY].set(c);
+        board.board_sets[I].set(c);
     }
     else if (get_symbol(c) == 'c')
     {
-        board.board_sets[1].set(c);
-        board.board_sets[3].set(c);
+        board.board_sets[EMPTY].set(c);
+        board.board_sets[C].set(c);
     }
     else if (get_symbol(c) == 'b')
     {
-        board.board_sets[1].set(c);
-        board.board_sets[4].set(c);
+        board.board_sets[EMPTY].set(c);
+        board.board_sets[B].set(c);
     }
     else if (get_symbol(c) == 'x')
-    {
-        board.board_sets[5].set(c);
-    }
-    else if (check_players(get_symbol(c)))
-    {
-        board.player_sets[get_symbol(c) - '0' - 1].set(c);
-    }
-}
+        board.board_sets[X].set(c);
 
-void Map::init_protected_fields(Board &board)
-{
-    for (uint8_t i = 0; i < board.get_player_count(); i++)
-    {
-        board.protected_fields[i] = board.player_sets[i] & (board.wall_sets[3] | board.wall_sets[4] | board.wall_sets[5] | board.wall_sets[6] | board.wall_sets[7]);
-    }
+    else if (check_players(get_symbol(c)))
+        board.player_sets[get_symbol(c) - '0' - 1].set(c);
 }
 
 void Map::init_wall_values(Board &board)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-    {
         if (board.border_sets[0].test(c))
         {
             uint8_t counter = 0;
+            uint8_t most = 0;
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
                 if (next_coord == 0)
                 {
                     counter++;
+                    if (counter > most)
+                        most = counter;
                 }
+                else
+                    counter = 0;
             }
-            board.wall_sets[counter - 1].set(c);
+            board.wall_sets[most - 1].set(c);
         }
-    }
-    init_protected_fields(board);
 }
 
-bool Map::get_walls(Board &board, std::bitset<2501> &checked)
+bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-        {
-            if (get_transition(c, d) == 0 && !board.board_sets[0].test(c))
+            if (get_transition(c, d) == 0 && !board.board_sets[MINUS].test(c))
             {
                 checked.set(c);
                 break;
             }
-        }
-    }
+
     if (checked.count() == 0)
         return false;
     else
@@ -281,44 +271,33 @@ bool Map::get_walls(Board &board, std::bitset<2501> &checked)
     void init_wall_values(Board & board);
 }
 
-std::bitset<2501> Map::get_inside_of_walls(Board &board, std::bitset<2501> &checked, uint16_t counter)
+std::bitset<MAX_NUM_OF_FIELDS> Map::get_inside_of_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked, uint16_t counter)
 {
-    std::bitset<2501> set;
+    std::bitset<MAX_NUM_OF_FIELDS> set;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
         if (board.border_sets[counter].test(c))
-        {
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-            {
                 if (get_transition(c, d) != 0)
-                {
                     if (checked.test(c))
                     {
-                        uint16_t trans1 = get_transition(c, (d + 3) % NUM_OF_DIRECTIONS);
-                        uint16_t trans2 = get_transition(c, (d + 4) % NUM_OF_DIRECTIONS);
-                        uint16_t trans3 = get_transition(c, (d + 5) % NUM_OF_DIRECTIONS);
+                        uint16_t trans1 = get_transition(c, get_reverse_direction(d + 7));
+                        uint16_t trans2 = get_transition(c, get_reverse_direction(d));
+                        uint16_t trans3 = get_transition(c, get_reverse_direction(d + 1));
                         if (trans1 != 0 && !checked.test(trans1))
-                        {
                             set.set(trans1);
-                        }
+
                         if (trans2 != 0 && !checked.test(trans2))
-                        {
                             set.set(trans2);
-                        }
+
                         if (trans3 != 0 && !checked.test(trans3))
-                        {
                             set.set(trans3);
-                        }
                     }
-                }
-            }
-        }
-    }
+
     checked |= set;
     return set;
 }
 
-bool Map::set_player_border_sets(Board &board, std::bitset<2501> set)
+bool Map::set_player_border_sets(Board &board, std::bitset<MAX_NUM_OF_FIELDS> set)
 {
     if (set.count() == 0)
         return false;
@@ -328,42 +307,102 @@ bool Map::set_player_border_sets(Board &board, std::bitset<2501> set)
 
 void Map::init_evaluation(Board &board)
 {
-    std::bitset<2501> checked;
+    std::bitset<MAX_NUM_OF_FIELDS> checked;
     if (get_walls(board, checked))
     {
         uint16_t counter = 0;
         while (set_player_border_sets(board, get_inside_of_walls(board, checked, counter)))
+        {
             counter++;
+            if (counter == 2)
+                break;
+        }
     }
+}
+
+void Map::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community, uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &checked_fields)
+{
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0 && !board.board_sets[EMPTY].test(next_coord) && !community.test(next_coord))
+        {
+            community.set(next_coord);
+            if (checked_fields.test(next_coord))
+                continue;
+            else
+            {
+                checked_fields.set(next_coord);
+                expand_community(board, community, next_coord, checked_fields);
+            }
+        }
+    }
+}
+
+void Map::init_frames(Board &board)
+{
+    for (uint16_t c = 1; c < get_num_of_fields(); c++)
+        for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+            if (board.communities[i].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
+                        board.frames[i].set(next_coord);
+                }
+}
+
+void Map::remove_double_communities(Board &board)
+{
+    std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_communities;
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+        for (uint8_t j = 0; j < board.get_num_of_communities(); j++)
+            if (i != j && (board.communities[i] & board.communities[j]).count() != 0)
+            {
+                board.communities[i] |= board.communities[j];
+                board.communities[j].reset();
+            }
+    for (auto &community : board.communities)
+        if (community.count() != 0)
+            temp_communities.push_back(community);
+
+    board.communities = temp_communities;
+}
+
+void Map::init_communities(Board &board)
+{
+    std::bitset<MAX_NUM_OF_FIELDS> all_players;
+    std::bitset<MAX_NUM_OF_FIELDS> checked_fields;
+    for (auto &player : board.player_sets)
+        all_players |= player;
+
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if (all_players.test(c) && !checked_fields.test(c))
+        {
+            board.communities.push_back(std::bitset<MAX_NUM_OF_FIELDS>(0));
+            board.communities.back().set(c);
+            expand_community(board, board.communities.back(), c, checked_fields);
+        }
+
+    remove_double_communities(board);
+    board.frames.resize(board.get_num_of_communities());
+    init_frames(board);
 }
 
 Board Map::init_boards_and_players()
 {
     Board ret_board(*this);
+
+    LOG_INFO("number of fields: " + std::to_string(m_num_of_fields));
     for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
         set_values(ret_board, c);
-    }
+
     for (uint8_t i = 0; i < get_player_count(); i++)
     {
         ret_board.set_overwrite_stones(i, m_initial_overwrite_stones);
         ret_board.set_bombs(i, m_initial_bombs);
     }
-    for (uint16_t c = 1; c < get_num_of_fields(); c++)
-    {
-        if (!ret_board.board_sets[1].test(c))
-        {
-            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-            {
-                uint16_t next_coord = get_transition(c, d);
-                if (next_coord != 0 && ret_board.board_sets[1].test(next_coord))
-                {
-                    ret_board.board_sets[6].set(next_coord);
-                }
-            }
-        }
-    }
     init_evaluation(ret_board);
+    init_communities(ret_board);
     return ret_board;
 }
-

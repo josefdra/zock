@@ -1,36 +1,49 @@
 #include "board.hpp"
 #include "map.hpp"
+#include "logging.hpp"
 
 Board::Board(Map &map)
+    : board_sets(),
+      player_sets(map.get_player_count()),
+      valid_moves(map.get_player_count()),
+      wall_sets(),
+      border_sets(1),
+      overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
+      bombs(map.get_player_count(), map.get_initial_bombs()),
+      communities(0),
+      frames(0),
+      disqualified(map.get_player_count(), false),
+      m_player_count(map.get_player_count()),
+      m_num_of_fields(map.get_num_of_fields()),
+      m_width(map.get_width()),
+      m_height(map.get_height()),
+      m_coord(0),
+      m_spec(0),
+      m_overwrite_move(map.get_player_count(), false),
+      evaluation(0)
 {
-    m_player_count = map.get_player_count();
-    m_num_of_fields = map.get_num_of_fields();
-    m_width = map.get_width();
-    m_height = map.get_height();
-    m_overwrite_move = std::vector<bool>(m_player_count, false);
-    board_sets = std::vector<std::bitset<2501>>(7);
-    player_sets = std::vector<std::bitset<2501>>(m_player_count);
-    valid_moves = std::vector<std::bitset<2501>>(m_player_count);
-    wall_sets = std::array<std::bitset<2501>, 8>();
-    border_sets = std::vector<std::bitset<2501>>(1);
-    protected_fields = std::vector<std::bitset<2501>>(m_player_count);
-    fields_to_remove = std::vector<std::bitset<2501>>(m_num_of_fields);
-    overwrite_stones = std::vector<uint16_t>(m_player_count, map.get_initial_overwrite_stones());
-    bombs = std::vector<uint16_t>(m_player_count, map.get_initial_bombs());
-    disqualified = std::vector<bool>(m_player_count, false);
-}
-
-Board::Board(Board &board, std::vector<std::bitset<2501>> &to_remove)
-{
-    *this = board;
-    fields_to_remove = to_remove;
 }
 
 Board::Board(Board &board, uint16_t coord, uint8_t spec)
+    : board_sets(board.board_sets),
+      player_sets(board.player_sets),
+      valid_moves(board.valid_moves),
+      wall_sets(board.wall_sets),
+      border_sets(board.border_sets),
+      overwrite_stones(board.overwrite_stones),
+      bombs(board.bombs),
+      communities(board.communities),
+      frames(board.frames),
+      disqualified(board.disqualified),
+      m_player_count(board.m_player_count),
+      m_num_of_fields(board.m_num_of_fields),
+      m_width(board.m_width),
+      m_height(board.m_height),
+      m_coord(coord),
+      m_spec(spec),
+      m_overwrite_move(board.m_overwrite_move),
+      evaluation(board.evaluation)
 {
-    *this = board;
-    m_coord = coord;
-    m_spec = spec;
 }
 
 Board::~Board() {}
@@ -105,6 +118,11 @@ int Board::get_evaluation()
     return evaluation;
 }
 
+uint8_t Board::get_num_of_communities()
+{
+    return communities.size();
+}
+
 void Board::increment_overwrite_stones(uint8_t player)
 {
     overwrite_stones[player]++;
@@ -153,79 +171,77 @@ uint16_t Board::two_dimension_2_one_dimension(uint8_t x, uint8_t y)
 
 std::string Board::get_color_string(Colors color)
 {
-#ifdef COLOR
+    // #ifdef COLOR
     switch (color)
     {
     case orange:
-        return "\e[38;5;208m";
+        return "\033[38;5;208m";
     case red:
-        return "\e[91m";
+        return "\033[91m";
     case green:
-        return "\e[92m";
+        return "\033[92m";
     case yellow:
-        return "\e[93m";
+        return "\033[93m";
     case blue:
-        return "\e[94m";
+        return "\033[94m";
     case magenta:
-        return "\e[95m";
+        return "\033[95m";
     case cyan:
-        return "\e[96m";
+        return "\033[96m";
     case black:
-        return "\e[90m";
+        return "\033[90m";
     default:
-        return "\e[37m";
+        return "\033[37m";
     }
-#else
-    return "";
-#endif
+    // #else
+    //     return "";
+    // #endif
 }
 
 void Board::print_upper_outlines()
 {
     std::cout << "     ";
     for (uint16_t i = 0; i < get_width(); i++)
-    {
         std::cout << std::setw(2) << i;
-    }
+
     std::cout << std::endl
               << "    /";
     for (uint16_t i = 0; i < get_width(); i++)
-    {
         std::cout << "--";
-    }
+
     std::cout << std::endl;
 }
 
 bool Board::print_board_sets(uint16_t c)
 {
-    if (board_sets[0].test(c))
+    if (board_sets[MINUS].test(c))
     {
         std::cout << "-";
         return true;
     }
-    else if (board_sets[2].test(c))
+    else if (board_sets[I].test(c))
     {
         std::cout << "i";
         return true;
     }
-    else if (board_sets[3].test(c))
+    else if (board_sets[C].test(c))
     {
         std::cout << "c";
         return true;
     }
-    else if (board_sets[4].test(c))
+    else if (board_sets[B].test(c))
     {
         std::cout << "b";
         return true;
     }
     // boards[1] is printed after i, c, b, because these fields are also 0 fields
     // and otherwise the i, c, b values would be overwritten
-    else if (board_sets[1].test(c))
+    else if (board_sets[EMPTY].test(c))
     {
         std::cout << "0";
         return true;
     }
-    else if (board_sets[5].test(c))
+    else if (board_sets[X].test(c))
     {
         std::cout << "x";
         return true;
@@ -243,53 +259,56 @@ void Board::print(uint8_t player, bool our_player)
         {
             uint16_t c = two_dimension_2_one_dimension(x, y);
             if (!print_board_sets(c))
-            {
                 for (uint16_t i = 0; i < m_player_count; i++)
-                {
                     if (player_sets[i].test(c))
                     {
                         std::cout << get_color_string(Colors(i + 1)) << (uint16_t)(i + 1);
-#ifdef COLOR
+                        // #ifdef COLOR
                         std::cout << "\033[0m";
-#endif
+                        // #endif
                     }
-                }
-            }
-            if (our_player && valid_moves[player].test(c))
-            {
+            if (our_player && get_total_moves(player).test(c))
                 std::cout << "'";
-            }
+
             else
-            {
                 std::cout << " ";
-            }
         }
         std::cout << std::endl;
     }
-    std::cout << "Calculated valid moves: " << valid_moves[player].count() << std::endl;
+    LOG_INFO("Calculated valid moves: " + std::to_string(get_total_moves(player).count()));
     std::cout << std::endl;
 }
 
-// For visualization of a bitset. Can probably be removed
-void Board::print_bitset(std::bitset<2501> &bitset)
+void Board::print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &bitset)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
         if (bitset.test(c))
         {
             std::cout << get_color_string(yellow) << "1 ";
-#ifdef COLOR
+            // #ifdef COLOR
             std::cout << "\033[0m";
-#endif
+            // #endif
         }
         else
-        {
             std::cout << "0 ";
-        }
+
         if (c % m_width == 0)
-        {
             std::cout << std::endl;
-        }
     }
     std::cout << std::endl;
+}
+
+void Board::reset_valid_moves(uint8_t player)
+{
+    for (auto &moves : valid_moves[player])
+        moves.reset();
+}
+
+std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
+{
+    std::bitset<MAX_NUM_OF_FIELDS> total_moves;
+    for (auto &moves : valid_moves[player])
+        total_moves |= moves;
+    return total_moves;
 }

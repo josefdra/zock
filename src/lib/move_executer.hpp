@@ -1,6 +1,10 @@
 #ifndef MOVE_EXECUTER_HPP
 #define MOVE_EXECUTER_HPP
 
+#define MAX_NUM_OF_FIELDS 2501
+#define BOMB_SPEC 20
+#define OVERWRITE_SPEC 21
+
 #include <stdint.h>
 #include <vector>
 #include <unordered_set>
@@ -23,14 +27,16 @@ public:
     uint16_t get_num_of_fields();
     uint8_t get_num_of_players();
     uint8_t get_player_num();
-    void update_bits(std::bitset<2501> &, uint8_t, Board &, Timer &);
-    std::bitset<2501> get_bits_to_update(uint8_t, Board &, Timer &);
-    void update_boards(uint8_t, uint8_t, Board &, Timer &);
-    // void adjust_protected_fields(Board &, uint8_t);
-    Board exec_move(uint8_t, Board, Timer &);
-    void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<2501> &, Board &);
-    void init_bomb_phase_boards(Board &, uint16_t, uint8_t);
-    Board exec_bomb(uint8_t, Board, Timer &, uint8_t);
+    void update_bits(std::bitset<MAX_NUM_OF_FIELDS> &, uint8_t, Board &);
+    std::bitset<MAX_NUM_OF_FIELDS> get_bits_to_update(uint8_t, Board &);
+    void update_communities(std::bitset<MAX_NUM_OF_FIELDS> &, Board &);
+    void update_frames(std::bitset<MAX_NUM_OF_FIELDS> &, Board &);
+    void merge_communities(Board &);
+    void update_boards(uint8_t, uint8_t, Board &);
+    void exec_move(uint8_t, Board &);
+    void get_bomb_coords(uint16_t, uint16_t, uint8_t, std::bitset<MAX_NUM_OF_FIELDS> &, Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
+    std::bitset<MAX_NUM_OF_FIELDS> get_fields_to_remove(Board &, uint16_t, uint8_t, std::bitset<MAX_NUM_OF_FIELDS> &);
+    Board exec_bomb(uint8_t, Board, uint8_t);
 
 private:
     std::vector<uint16_t> m_transitions;

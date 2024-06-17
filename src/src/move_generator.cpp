@@ -4,6 +4,7 @@
 #include "move_executer.hpp"
 #include "timer.hpp"
 #include "board.hpp"
+#include "logging.hpp"
 
 MoveGenerator::MoveGenerator() {}
 
@@ -19,12 +20,12 @@ MoveGenerator::~MoveGenerator() {}
 
 uint16_t MoveGenerator::get_transition(uint16_t c, uint8_t d)
 {
-    return m_transitions[(c - 1) * 8 + d] / 10;
+    return m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] / COORD_TO_DIR_OFFSET;
 }
 
 uint8_t MoveGenerator::get_direction(uint16_t c, uint8_t d)
 {
-    return m_transitions[(c - 1) * 8 + d] % 10;
+    return m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] % COORD_TO_DIR_OFFSET;
 }
 
 uint16_t MoveGenerator::get_num_of_fields()
@@ -42,7 +43,12 @@ uint8_t MoveGenerator::get_player_num()
     return m_player_num;
 }
 
-bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player_number, Timer &timer)
+uint8_t MoveGenerator::get_reverse_direction(uint8_t d)
+{
+    return (d + 4) % NUM_OF_DIRECTIONS;
+}
+
+bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player_number)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
@@ -50,11 +56,7 @@ bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player
         uint8_t next_direction = get_direction(c, d);
         uint16_t prev_coord = c;
         uint8_t prev_direction = d;
-        if (timer.return_rest_time() < timer.exception_time)
-        {
-            throw TimeLimitExceededException();
-        }
-        while (next_coord != 0 && next_coord != c && !board.board_sets[1].test(next_coord) && !board.player_sets[player_number].test(next_coord))
+        while (next_coord != 0 && next_coord != c && !board.board_sets[EMPTY].test(next_coord) && !board.player_sets[player_number].test(next_coord))
         {
             prev_coord = next_coord;
             prev_direction = next_direction;
@@ -62,20 +64,17 @@ bool MoveGenerator::check_if_valid_move(Board &board, uint16_t c, uint8_t player
             if (next_coord == 0)
                 break;
             if (board.player_sets[player_number].test(next_coord))
-            {
                 return true;
-            }
+
             next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
-            {
+            if (get_reverse_direction(prev_direction) == next_direction && prev_coord == next_coord)
                 break;
-            }
         }
     }
     return false;
 }
 
-void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c)
+void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c, uint8_t index)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
@@ -83,268 +82,218 @@ void MoveGenerator::calculate_valid_no_overwrite_moves_from_player(Board &board,
         uint8_t next_direction = get_direction(c, d);
         uint16_t prev_coord = c;
         uint8_t prev_direction = d;
-        while (next_coord != 0 && next_coord != c && !board.board_sets[1].test(next_coord) && !board.player_sets[player_number].test(next_coord))
+        while (next_coord != 0 && next_coord != c && !board.board_sets[EMPTY].test(next_coord) && !board.player_sets[player_number].test(next_coord))
         {
             prev_coord = next_coord;
             prev_direction = next_direction;
             next_coord = get_transition(prev_coord, prev_direction);
             if (next_coord == 0)
                 break;
-            if (board.board_sets[1].test(next_coord))
-            {
-                board.valid_moves[player_number].set(next_coord);
-            }
+
+            if (board.board_sets[EMPTY].test(next_coord))
+                board.valid_moves[player_number][index].set(next_coord);
+
             next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
-            {
+            if (get_reverse_direction(prev_direction) == next_direction && prev_coord == next_coord)
                 break;
-            }
         }
     }
 }
 
-void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c)
+void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, uint8_t player_number, uint16_t c, uint8_t index)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
+
         uint16_t next_coord = get_transition(c, d);
         uint8_t next_direction = get_direction(c, d);
         uint16_t prev_coord = c;
         uint8_t prev_direction = d;
         if (next_coord == 0 || board.player_sets[player_number].test(next_coord))
             continue;
-        while (!board.board_sets[1].test(next_coord) && next_coord != c && !board.player_sets[player_number].test(next_coord))
+
+        while (!board.board_sets[EMPTY].test(next_coord) && next_coord != c && !board.player_sets[player_number].test(next_coord))
         {
             prev_coord = next_coord;
             prev_direction = next_direction;
             next_coord = get_transition(prev_coord, prev_direction);
-            if (next_coord == 0 || board.board_sets[1].test(next_coord))
+            if (next_coord == 0 || board.board_sets[EMPTY].test(next_coord))
                 break;
-            board.valid_moves[player_number].set(next_coord);
+
+            board.valid_moves[player_number][index].set(next_coord);
             next_direction = get_direction(prev_coord, prev_direction);
-            if ((prev_direction + 4) % 8 == next_direction)
-            {
+            if (get_reverse_direction(prev_direction) == next_direction && prev_coord == next_coord)
                 break;
-            }
         }
     }
 }
 
-void MoveGenerator::calculate_moves_from_player(Board &board, uint8_t player_number, Timer &timer)
+void MoveGenerator::calculate_moves_from_player_no_ow(Board &board, uint8_t player_number, uint8_t index)
+{
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if ((board.player_sets[player_number] & board.communities[index]).test(c))
+            calculate_valid_no_overwrite_moves_from_player(board, player_number, c, index);
+}
+
+void MoveGenerator::calculate_moves_from_player_ow(Board &board, uint8_t player_number, Timer &timer, uint8_t index)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
     {
-        if (board.player_sets[player_number].test(c))
-        {
-            if (timer.return_rest_time() < timer.exception_time)
-            {
-                throw TimeLimitExceededException();
-            }
-            calculate_valid_no_overwrite_moves_from_player(board, player_number, c);
-        }
-    }
-    if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
-    {
-        board.set_overwrite_move(player_number);
-        for (uint16_t c = 1; c < m_num_of_fields; c++)
-        {
-            if (board.player_sets[player_number].test(c))
-            {
-                if (timer.return_rest_time() < timer.exception_time)
-                {
-                    throw TimeLimitExceededException();
-                }
-                calculate_valid_overwrite_moves_from_player(board, player_number, c);
-            }
-            if (board.board_sets[5].test(c))
-            {
-                board.valid_moves[player_number].set(c);
-            }
-        }
+        if (timer.return_rest_time() < timer.exception_time)
+            throw TimeLimitExceededException(("Timeout in move calculation from player"));
+
+        if ((board.player_sets[player_number] & board.communities[index]).test(c))
+            calculate_valid_overwrite_moves_from_player(board, player_number, c, index);
+
+        if (board.board_sets[X].test(c))
+            board.valid_moves[player_number][index].set(c);
     }
 }
 
-void MoveGenerator::calculate_moves_from_frame(Board &board, uint8_t player_number, Timer &timer)
+void MoveGenerator::calculate_moves_from_frame_no_ow(Board &board, uint8_t player_number, uint8_t index)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        if (board.board_sets[6].test(c))
-        {
-            if (check_if_valid_move(board, c, player_number, timer))
-                board.valid_moves[player_number].set(c);
-        }
-    }
-    if (board.valid_moves[player_number].count() == 0 && board.has_overwrite_stones(player_number))
-    {
-        board.set_overwrite_move(player_number);
-        for (uint16_t c = 1; c < m_num_of_fields; c++)
-        {
-            if (!board.board_sets[1].test(c))
-            {
-                if (check_if_valid_move(board, c, player_number, timer))
-                    board.valid_moves[player_number].set(c);
-            }
-            if (board.board_sets[5].test(c))
-            {
-                board.valid_moves[player_number].set(c);
-            }
-        }
-    }
+        if (board.frames[index].test(c))
+            if (check_if_valid_move(board, c, player_number))
+                board.valid_moves[player_number][index].set(c);
 }
 
 void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, Timer &timer)
 {
-    board.valid_moves[player_number].reset();
-    if (2 * board.player_sets[player_number].count() < board.board_sets[6].count())
+    board.valid_moves[player_number].clear();
+    board.valid_moves[player_number].resize(board.get_num_of_communities());
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+        if ((board.communities[i] & board.player_sets[player_number]).count() != 0)
+        {
+            if (2 * (board.communities[i] & board.player_sets[player_number]).count() < board.frames[i].count())
+                calculate_moves_from_player_no_ow(board, player_number, i);
+
+            else
+                calculate_moves_from_frame_no_ow(board, player_number, i);
+        }
+
+    if (board.get_total_moves(player_number).count() == 0 && board.has_overwrite_stones(player_number))
     {
-        calculate_moves_from_player(board, player_number, timer);
-    }
-    else
-    {
-        calculate_moves_from_frame(board, player_number, timer);
+        board.set_overwrite_move(player_number);
+        for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+            if ((board.communities[i] & board.player_sets[player_number]).count() != 0)
+                calculate_moves_from_player_ow(board, player_number, timer, i);
     }
 }
 
-uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
+uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool sorting)
 {
-    if (search_depth == 1)
-    {
-        search_depth = 4;
-        timer.exception_time = (search_depth + 1) * timer.exception_time;
-    }
     MoveExecuter move_exec(map);
     MoveGenerator move_gen(map);
-    MiniMax minimax(move_exec, move_gen);
+    Algorithms algorithms(move_exec, move_gen);
     uint8_t x, y, player;
     player = map.get_player_number();
-    try
-    {
-        calculate_valid_moves(board, player, timer);
-    }
-    catch (TimeLimitExceededException &e)
-    {
-    }
-    Board res = minimax.get_best_coord(board, timer, search_depth, sorting);
-    if (board.board_sets[3].test(res.get_coord()))
-    {
+    calculate_valid_moves(board, player, timer);
+    Board res = algorithms.get_best_coord(board, timer, sorting);
+    if (board.board_sets[C].test(res.get_coord()))
         res.set_spec(res.get_spec() + 1);
-    }
+
     board.reset_overwrite_moves();
-    std::cout << "Debug print, to see valid moves, before move executed" << std::endl;
-    // board.print(player, true);
     map.one_dimension_2_second_dimension(res.get_coord(), x, y);
-    uint32_t move = (uint32_t)x << 16 | (uint32_t)y << 8 | (uint32_t)res.get_spec();
+    uint32_t move = (uint32_t)x << TWO_BYTES | (uint32_t)y << BYTE | (uint32_t)res.get_spec();
     return move;
 }
 
-void MoveGenerator::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<2501> &mask, Board &board)
+void MoveGenerator::get_affected_by_bomb(uint8_t strength, uint16_t &affected_by_bomb)
 {
-    if (strength == 0 || board.fields_to_remove[start_coord] == mask)
-    {
-        return;
-    }
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-    {
-        uint16_t next_coord = get_transition(c, d);
-        if (next_coord != 0 && next_coord != start_coord)
+    if (strength > 0)
+        while (strength > 0)
         {
-            board.fields_to_remove[start_coord].set(next_coord);
-            get_bomb_coords(start_coord, next_coord, strength - 1, mask, board);
+            affected_by_bomb += strength * 8;
+            strength--;
         }
-    }
 }
 
-void MoveGenerator::init_bomb_phase_boards(Board &board, uint8_t strength, uint8_t player)
+void MoveGenerator::sort_players_by_stones(std::vector<std::pair<uint8_t, uint16_t>> &player_stones, Board &board)
 {
-    std::bitset<2501> mask;
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        if (!board.board_sets[0].test(c))
-            mask.set(c);
-    }
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-    {
-        board.fields_to_remove[c].set(c);
-        if (strength > 0)
-        {
-            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-            {
-                uint16_t next_coord = get_transition(c, d);
-                if (next_coord != 0 && next_coord != c)
-                {
-                    board.fields_to_remove[c].set(next_coord);
-                    get_bomb_coords(c, next_coord, strength - 1, mask, board);
-                }
-            }
-        }
-    }
+    for (uint8_t i = 0; i < m_num_of_players; i++)
+        player_stones.push_back(std::make_pair(i, board.player_sets[i].count()));
+
+    std::sort(player_stones.begin(), player_stones.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
+              { return a.second > b.second; });
 }
 
-uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer, uint8_t search_depth, bool sorting)
+void MoveGenerator::select_target_player(uint8_t &target_player, uint8_t &player_index, Board &board, std::vector<std::pair<uint8_t, uint16_t>> &player_stones)
 {
-    std::cout << "gen" << std::endl;
+    for (uint8_t i = 0; i < board.get_player_count(); i++)
+        if (player_stones[i].first == target_player)
+        {
+            player_index = i;
+            if (i > 0)
+                do
+                    target_player = player_stones[i - 1].first;
+                while (board.player_sets[target_player].count() == 0 && --i > 0);
+
+            else
+                do
+                    target_player = player_stones[i + 1].first;
+                while (board.player_sets[target_player].count() == 0 && ++i < board.get_player_count());
+
+            break;
+        }
+}
+
+uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
+{
     uint8_t x, y;
-    uint16_t coord;
-    // uint16_t affected_by_bomb = 1;
-    // if (map.get_strength() > 0)
-    //     affected_by_bomb = map.get_strength() * 8;
-    // // Sort players by number of stones in ascending order
-    // std::vector<std::pair<uint8_t, uint16_t>> player_stones;
-    // for (uint8_t i = 0; i < m_num_of_players; i++)
-    // {
-    //     player_stones.push_back(std::make_pair(i, board.player_sets[i].count()));
-    // }
-    // std::sort(player_stones.begin(), player_stones.end(), [](const std::pair<uint8_t, uint16_t> &a, const std::pair<uint8_t, uint16_t> &b)
-    //           { return a.second > b.second; });
-    // uint8_t target_player = (map.get_player_number() + 1) % map.get_player_count();
-    // uint8_t player_index;
-    // for (uint8_t i = 0; i < player_stones.size(); ++i)
-    // {
-    //     if (player_stones[i].first == map.get_player_number())
-    //     {
-    //         player_index = i;
-    //         if (i > 0)
-    //         {
-    //             target_player = player_stones[i - 1].first;
-    //         }
-    //         else
-    //         {
-    //             target_player = player_stones[i + 1].first;
-    //         }
-    //         break;
-    //     }
-    // }
-    // if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * board.get_bombs(map.get_player_number()) && (player_index + 1) < player_stones.size())
-    //     target_player = player_stones[player_index + 1].first;
-    // if ((player_index + 1) < player_stones.size())
-    // {
-    //     target_player = map.get_player_number();
-    // }
-    // uint16_t most_deleted_stones = 0;
-    // for (uint16_t c = 1; c < m_num_of_fields; c++)
-    // {
-    //     if (board.board_sets[0].test(c))
-    //         continue;
-    //     uint16_t target_deleted_stones = (board.player_sets[target_player] & board.fields_to_remove[c]).count();
-    //     uint16_t current_player_deleted_stones = (board.player_sets[map.get_player_number()] & board.fields_to_remove[c]).count();
-    //     if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (board.player_sets[map.get_player_number()] & board.fields_to_remove[c]).count()))
-    //     {
-    //         most_deleted_stones = target_deleted_stones;
-    //         coord = c;
-    //     }
-    // }
-    // if (coord = 0)
+    uint16_t coord = 0;
+    try
     {
+        uint16_t affected_by_bomb = 1;
+        get_affected_by_bomb(map.get_strength(), affected_by_bomb);
+        // Sort players by number of stones in ascending order
+        std::vector<std::pair<uint8_t, uint16_t>> player_stones;
+        sort_players_by_stones(player_stones, board);
+        uint8_t target_player = map.get_player_number(), player_index = 0;
+        select_target_player(target_player, player_index, board, player_stones);
+        if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * board.get_bombs(map.get_player_number()) && (player_index + 1) < static_cast<int>(player_stones.size()))
+            target_player = player_stones[player_index + 1].first;
+
+        while (board.player_sets[target_player].count() == 0)
+            target_player = (target_player + 1) % map.get_player_count();
+
+        uint16_t most_deleted_stones = 0;
+        std::bitset<MAX_NUM_OF_FIELDS> mask;
+        for (uint16_t c = 1; c < m_num_of_fields; c++)
+            if (!board.board_sets[MINUS].test(c))
+                mask.set(c);
+
+        MoveExecuter move_exec(map);
         for (uint16_t c = 1; c < m_num_of_fields; c++)
         {
-            if (!board.board_sets[0].test(c) && !board.player_sets[map.get_player_number()].test(c))
+            if (timer.return_rest_time() < timer.exception_time)
+                throw TimeLimitExceededException(("Timeout in generate_bomb"));
+
+            if (board.board_sets[MINUS].test(c))
+                continue;
+
+            std::bitset<MAX_NUM_OF_FIELDS> fields_to_remove(move_exec.get_fields_to_remove(board, c, map.get_strength(), mask));
+            uint16_t target_deleted_stones = (board.player_sets[target_player] & fields_to_remove).count();
+            uint16_t current_player_deleted_stones = (board.player_sets[map.get_player_number()] & fields_to_remove).count();
+            if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (board.player_sets[map.get_player_number()] & fields_to_remove).count()))
             {
+                LOG_INFO("Bombing: " + std::to_string(c));
+                most_deleted_stones = target_deleted_stones;
                 coord = c;
-                break;
             }
         }
+        if (coord == 0)
+            for (uint16_t c = 1; c < m_num_of_fields; c++)
+                if (board.board_sets[EMPTY].test(c))
+                {
+                    coord = c;
+                    break;
+                }
+    }
+    catch (const TimeLimitExceededException &)
+    {
     }
     map.one_dimension_2_second_dimension(coord, x, y);
-    uint32_t bomb = (uint32_t)x << 16 | (uint32_t)y << 8;
+    uint32_t bomb = (uint32_t)x << TWO_BYTES | (uint32_t)y << BYTE;
     return bomb;
 }
