@@ -81,14 +81,7 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_bits_to_update(uint8_t player, 
     return to_color;
 }
 
-void MoveExecuter::update_communities(std::bitset<MAX_NUM_OF_FIELDS> &to_color, Board &board)
-{
-    for (auto &community : board.communities)
-        if ((community & to_color).count() != 0)
-            community |= to_color;
-}
-
-void MoveExecuter::update_frames(std::bitset<MAX_NUM_OF_FIELDS> &to_color, Board &board)
+void MoveExecuter::update_communities_and_frames(std::bitset<MAX_NUM_OF_FIELDS> &to_color, Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> temp;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
@@ -100,11 +93,12 @@ void MoveExecuter::update_frames(std::bitset<MAX_NUM_OF_FIELDS> &to_color, Board
                     temp.set(next_coord);
             }
 
-    for (auto &frame : board.frames)
-        if ((frame & to_color).count() != 0)
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+        if ((board.communities[i] & to_color).count() != 0)
         {
-            frame &= ~to_color;
-            frame |= temp;
+            board.communities[i] |= to_color;
+            board.frames[i] |= temp;
+            board.frames[i] &= ~board.communities[i];
         }
 }
 
@@ -128,18 +122,17 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
                     merge = true;
                 }
 
-        std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp;
-        for (auto &community : board.communities)
-            if (community.count() != 0)
-                temp.push_back(community);
+        std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_communities;
+        std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_frames;
+        for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+            if (board.communities[i].count() != 0)
+            {
+                temp_communities.push_back(board.communities[i]);
+                temp_frames.push_back(board.frames[i]);
+            }
 
-        board.communities = temp;
-        temp.clear();
-        for (auto &frame : board.frames)
-            if (frame.count() != 0)
-                temp.push_back(frame);
-
-        board.frames = temp;
+        board.communities = temp_communities;
+        board.frames = temp_frames;
     }
 }
 
@@ -155,8 +148,7 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     }
     std::bitset<MAX_NUM_OF_FIELDS> to_color = get_bits_to_update(player, board);
     update_bits(to_color, player, board);
-    update_communities(to_color, board);
-    update_frames(to_color, board);
+    update_communities_and_frames(to_color, board);
     merge_communities(board, index);
     if (inversion)
     {

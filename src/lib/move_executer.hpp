@@ -29,8 +29,7 @@ public:
     uint8_t get_player_num();
     void update_bits(std::bitset<MAX_NUM_OF_FIELDS> &, uint8_t, Board &);
     std::bitset<MAX_NUM_OF_FIELDS> get_bits_to_update(uint8_t, Board &);
-    void update_communities(std::bitset<MAX_NUM_OF_FIELDS> &, Board &);
-    void update_frames(std::bitset<MAX_NUM_OF_FIELDS> &, Board &);
+    void update_communities_and_frames(std::bitset<MAX_NUM_OF_FIELDS> &, Board &);
     void merge_communities(Board &, uint8_t &);
     void update_boards(uint8_t, uint8_t, Board &, uint8_t &);
     void exec_move(uint8_t, Board &, uint8_t &);
