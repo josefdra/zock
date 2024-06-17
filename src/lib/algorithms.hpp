@@ -1,6 +1,8 @@
 #ifndef ALGORITHMS_HPP
 #define ALGORITHMS_HPP
 
+#define MEMORY_SIZE_WITH_BUFFER 3000
+
 #include <stdint.h>
 #include <array>
 #include <bitset>
@@ -15,6 +17,7 @@ class Board;
 typedef std::vector<std::vector<std::tuple<int, uint16_t, uint8_t>>> moves_vector;
 typedef std::vector<std::tuple<int, uint16_t, uint8_t>> moves;
 typedef std::tuple<int, uint16_t, uint8_t> move;
+typedef std::tuple<int, uint16_t, uint8_t> move_tuple;
 
 class Algorithms
 {
@@ -22,15 +25,15 @@ public:
     Algorithms(MoveExecuter &, MoveGenerator &);
     ~Algorithms();
 
-    uint8_t get_next_player(uint8_t, Board &, Timer &);
+    uint8_t get_next_player(uint8_t, Board &, Timer &, uint8_t &);
     int set_up_best_eval(uint8_t &, uint8_t);
-    int do_move(Board &, move &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, bool, uint8_t);
-    void get_eval(Board &, moves &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, int &, bool, uint8_t);
-    move get_first_move(moves_vector &);
-    int brs(Board &, int, int, uint8_t, uint8_t, uint8_t, Timer &, bool, uint8_t);
-    void set_up_killer(moves_vector &, uint8_t, uint8_t);
-    void sort_valid_moves(Board &, uint8_t, moves_vector &, Timer &, uint8_t);
-    void set_up_moves(Board &, uint8_t, moves_vector &);
+    int do_move(Board &, move &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, bool, uint8_t &);
+    void get_eval(Board &, moves &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, int &, bool, uint8_t &);
+    move get_first_move(moves &);
+    int brs(Board &, int, int, uint8_t, uint8_t, uint8_t, Timer &, bool, uint8_t &);
+    void set_up_killer(moves &, uint8_t);
+    void sort_valid_moves(Board &, uint8_t, moves &, Timer &, uint8_t, uint8_t);
+    void set_up_moves(Board &, uint8_t, moves &, uint8_t);
     void init_best_board(Board &);
     Board get_best_coord(Board &, Timer &, bool);  
 

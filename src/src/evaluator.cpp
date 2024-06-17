@@ -38,10 +38,9 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
             if (timer.return_rest_time() < timer.exception_time)
                 throw TimeLimitExceededException("Timeout in evaluation");
 
-            if (!board.disqualified[i])
-                move_gen.calculate_valid_moves(board, i, timer);
-            else
+            if (board.disqualified[i])
                 board.reset_valid_moves(i);
+                
             if (i != player_num)
                 score -= board.get_total_moves(i).count() * ENEMY_MOVE_MULTIPLIER + board.player_sets[i].count() * ENEMY_STONE_MULTIPLIER;
         }
@@ -50,7 +49,7 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
                 score += get_wall_value(board, player_num);
 
             else if (j == 1)
-                score -= (border_set_size)*BEFORE_WALL_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();
+                score -= border_set_size * BEFORE_WALL_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();
 
             else
                 score += (border_set_size - j) * NORMAL_FIELD_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();

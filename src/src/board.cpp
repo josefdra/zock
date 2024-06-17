@@ -20,7 +20,8 @@ Board::Board(Map &map)
       m_coord(0),
       m_spec(0),
       m_overwrite_move(map.get_player_count(), false),
-      evaluation(0)
+      evaluation(0),
+      final_state(false)
 {
 }
 
@@ -42,7 +43,8 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       m_coord(coord),
       m_spec(spec),
       m_overwrite_move(board.m_overwrite_move),
-      evaluation(board.evaluation)
+      evaluation(board.evaluation),
+      final_state(board.final_state)
 {
 }
 
@@ -71,6 +73,11 @@ void Board::set_bombs(uint8_t player, uint16_t _bombs)
 void Board::set_overwrite_move(uint8_t player)
 {
     m_overwrite_move[player] = true;
+}
+
+void Board::set_final_state()
+{
+    final_state = true;
 }
 
 uint8_t Board::get_player_count()
@@ -151,6 +158,11 @@ bool Board::has_overwrite_stones(uint8_t player)
 bool Board::is_overwrite_move(uint8_t player)
 {
     return m_overwrite_move[player];
+}
+
+bool Board::is_final_state()
+{
+    return final_state;
 }
 
 void Board::reset_overwrite_moves()
@@ -310,5 +322,6 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
     std::bitset<MAX_NUM_OF_FIELDS> total_moves;
     for (auto &moves : valid_moves[player])
         total_moves |= moves;
+
     return total_moves;
 }

@@ -100,7 +100,8 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     {
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
         LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
-        move_exec.exec_move(player, board);
+        uint8_t temp_index = MAX_INDEX;
+        move_exec.exec_move(player, board, temp_index);
     }
     else
     {

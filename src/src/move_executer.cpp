@@ -108,7 +108,7 @@ void MoveExecuter::update_frames(std::bitset<MAX_NUM_OF_FIELDS> &to_color, Board
         }
 }
 
-void MoveExecuter::merge_communities(Board &board)
+void MoveExecuter::merge_communities(Board &board, uint8_t &index)
 {
     bool merge = true;
     while (merge)
@@ -118,6 +118,8 @@ void MoveExecuter::merge_communities(Board &board)
             for (uint8_t j = 0; j < board.get_num_of_communities(); j++)
                 if (i != j && (board.communities[i] & board.frames[j]).count() != 0)
                 {
+                    if (index == j)
+                        index = i;
                     board.communities[i] |= board.communities[j];
                     board.communities[j].reset();
                     board.frames[i] |= board.frames[j];
@@ -141,7 +143,7 @@ void MoveExecuter::merge_communities(Board &board)
     }
 }
 
-void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board)
+void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, uint8_t &index)
 {
     uint16_t coord = board.get_coord();
     bool inversion = false;
@@ -152,10 +154,15 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
         inversion = true;
     }
     std::bitset<MAX_NUM_OF_FIELDS> to_color = get_bits_to_update(player, board);
+    std::cout << "before update bits" << std::endl;
     update_bits(to_color, player, board);
+    std::cout << "before update communities" << std::endl;
     update_communities(to_color, board);
+    std::cout << "before update frames" << std::endl;
     update_frames(to_color, board);
-    merge_communities(board);
+    std::cout << "before merge communities" << std::endl;
+    merge_communities(board, index);
+    std::cout << "after merge communities" << std::endl;
     if (inversion)
     {
         uint16_t player_count = board.get_player_count();
@@ -173,7 +180,7 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     }
 }
 
-void MoveExecuter::exec_move(uint8_t player, Board &board)
+void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
 {
     uint16_t coord = board.get_coord();
     uint8_t spec = board.get_spec();
@@ -199,7 +206,8 @@ void MoveExecuter::exec_move(uint8_t player, Board &board)
         board.board_sets[C].reset(coord);
         change_stones = spec;
     }
-    update_boards(player, change_stones, board);
+    update_boards(player, change_stones, board, index);
+    std::cout << "after update boards" << std::endl;
 }
 
 void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<MAX_NUM_OF_FIELDS> &mask, Board &board, std::bitset<MAX_NUM_OF_FIELDS> &fields_to_remove)
