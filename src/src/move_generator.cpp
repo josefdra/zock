@@ -189,7 +189,6 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     uint8_t x, y, player;
     player = map.get_player_number();
     calculate_valid_moves(board, player, timer);
-
     Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[C].test(res.get_coord()))
         res.set_spec(res.get_spec() + 1);

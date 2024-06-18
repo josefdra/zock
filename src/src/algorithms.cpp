@@ -221,6 +221,7 @@ void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, ui
 void Algorithms::init_best_board(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> total_moves = board.get_total_moves(m_move_exec.get_player_num());
+    LOG_INFO("total moves: " + std::to_string(total_moves.count()));
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (total_moves.test(c))
         {            
