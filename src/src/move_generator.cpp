@@ -158,28 +158,17 @@ void MoveGenerator::calculate_moves_from_frame_no_ow(Board &board, uint8_t playe
                 board.valid_moves[player_number][index].set(c);
 }
 
-void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, Timer &timer)
+void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, Timer &timer, uint8_t &index)
 {
-    board.valid_moves[player_number].clear();
-    board.valid_moves[player_number].resize(board.get_num_of_communities());
-    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
-        if ((board.communities[i] & board.player_sets[player_number]).count() != 0)
-        {            
-            if (2 * (board.communities[i] & board.player_sets[player_number]).count() < board.frames[i].count())
-                {
-                    calculate_moves_from_player_no_ow(board, player_number, i);
-                    LOG_INFO("Calculating from player");
-                }
-            else
-                calculate_moves_from_frame_no_ow(board, player_number, i);
-        }
+    if (2 * (board.communities[index] & board.player_sets[player_number]).count() < board.frames[index].count())
+        calculate_moves_from_player_no_ow(board, player_number, index);
+    else
+        calculate_moves_from_frame_no_ow(board, player_number, index);
 
     if (board.get_total_moves(player_number).count() == 0 && board.has_overwrite_stones(player_number))
     {
         board.set_overwrite_move(player_number);
-        for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
-            if ((board.communities[i] & board.player_sets[player_number]).count() != 0)
-                calculate_moves_from_player_ow(board, player_number, timer, i);
+        calculate_moves_from_player_ow(board, player_number, timer, index);
     }
 }
 
@@ -190,7 +179,18 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     Algorithms algorithms(move_exec, move_gen);
     uint8_t x, y, player;
     player = map.get_player_number();
-    calculate_valid_moves(board, player, timer);
+    board.valid_moves[player].clear();
+    board.valid_moves[player].resize(board.get_num_of_communities());
+    for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
+        if ((board.communities[index] & board.player_sets[player]).count() != 0)
+        {            
+            if (2 * (board.communities[index] & board.player_sets[player]).count() < board.frames[index].count())
+                LOG_INFO("Calculating moves from player");
+            else
+                LOG_INFO("Calculating moves from frame");
+            calculate_valid_moves(board, player, timer, index);
+        }
+
     Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[C].test(res.get_coord()))
         res.set_spec(res.get_spec() + 1);

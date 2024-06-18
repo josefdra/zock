@@ -20,7 +20,12 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         if (!board.disqualified[next_player])
-            m_move_gen.calculate_valid_moves(board, next_player, timer);
+        {            
+            board.valid_moves[next_player].clear();
+            board.valid_moves[next_player].resize(board.get_num_of_communities());
+            if ((board.communities[index] & board.player_sets[next_player]).count() != 0)
+                m_move_gen.calculate_valid_moves(board, next_player, timer, index);
+        }
 
         if (next_player == player_num)
         {
@@ -88,8 +93,8 @@ void Algorithms::get_eval(Board &board, moves &moves, int alpha, int beta, uint8
 
 move Algorithms::get_first_move(moves &moves)
 {
-        for (auto &m : moves)
-            return m;
+    for (auto &m : moves)
+        return m;
 
     return move();
 }
@@ -224,7 +229,7 @@ void Algorithms::init_best_board(Board &board)
     LOG_INFO("total moves: " + std::to_string(total_moves.count()));
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (total_moves.test(c))
-        {            
+        {
             board.set_coord(c);
             if (board.board_sets[C].test(c))
                 board.set_spec(m_move_exec.get_player_num());
@@ -249,6 +254,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     Board prev_board = board;
     int alpha = INT32_MIN;
     int beta = INT32_MAX;
+    uint8_t search_depth;
+    uint16_t total_search_depths = 0;
     try
     {
         for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
@@ -256,7 +263,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             set_up_moves(board, player_num, moves[index], index);
             if (sorting)
                 sort_valid_moves(board, player_num, moves[index], timer, 0, index);
-            for (uint8_t search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
+            for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
                 for (auto &m : moves[index])
                 {
                     if (timer.return_rest_time() < timer.exception_time)
@@ -273,14 +280,17 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     }
                     board = prev_board;
                 }
+            total_search_depths += search_depth;
         }
     }
     catch (TimeLimitExceededException &e)
     {
+        total_search_depths += search_depth;
         board = prev_board;
         LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }
+    LOG_INFO("average reached depth: " + std::to_string((float)total_search_depths / (float)board.get_num_of_communities()));
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
 }
