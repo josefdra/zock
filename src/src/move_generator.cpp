@@ -166,8 +166,10 @@ void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, T
         if ((board.communities[i] & board.player_sets[player_number]).count() != 0)
         {            
             if (2 * (board.communities[i] & board.player_sets[player_number]).count() < board.frames[i].count())
-                calculate_moves_from_player_no_ow(board, player_number, i);
-
+                {
+                    calculate_moves_from_player_no_ow(board, player_number, i);
+                    LOG_INFO("Calculating from player");
+                }
             else
                 calculate_moves_from_frame_no_ow(board, player_number, i);
         }
