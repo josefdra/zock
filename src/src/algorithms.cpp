@@ -111,14 +111,13 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
 #endif
         uint8_t next_player = get_next_player(player_num, board, timer, index);
         if (depth == 0 || board.is_final_state())
-            return get_evaluation(board, player_num, m_move_gen, timer);
+            return get_evaluation(board, player_num, timer);
 
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
         set_up_moves(board, next_player, moves, index);
         if (sorting)
-            sort_valid_moves(board, next_player, moves, timer, depth, index);
-
+            sort_valid_moves(board, next_player, moves, timer, depth);
         int best_eval = set_up_best_eval(brs_m, player_num);
         if (brs_m < 2)
             get_eval(board, moves, alpha, beta, brs_m, depth, timer, prev_board, next_player, best_eval, sorting, index);
@@ -169,7 +168,7 @@ void Algorithms::set_up_killer(moves &moves, uint8_t depth)
 /// @param timer
 /// @param maximizer
 /// @return sorted valid moves as vector
-void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves, Timer &timer, uint8_t depth, uint8_t index)
+void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves, Timer &timer, uint8_t depth)
 {
     Board prev_board = board;
     try
@@ -262,7 +261,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         {
             set_up_moves(board, player_num, moves[index], index);
             if (sorting)
-                sort_valid_moves(board, player_num, moves[index], timer, 0, index);
+                sort_valid_moves(board, player_num, moves[index], timer, 0);
             for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
                 for (auto &m : moves[index])
                 {

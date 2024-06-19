@@ -183,7 +183,7 @@ uint16_t Board::two_dimension_2_one_dimension(uint8_t x, uint8_t y)
 
 std::string Board::get_color_string(Colors color)
 {
-    // #ifdef COLOR
+#ifdef COLOR
     switch (color)
     {
     case orange:
@@ -205,9 +205,9 @@ std::string Board::get_color_string(Colors color)
     default:
         return "\033[37m";
     }
-    // #else
-    //     return "";
-    // #endif
+#else
+    return "";
+#endif
 }
 
 void Board::print_upper_outlines()
@@ -275,9 +275,9 @@ void Board::print(uint8_t player, bool our_player)
                     if (player_sets[i].test(c))
                     {
                         std::cout << get_color_string(Colors(i + 1)) << (uint16_t)(i + 1);
-                        // #ifdef COLOR
+#ifdef COLOR
                         std::cout << "\033[0m";
-                        // #endif
+#endif
                     }
             if (our_player && get_total_moves(player).test(c))
                 std::cout << "'";
@@ -298,9 +298,9 @@ void Board::print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &bitset)
         if (bitset.test(c))
         {
             std::cout << get_color_string(yellow) << "1 ";
-            // #ifdef COLOR
+#ifdef COLOR
             std::cout << "\033[0m";
-            // #endif
+#endif
         }
         else
             std::cout << "0 ";

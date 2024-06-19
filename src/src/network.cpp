@@ -120,7 +120,6 @@ uint32_t Network::get_actual_message_length(uint8_t &type)
         usleep(10);
 
     recv(m_csocket, &type, sizeof(type), 0);
-    LOG_INFO("Received type: " + std::to_string(type));
     uint32_t message_length = 0;
     recv(m_csocket, &message_length, sizeof(message_length), 0);
     return ntohl(message_length);
@@ -142,7 +141,6 @@ uint64_t Network::receive_data()
 {
     uint8_t type = 0;
     uint32_t actual_message_length = get_actual_message_length(type);
-    LOG_INFO("Received Message Length: " + std::to_string(actual_message_length));
     if (actual_message_length > 10000)
         actual_message_length = 1;
     uint64_t game_data = 0;

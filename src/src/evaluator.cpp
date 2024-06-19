@@ -26,7 +26,7 @@ int get_eliminate_player_score(Board &board, uint8_t player_num)
     return value;
 }
 
-int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Timer &timer)
+int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
 {
     uint8_t end_game_multiplier = 1;
 
@@ -63,7 +63,6 @@ int get_evaluation(Board &board, uint8_t player_num, MoveGenerator &move_gen, Ti
 
         if (board.is_overwrite_move(player_num))
             score -= OVERWRITE_VALUE;
-
         return score;
     }
     catch (const TimeLimitExceededException &)

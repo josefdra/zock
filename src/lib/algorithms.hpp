@@ -30,12 +30,13 @@ public:
     int do_move(Board &, move &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, bool, uint8_t &);
     void get_eval(Board &, moves &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, int &, bool, uint8_t &);
     move get_first_move(moves &);
+    int minimaxOrParanoidWithPruning(Board &, int, int, int8_t, uint8_t, bool, Timer &, uint8_t &);
     int brs(Board &, int, int, uint8_t, uint8_t, uint8_t, Timer &, bool, uint8_t &);
     void set_up_killer(moves &, uint8_t);
-    void sort_valid_moves(Board &, uint8_t, moves &, Timer &, uint8_t, uint8_t);
+    void sort_valid_moves(Board &, uint8_t, moves &, Timer &, uint8_t);
     void set_up_moves(Board &, uint8_t, moves &, uint8_t);
     void init_best_board(Board &);
-    Board get_best_coord(Board &, Timer &, bool);  
+    Board get_best_coord(Board &, Timer &, bool);
 
     std::vector<std::vector<uint16_t>> killer_moves;
 
