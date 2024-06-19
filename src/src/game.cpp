@@ -77,7 +77,6 @@ void Game::end(Board &board, uint8_t player_number)
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
 {
-
     if (((data >> BYTE) & FOUR_SET_BYTES) != 0)
         m_initial_time_limit = ((data >> BYTE) & FOUR_SET_BYTES);
 
@@ -121,12 +120,9 @@ void Game::run(Network &net, bool sorting)
     map.read_map(net.receive_map());
     Board board = map.init_boards_and_players();
     board.print(0, false);
-    uint8_t counter = 0;
 
     while (!is_game_over() && !board.disqualified[map.get_player_number()])
     {
-        counter++;
-        LOG_INFO("Counter: " + std::to_string(counter));
         uint64_t data = net.receive_data();
         switch (data >> SEVEN_BYTES)
         {
@@ -159,7 +155,6 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_PHASE1_END:
         {
-            // board = Board(board, map.fields_to_remove);
             set_bomb_phase();
             break;
         }

@@ -380,6 +380,8 @@ void Map::init_communities(Board &board)
     for (auto &player : board.player_sets)
         all_players |= player;
 
+    all_players |= board.board_sets[X];
+
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         if (all_players.test(c) && !checked_fields.test(c))
         {
