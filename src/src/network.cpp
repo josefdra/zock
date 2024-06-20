@@ -127,6 +127,7 @@ uint32_t Network::get_actual_message_length(uint8_t &type)
 
 std::stringstream Network::receive_map()
 {
+    usleep(10000);
     uint8_t type = 0;
     uint32_t actual_message_length = get_actual_message_length(type);
     std::vector<char> message(actual_message_length + 1);
