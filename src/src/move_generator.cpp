@@ -183,7 +183,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     board.valid_moves[player].resize(board.get_num_of_communities());
     for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
         if ((board.communities[index] & board.player_sets[player]).count() != 0)
-        {            
+        {
             if (2 * (board.communities[index] & board.player_sets[player]).count() < board.frames[index].count())
                 LOG_INFO("Calculating moves from player");
             else
@@ -256,8 +256,14 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
         if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * board.get_bombs(map.get_player_number()) && (player_index + 1) < static_cast<int>(player_stones.size()))
             target_player = player_stones[player_index + 1].first;
 
+        uint8_t counter = board.get_player_count();
         while (board.player_sets[target_player].count() == 0)
+        {
             target_player = (target_player + 1) % map.get_player_count();
+            counter--;
+            if(counter == 0)
+                break;
+        }
 
         uint16_t most_deleted_stones = 0;
         std::bitset<MAX_NUM_OF_FIELDS> mask;
