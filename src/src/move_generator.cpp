@@ -198,7 +198,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
                 LOG_INFO("Calculating moves from frame");
             calculate_valid_moves(board, player, timer, index);
         }
-        else if ((board.communities[index] & board.board_sets[X]).count() != 0)
+        else if ((board.communities[index] & board.board_sets[X]).count() != 0 && board.has_overwrite_stones(player))
             add_x_moves(board, player, index);
 
     Board res = algorithms.get_best_coord(board, timer, sorting);
