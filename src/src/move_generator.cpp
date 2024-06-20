@@ -194,10 +194,6 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
         if ((board.communities[index] & board.player_sets[player]).count() != 0)
         {
             counter++;
-            if (2 * (board.communities[index] & board.player_sets[player]).count() < board.frames[index].count())
-                LOG_INFO("Calculating moves from player");
-            else
-                LOG_INFO("Calculating moves from frame");
             calculate_valid_moves(board, player, timer, index);
         }
 
