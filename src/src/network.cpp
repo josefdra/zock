@@ -127,12 +127,19 @@ uint32_t Network::get_actual_message_length(uint8_t &type)
 
 std::stringstream Network::receive_map()
 {
+    std::stringstream ss;
+    uint32_t received_data = 0;    
     uint8_t type = 0;
     uint32_t actual_message_length = get_actual_message_length(type);
-    std::vector<char> message(actual_message_length + 1);
-    recv(m_csocket, message.data(), actual_message_length, 0);
-    message[actual_message_length] = '\0';
-    std::stringstream ss(message.data());
+    uint32_t left_to_receive = actual_message_length;
+    while(received_data < actual_message_length)
+    {
+        std::vector<char> message(left_to_receive);
+        received_data += recv(m_csocket, message.data(), left_to_receive, 0);
+        ss << message.data();
+        left_to_receive = actual_message_length - received_data;
+    }
+    
     LOG_INFO("Received map");
     return ss;
 }
