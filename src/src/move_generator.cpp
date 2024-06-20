@@ -311,6 +311,14 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
                     coord = c;
                     break;
                 }
+
+        if (coord == 0)
+            for (uint16_t c = 1; c < m_num_of_fields; c++)
+                if (board.player_sets[map.get_player_number()].test(c))
+                {
+                    coord = c;
+                    break;
+                }
     }
     catch (const TimeLimitExceededException &)
     {
