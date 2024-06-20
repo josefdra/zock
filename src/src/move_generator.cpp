@@ -279,7 +279,6 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
             uint16_t current_player_deleted_stones = (board.player_sets[map.get_player_number()] & fields_to_remove).count();
             if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (board.player_sets[map.get_player_number()] & fields_to_remove).count()))
             {
-                LOG_INFO("Bombing: " + std::to_string(c));
                 most_deleted_stones = target_deleted_stones;
                 coord = c;
             }
