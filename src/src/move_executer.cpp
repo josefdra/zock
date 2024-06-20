@@ -148,8 +148,11 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     }
     std::bitset<MAX_NUM_OF_FIELDS> to_color = get_bits_to_update(player, board);
     update_bits(to_color, player, board);
-    update_communities_and_frames(to_color, board);
-    merge_communities(board, index);
+    if (board.get_num_of_communities() > 1)
+    {
+        update_communities_and_frames(to_color, board);
+        merge_communities(board, index);
+    }
     if (inversion)
     {
         uint16_t player_count = board.get_player_count();
