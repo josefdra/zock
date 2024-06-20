@@ -172,6 +172,13 @@ void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, T
     }
 }
 
+void MoveGenerator::add_x_moves(Board &board, uint8_t player_number, uint8_t index)
+{
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if ((board.board_sets[X] & board.communities[index]).test(c))
+            board.valid_moves[player_number][index].set(c);
+}
+
 uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool sorting)
 {
     MoveExecuter move_exec(map);
@@ -181,6 +188,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     player = map.get_player_number();
     board.valid_moves[player].clear();
     board.valid_moves[player].resize(board.get_num_of_communities());
+
     for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
         if ((board.communities[index] & board.player_sets[player]).count() != 0)
         {
@@ -190,6 +198,8 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
                 LOG_INFO("Calculating moves from frame");
             calculate_valid_moves(board, player, timer, index);
         }
+        else if ((board.communities[index] & board.board_sets[X]).count() != 0)
+            add_x_moves(board, player, index);
 
     Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[C].test(res.get_coord()))
@@ -261,7 +271,7 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
         {
             target_player = (target_player + 1) % map.get_player_count();
             counter--;
-            if(counter == 0)
+            if (counter == 0)
                 break;
         }
 
