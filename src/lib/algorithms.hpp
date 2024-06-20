@@ -2,6 +2,8 @@
 #define ALGORITHMS_HPP
 
 #define MEMORY_SIZE_WITH_BUFFER 3000
+#define ZERO_EVALUATION 0
+#define ZERO_SPEC 0
 
 #include <stdint.h>
 #include <array>

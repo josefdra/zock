@@ -300,6 +300,7 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
     catch (const TimeLimitExceededException &)
     {
     }
+    LOG_INFO("Bomb at: " + std::to_string(coord));
     map.one_dimension_2_second_dimension(coord, x, y);
     uint32_t bomb = (uint32_t)x << TWO_BYTES | (uint32_t)y << BYTE;
     return bomb;

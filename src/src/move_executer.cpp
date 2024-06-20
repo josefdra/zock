@@ -233,7 +233,6 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_fields_to_remove(Board &board, 
 
 Board MoveExecuter::exec_bomb(uint8_t player, Board board, uint8_t strength)
 {
-    LOG_INFO("exec");
     uint16_t coord = board.get_coord();
     std::bitset<MAX_NUM_OF_FIELDS> mask;
     for (uint16_t c = 1; c < m_num_of_fields; c++)

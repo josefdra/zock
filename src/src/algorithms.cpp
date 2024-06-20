@@ -212,13 +212,13 @@ void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, ui
         {
             if (board.board_sets[C].test(c))
                 for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
-                    moves.push_back(std::make_tuple(0, c, j));
+                    moves.push_back(std::make_tuple(ZERO_EVALUATION, c, j));
 
             else if (board.board_sets[B].test(c))
-                moves.push_back(std::make_tuple(0, c, OVERWRITE_SPEC));
+                moves.push_back(std::make_tuple(ZERO_EVALUATION, c, OVERWRITE_SPEC));
 
             else
-                moves.push_back(std::make_tuple(0, c, 0));
+                moves.push_back(std::make_tuple(ZERO_EVALUATION, c, 0));
         }
 }
 
