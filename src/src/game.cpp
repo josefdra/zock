@@ -146,6 +146,10 @@ void Game::run(Network &net, bool sorting)
         case TYPE_DISQUALIFICATION:
         {
             board.print(0, false);
+            for (auto &community : board.communities)
+                board.print_bitset(community);
+            for (auto &frame : board.frames)
+                board.print_bitset(frame);
             set_disqualified(board, (data & ONE_SET_BYTE) - 1);
             break;
         }
