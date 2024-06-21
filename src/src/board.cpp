@@ -12,10 +12,6 @@ Board::Board(Map &map)
       bombs(map.get_player_count(), map.get_initial_bombs()),
       communities(0),
       frames(0),
-      start_end_communities(0),
-      start_end_frames(0),
-      communities_offset(0),
-      frames_offset(0),
       disqualified(map.get_player_count(), false),
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
@@ -39,10 +35,6 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       bombs(board.bombs),
       communities(board.communities),
       frames(board.frames),
-      start_end_communities(board.start_end_communities),
-      start_end_frames(board.start_end_frames),
-      communities_offset(board.communities_offset),
-      frames_offset(board.frames_offset),
       disqualified(board.disqualified),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
@@ -334,14 +326,3 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
     return total_moves;
 }
 
-void Board::calculate_offsets()
-{
-    communities_offset = std::vector<uint8_t>(communities.size(), 0);
-    frames_offset = std::vector<uint8_t>(frames.size(), 0);
-
-    for(uint8_t i = 0; i < communities.size(); i++)
-    {
-        communities_offset[i] = m_width - (std::get<1>(start_end_communities[i]) % m_width) - (std::get<0>(start_end_communities[i]) % m_width);
-        frames_offset[i] = m_width - (std::get<1>(start_end_frames[i]) % m_width) - (std::get<0>(start_end_frames[i]) % m_width);
-    }        
-}

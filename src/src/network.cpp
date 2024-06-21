@@ -163,3 +163,4 @@ uint64_t Network::receive_data()
     }
     return (game_data | (big_type << 56));
 }
+

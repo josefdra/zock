@@ -70,3 +70,4 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
         throw;
     }
 }
+
