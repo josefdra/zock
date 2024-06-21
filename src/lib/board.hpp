@@ -71,6 +71,7 @@ public:
     void print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &);
     void reset_valid_moves(uint8_t);
     std::bitset<MAX_NUM_OF_FIELDS> get_total_moves(uint8_t);
+    void calculate_offsets();
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -90,6 +91,12 @@ public:
 
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> communities;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> frames;
+
+    std::vector<std::tuple<uint16_t, uint16_t>> start_end_communities;
+    std::vector<std::tuple<uint16_t, uint16_t>> start_end_frames;
+
+    std::vector<uint8_t> communities_offset;
+    std::vector<uint8_t> frames_offset;
 
     std::vector<bool> disqualified;
 

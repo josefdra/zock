@@ -327,6 +327,10 @@ void Map::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &communi
         uint16_t next_coord = get_transition(c, d);
         if (next_coord != 0 && !board.board_sets[EMPTY].test(next_coord) && !community.test(next_coord))
         {
+            if (next_coord > std::get<1>(board.start_end_communities.back()))
+                std::get<1>(board.start_end_communities.back()) = next_coord;
+            if (next_coord < std::get<0>(board.start_end_communities.back()))
+                std::get<0>(board.start_end_communities.back()) = next_coord;
             community.set(next_coord);
             if (checked_fields.test(next_coord))
                 continue;
@@ -348,7 +352,13 @@ void Map::init_frames(Board &board)
                 {
                     uint16_t next_coord = get_transition(c, d);
                     if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
+                    {
+                        if (next_coord > std::get<1>(board.start_end_frames[i]))
+                            std::get<1>(board.start_end_frames[i]) = next_coord;
+                        if (next_coord < std::get<0>(board.start_end_frames[i]))
+                            std::get<0>(board.start_end_frames[i]) = next_coord;
                         board.frames[i].set(next_coord);
+                    }
                 }
 
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
@@ -359,6 +369,8 @@ void Map::init_frames(Board &board)
 void Map::remove_double_communities(Board &board)
 {
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_communities;
+    std::vector<std::tuple<uint16_t, uint16_t>> temp_start_end_communities;
+    std::vector<std::tuple<uint16_t, uint16_t>> temp_start_end_frames;
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
         for (uint8_t j = 0; j < board.get_num_of_communities(); j++)
             if (i != j && (board.communities[i] & board.communities[j]).count() != 0)
@@ -366,11 +378,18 @@ void Map::remove_double_communities(Board &board)
                 board.communities[i] |= board.communities[j];
                 board.communities[j].reset();
             }
-    for (auto &community : board.communities)
-        if (community.count() != 0)
-            temp_communities.push_back(community);
+
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+        if (board.communities[i].count() != 0)
+        {
+            temp_communities.push_back(board.communities[i]);
+            temp_start_end_communities.push_back(board.start_end_communities[i]);
+            temp_start_end_frames.push_back(board.start_end_frames[i]);
+        }
 
     board.communities = temp_communities;
+    board.start_end_communities = temp_start_end_communities;
+    board.start_end_frames = temp_start_end_frames;
 }
 
 void Map::init_communities(Board &board)
@@ -385,6 +404,7 @@ void Map::init_communities(Board &board)
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         if (all_players.test(c) && !checked_fields.test(c))
         {
+            board.start_end_communities.push_back(std::make_tuple(c, 0));
             board.communities.push_back(std::bitset<MAX_NUM_OF_FIELDS>(0));
             board.communities.back().set(c);
             expand_community(board, board.communities.back(), c, checked_fields);
@@ -393,6 +413,7 @@ void Map::init_communities(Board &board)
     remove_double_communities(board);
     board.frames.resize(board.get_num_of_communities());
     init_frames(board);
+    board.calculate_offsets();
 }
 
 Board Map::init_boards_and_players()

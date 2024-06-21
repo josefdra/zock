@@ -20,7 +20,7 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         if (!board.disqualified[next_player])
-        {            
+        {
             board.valid_moves[next_player].clear();
             board.valid_moves[next_player].resize(board.get_num_of_communities());
             if ((board.communities[index] & board.player_sets[next_player]).count() != 0)
