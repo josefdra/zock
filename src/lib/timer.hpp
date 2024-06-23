@@ -34,6 +34,11 @@ public:
         m_start_time = std::chrono::high_resolution_clock::now();
     }
 
+    void reset_timer()
+    {
+        m_start_time = std::chrono::high_resolution_clock::now();
+    }
+
     double return_rest_time() const
     {
         auto end_time = std::chrono::high_resolution_clock::now();

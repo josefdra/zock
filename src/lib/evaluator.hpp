@@ -9,14 +9,14 @@
 #define SIX_WALLS_VALUE 3
 #define SEVEN_WALLS_VALUE 1
 #define EIGHT_WALLS_VALUE -5
-#define ONE_WALL 1
-#define TWO_WALLS 2
-#define THREE_WALLS 3
-#define FOUR_WALLS 4
-#define FIVE_WALLS 5
-#define SIX_WALLS 6
-#define SEVEN_WALLS 7
-#define EIGHT_WALLS 8
+#define ONE_WALL 0
+#define TWO_WALLS 1
+#define THREE_WALLS 2
+#define FOUR_WALLS 3
+#define FIVE_WALLS 4
+#define SIX_WALLS 5
+#define SEVEN_WALLS 6
+#define EIGHT_WALLS 7
 #define WALL_MULTIPLIER 50
 #define MOVE_MULTIPLIER 100
 #define STONE_MULTIPLIER 50
@@ -29,6 +29,7 @@
 
 #include <bitset>
 #include <stdint.h>
+#include <cmath>
 
 class Board;
 class MoveGenerator;
@@ -36,6 +37,6 @@ class Timer;
 
 int get_wall_value(Board &, uint8_t);
 int get_eliminate_player_score(Board &, uint8_t);
-int get_evaluation(Board &, uint8_t, MoveGenerator &, Timer &);
+int get_evaluation(Board &, uint8_t, Timer &);
 
 #endif // EVALUATOR_HPP

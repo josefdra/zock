@@ -43,6 +43,7 @@ public:
     void set_overwrite_stones(uint8_t, uint16_t);
     void set_bombs(uint8_t, uint16_t);
     void set_overwrite_move(uint8_t);
+    void set_final_state();
     uint8_t get_player_count();
     uint16_t get_num_of_fields();
     uint8_t get_width();
@@ -59,6 +60,7 @@ public:
     void decrement_bombs(uint8_t);
     bool has_overwrite_stones(uint8_t);
     bool is_overwrite_move(uint8_t);
+    bool is_final_state();
     void reset_overwrite_moves();
     void one_dimension_2_second_dimension(uint16_t, uint8_t &, uint8_t &);
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
@@ -69,6 +71,7 @@ public:
     void print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &);
     void reset_valid_moves(uint8_t);
     std::bitset<MAX_NUM_OF_FIELDS> get_total_moves(uint8_t);
+    void calculate_offsets();
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -89,6 +92,12 @@ public:
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> communities;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> frames;
 
+    std::vector<std::tuple<uint16_t, uint16_t>> start_end_communities;
+    std::vector<std::tuple<uint16_t, uint16_t>> start_end_frames;
+
+    std::vector<uint8_t> communities_offset;
+    std::vector<uint8_t> frames_offset;
+
     std::vector<bool> disqualified;
 
 private:
@@ -100,6 +109,7 @@ private:
     uint8_t m_spec;
     std::vector<bool> m_overwrite_move;
     int evaluation;
+    bool final_state;
 };
 
 #endif // BOARD_HPP

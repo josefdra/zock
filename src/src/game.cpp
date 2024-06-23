@@ -77,7 +77,6 @@ void Game::end(Board &board, uint8_t player_number)
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
 {
-
     if (((data >> BYTE) & FOUR_SET_BYTES) != 0)
         m_initial_time_limit = ((data >> BYTE) & FOUR_SET_BYTES);
 
@@ -100,7 +99,8 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     {
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
         LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
-        move_exec.exec_move(player, board);
+        uint8_t temp_index = MAX_INDEX;
+        move_exec.exec_move(player, board, temp_index);
     }
     else
     {
@@ -146,13 +146,11 @@ void Game::run(Network &net, bool sorting)
         case TYPE_DISQUALIFICATION:
         {
             board.print(0, false);
-            LOG_INFO("Board print 0, false");
             set_disqualified(board, (data & ONE_SET_BYTE) - 1);
             break;
         }
         case TYPE_PHASE1_END:
         {
-            // board = Board(board, map.fields_to_remove);
             set_bomb_phase();
             break;
         }
@@ -171,3 +169,4 @@ void Game::run(Network &net, bool sorting)
     }
     end(board, map.get_player_number());
 }
+

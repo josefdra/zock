@@ -8,6 +8,7 @@
 #define SEVEN_BYTES 56
 #define ONE_SET_BYTE 0xFF
 #define FOUR_SET_BYTES 0xFFFFFFFF
+#define MAX_INDEX 255
 
 #include <stdint.h>
 #include <vector>

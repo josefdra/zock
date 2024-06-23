@@ -127,12 +127,21 @@ uint32_t Network::get_actual_message_length(uint8_t &type)
 
 std::stringstream Network::receive_map()
 {
+    std::stringstream ss;
+    uint32_t total_received_data = 0;    
+    uint32_t received_data = 0;    
     uint8_t type = 0;
     uint32_t actual_message_length = get_actual_message_length(type);
-    std::vector<char> message(actual_message_length + 1);
-    recv(m_csocket, message.data(), actual_message_length, 0);
-    message[actual_message_length] = '\0';
-    std::stringstream ss(message.data());
+    uint32_t left_to_receive = actual_message_length;
+    while(total_received_data < actual_message_length)
+    {
+        std::vector<char> message(left_to_receive);
+        received_data = recv(m_csocket, message.data(), left_to_receive, 0);
+        ss.write(message.data(), received_data);
+        total_received_data += received_data;
+        left_to_receive = actual_message_length - total_received_data;
+    }
+    
     LOG_INFO("Received map");
     return ss;
 }
@@ -141,6 +150,8 @@ uint64_t Network::receive_data()
 {
     uint8_t type = 0;
     uint32_t actual_message_length = get_actual_message_length(type);
+    if (actual_message_length > 10000)
+        actual_message_length = 1;
     uint64_t game_data = 0;
     uint64_t big_type = type;
     unsigned char message[3000];
@@ -152,3 +163,4 @@ uint64_t Network::receive_data()
     }
     return (game_data | (big_type << 56));
 }
+

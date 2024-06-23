@@ -350,6 +350,10 @@ void Map::init_frames(Board &board)
                     if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
                         board.frames[i].set(next_coord);
                 }
+
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+        if (board.frames[i].count() == 0)
+            board.communities[i].reset();
 }
 
 void Map::remove_double_communities(Board &board)
@@ -375,6 +379,8 @@ void Map::init_communities(Board &board)
     std::bitset<MAX_NUM_OF_FIELDS> checked_fields;
     for (auto &player : board.player_sets)
         all_players |= player;
+
+    all_players |= board.board_sets[X];
 
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         if (all_players.test(c) && !checked_fields.test(c))
@@ -406,3 +412,4 @@ Board Map::init_boards_and_players()
     init_communities(ret_board);
     return ret_board;
 }
+

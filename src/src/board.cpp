@@ -20,7 +20,8 @@ Board::Board(Map &map)
       m_coord(0),
       m_spec(0),
       m_overwrite_move(map.get_player_count(), false),
-      evaluation(0)
+      evaluation(0),
+      final_state(false)
 {
 }
 
@@ -42,7 +43,8 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       m_coord(coord),
       m_spec(spec),
       m_overwrite_move(board.m_overwrite_move),
-      evaluation(board.evaluation)
+      evaluation(board.evaluation),
+      final_state(board.final_state)
 {
 }
 
@@ -71,6 +73,11 @@ void Board::set_bombs(uint8_t player, uint16_t _bombs)
 void Board::set_overwrite_move(uint8_t player)
 {
     m_overwrite_move[player] = true;
+}
+
+void Board::set_final_state()
+{
+    final_state = true;
 }
 
 uint8_t Board::get_player_count()
@@ -153,6 +160,11 @@ bool Board::is_overwrite_move(uint8_t player)
     return m_overwrite_move[player];
 }
 
+bool Board::is_final_state()
+{
+    return final_state;
+}
+
 void Board::reset_overwrite_moves()
 {
     m_overwrite_move = std::vector<bool>(m_player_count, false);
@@ -171,7 +183,7 @@ uint16_t Board::two_dimension_2_one_dimension(uint8_t x, uint8_t y)
 
 std::string Board::get_color_string(Colors color)
 {
-    // #ifdef COLOR
+#ifdef COLOR
     switch (color)
     {
     case orange:
@@ -193,9 +205,9 @@ std::string Board::get_color_string(Colors color)
     default:
         return "\033[37m";
     }
-    // #else
-    //     return "";
-    // #endif
+#else
+    return "";
+#endif
 }
 
 void Board::print_upper_outlines()
@@ -263,9 +275,9 @@ void Board::print(uint8_t player, bool our_player)
                     if (player_sets[i].test(c))
                     {
                         std::cout << get_color_string(Colors(i + 1)) << (uint16_t)(i + 1);
-                        // #ifdef COLOR
+#ifdef COLOR
                         std::cout << "\033[0m";
-                        // #endif
+#endif
                     }
             if (our_player && get_total_moves(player).test(c))
                 std::cout << "'";
@@ -286,9 +298,9 @@ void Board::print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &bitset)
         if (bitset.test(c))
         {
             std::cout << get_color_string(yellow) << "1 ";
-            // #ifdef COLOR
+#ifdef COLOR
             std::cout << "\033[0m";
-            // #endif
+#endif
         }
         else
             std::cout << "0 ";
@@ -310,5 +322,7 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
     std::bitset<MAX_NUM_OF_FIELDS> total_moves;
     for (auto &moves : valid_moves[player])
         total_moves |= moves;
+
     return total_moves;
 }
+
