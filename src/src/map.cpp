@@ -413,3 +413,49 @@ Board Map::init_boards_and_players()
     return ret_board;
 }
 
+void Map::generate_transitions()
+{
+    std::vector<std::array<uint16_t, 2>> tr;
+    std::vector<std::array<uint16_t, 6>> output;
+    std::array<uint16_t, 2> temp = {0, 0};
+    for (int i = 1; i < m_num_of_fields; i++)
+    {
+        if (m_numbers[i] != '-')
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (m_transitions[(i - 1) * 8 + j] == 0)
+                {
+                    temp[0] = i;
+                    temp[1] = j;
+                    tr.push_back(temp);
+                }
+            }
+        }
+    }
+    std::random_device rd;
+    std::mt19937 g(rd());
+    shuffle(tr.begin(), tr.end(), g);
+    std::array<uint16_t, 6> temp_bigger = {0, 0, 0, 0, 0, 0};
+    uint16_t temp_size = tr.size() / 2;
+    for (int i = 0; i < temp_size; i++)
+    {
+        tr.back()[0] % m_width == 0 ? temp_bigger[0] = m_width : temp_bigger[0] = tr.back()[0] % m_width;
+        temp_bigger[1] = (tr.back()[0] - 1) / m_width + 1;
+        temp_bigger[2] = tr.back()[1];
+        tr.pop_back();
+        tr.back()[0] % m_width == 0 ? temp_bigger[3] = m_width : temp_bigger[3] = tr.back()[0] % m_width;
+        temp_bigger[4] = (tr.back()[0] - 1) / m_width + 1;
+        temp_bigger[5] = tr.back()[1];
+        tr.pop_back();
+        if (!(temp_bigger[0] == 0 && temp_bigger[1] == 0 && temp_bigger[3] == 0 && temp_bigger[4] == 0))
+        {
+            output.push_back(temp_bigger);
+        }
+        temp_bigger = {0, 0, 0, 0, 0, 0};
+    }
+    for (auto elem : output)
+    {
+        std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
+    }
+}
