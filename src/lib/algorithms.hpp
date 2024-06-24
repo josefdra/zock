@@ -39,12 +39,18 @@ public:
     void set_up_moves(Board &, uint8_t, moves &, uint8_t);
     void init_best_board(Board &);
     Board get_best_coord(Board &, Timer &, bool);
+    void calculate_average_branching_factor(uint16_t, uint32_t, bool);
+    double estimate_runtime_next_depth(uint8_t &, Timer &);
+    void track_number_of_nodes(bool);
 
     std::vector<std::vector<uint16_t>> killer_moves;
 
 private:
     MoveExecuter m_move_exec;
     MoveGenerator m_move_gen;
+
+    double average_branching_factor = 0;
+    uint32_t total_nodes = 0;
 };
 
 #endif // ALGORITHMS_HPP

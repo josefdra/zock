@@ -6,6 +6,8 @@
 #include "logging.hpp"
 
 #define MAX_SEARCH_DEPTH 15
+#define ESTIMATED_TIME_DIVISOR 1.75
+#define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
 
 Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields()))), m_move_exec(move_exec), m_move_gen(move_gen)
 {
@@ -20,7 +22,7 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
         if (!board.disqualified[next_player])
-        {            
+        {
             board.valid_moves[next_player].clear();
             board.valid_moves[next_player].resize(board.get_num_of_communities());
             if ((board.communities[index] & board.player_sets[next_player]).count() != 0)
@@ -116,6 +118,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
         set_up_moves(board, next_player, moves, index);
+
         if (sorting)
             sort_valid_moves(board, next_player, moves, timer, depth);
         int best_eval = set_up_best_eval(brs_m, player_num);
@@ -210,6 +213,8 @@ void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, ui
     for (uint16_t c = 1; c < m_move_exec.get_num_of_fields(); c++)
         if (board.valid_moves[player_num][index].test(c))
         {
+            track_number_of_nodes(false);
+            calculate_average_branching_factor(board.valid_moves[player_num][index].count(), total_nodes, false);
             if (board.board_sets[C].test(c))
                 for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
                     moves.push_back(std::make_tuple(ZERO_EVALUATION, c, j));
@@ -263,6 +268,9 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             if (sorting)
                 sort_valid_moves(board, player_num, moves[index], timer, 0);
             for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
+            {
+                Timer measure_depth_search(timer.return_rest_time());
+
                 for (auto &m : moves[index])
                 {
                     if (timer.return_rest_time() < timer.exception_time)
@@ -279,6 +287,14 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     }
                     board = prev_board;
                 }
+
+                double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
+                if (estimated_runtime > timer.return_rest_time())
+                {
+                    LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                    break;
+                }
+            }
             total_search_depths += search_depth;
         }
     }
@@ -294,3 +310,54 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     return best_board;
 }
 
+void Algorithms::calculate_average_branching_factor(uint16_t num_of_valid_moves, uint32_t count, bool reset)
+{
+
+    static uint32_t sum = 0;
+
+    if (!reset)
+    {
+        sum += num_of_valid_moves;
+    }
+    else
+    {
+        sum = 0;
+    }
+    // LOG_INFO("call_count = " + std::to_string(count) + " sum = " + std::to_string(sum));
+    average_branching_factor = static_cast<double>(sum) / static_cast<double>(count);
+}
+
+void Algorithms::track_number_of_nodes(bool reset)
+{
+
+    if (!reset)
+    {
+        total_nodes++;
+    }
+    else
+    {
+        total_nodes = 0;
+    }
+}
+double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &timer)
+{
+    if (average_branching_factor != -1.0)
+    {
+        track_number_of_nodes(false);
+        double elapsed_time = timer.get_elapsed_time();
+        double time_per_node = elapsed_time / (static_cast<double>(total_nodes)); // times 2 because nodes at depth 0 aren't counted
+        // LOG_INFO("elapsed time: " + std::to_string(elapsed_time) + " no_nodes: " + std::to_string(no_nodes) + " time per node: " + std::to_string(time_per_node));
+        // LOG_INFO("branching average: " + std::to_string(average_branching_factor / 1.5));
+        double estimated_nodes_next_depth = pow(static_cast<double>(average_branching_factor / AVERAGE_BRANCHING_FACTOR_DIVISOR), static_cast<double>((current_depth + 1)));
+        // LOG_INFO("estimated nodes next depth: " + std::to_string(estimated_nodes_next_depth));
+        // LOG_INFO("caculating: " + std::to_string(estimated_nodes_next_depth) + " * " + std::to_string(time_per_node));
+        track_number_of_nodes(true);
+        calculate_average_branching_factor(0, 0, true);
+        average_branching_factor = 1;
+        return ((estimated_nodes_next_depth * time_per_node) / ESTIMATED_TIME_DIVISOR);
+    }
+    else
+    {
+        return -1.0;
+    }
+}
