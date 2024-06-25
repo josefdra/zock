@@ -130,14 +130,14 @@ void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, ui
 
 void MoveGenerator::calculate_moves_from_player_no_ow(Board &board, uint8_t player_number, uint8_t index)
 {
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    for (uint16_t c = std::get<0>(board.start_end_communities[index]); c < std::get<1>(board.start_end_communities[index]) + 1; c++)
         if ((board.player_sets[player_number] & board.communities[index]).test(c))
             calculate_valid_no_overwrite_moves_from_player(board, player_number, c, index);
 }
 
 void MoveGenerator::calculate_moves_from_player_ow(Board &board, uint8_t player_number, Timer &timer, uint8_t index)
 {
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    for (uint16_t c = std::get<0>(board.start_end_communities[index]); c < std::get<1>(board.start_end_communities[index]) + 1; c++)
     {
         if (timer.return_rest_time() < timer.exception_time)
             throw TimeLimitExceededException(("Timeout in move calculation from player"));
@@ -152,24 +152,24 @@ void MoveGenerator::calculate_moves_from_player_ow(Board &board, uint8_t player_
 
 void MoveGenerator::calculate_moves_from_frame_no_ow(Board &board, uint8_t player_number, uint8_t index)
 {
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
+    for (uint16_t c = std::get<0>(board.start_end_frames[index]); c < std::get<1>(board.start_end_frames[index]) + 1; c++)
         if (board.frames[index].test(c))
             if (check_if_valid_move(board, c, player_number))
                 board.valid_moves[player_number][index].set(c);
 }
 
-void MoveGenerator::calculate_valid_moves(Board &board, uint8_t player_number, Timer &timer, uint8_t &index)
+void MoveGenerator::calculate_valid_no_ow_moves(Board &board, uint8_t player_number, uint8_t &index)
 {
     if (2 * (board.communities[index] & board.player_sets[player_number]).count() < board.frames[index].count())
         calculate_moves_from_player_no_ow(board, player_number, index);
     else
         calculate_moves_from_frame_no_ow(board, player_number, index);
+}
 
-    if (board.get_total_moves(player_number).count() == 0 && board.has_overwrite_stones(player_number))
-    {
-        board.set_overwrite_move(player_number);
-        calculate_moves_from_player_ow(board, player_number, timer, index);
-    }
+void MoveGenerator::calculate_valid_ow_moves(Board &board, uint8_t player_number, Timer &timer, uint8_t &index)
+{
+    board.set_overwrite_move(player_number);
+    calculate_moves_from_player_ow(board, player_number, timer, index);
 }
 
 void MoveGenerator::add_x_moves(Board &board, uint8_t player_number, uint8_t index)
@@ -194,8 +194,13 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
         if ((board.communities[index] & board.player_sets[player]).count() != 0)
         {
             counter++;
-            calculate_valid_moves(board, player, timer, index);
+            calculate_valid_no_ow_moves(board, player, index);
         }
+
+    if (board.get_total_moves(player).count() == 0 && board.has_overwrite_stones(player))
+        for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
+            if ((board.communities[index] & board.player_sets[player]).count() != 0)
+                calculate_valid_ow_moves(board, player, timer, index);
 
     if (counter == 0)
         for (uint8_t index = 0; index < board.get_num_of_communities(); index++)

@@ -66,7 +66,6 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_bits_to_update(uint8_t player, 
         while (temp_transition != 0 && temp_transition != coord && !board.board_sets[EMPTY].test(temp_transition))
             if (board.player_sets[player].test(temp_transition))
             {
-                temp.set(temp_transition);
                 to_color |= temp;
                 break;
             }
@@ -85,18 +84,42 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_bits_to_update(uint8_t player, 
 void MoveExecuter::update_communities_and_frames(std::bitset<MAX_NUM_OF_FIELDS> &to_color, Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> temp;
+    uint16_t temp_lowest_community_coord = 65000;
+    uint16_t temp_highest_community_coord = 0;
+    uint16_t temp_lowest_frame_coord = 65000;
+    uint16_t temp_highest_frame_coord = 0;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         if (to_color.test(c))
+        {
+            if (c < temp_lowest_community_coord)
+                temp_lowest_community_coord = c;
+            if (c > temp_highest_community_coord)
+                temp_highest_community_coord = c;
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
                 if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
+                {
+                    if (next_coord < temp_lowest_frame_coord)
+                        temp_lowest_frame_coord = next_coord;
+                    if (next_coord > temp_highest_frame_coord)
+                        temp_highest_frame_coord = next_coord;
                     temp.set(next_coord);
+                }
             }
+        }
 
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
         if ((board.communities[i] & to_color).count() != 0)
         {
+            if (std::get<0>(board.start_end_communities[i]) > temp_lowest_community_coord)
+                std::get<0>(board.start_end_communities[i]) = temp_lowest_community_coord;
+            if (std::get<1>(board.start_end_communities[i]) < temp_highest_community_coord)
+                std::get<1>(board.start_end_communities[i]) = temp_highest_community_coord;
+            if (std::get<0>(board.start_end_frames[i]) > temp_lowest_frame_coord)
+                std::get<0>(board.start_end_frames[i]) = temp_lowest_frame_coord;
+            if (std::get<1>(board.start_end_frames[i]) < temp_highest_frame_coord)
+                std::get<1>(board.start_end_frames[i]) = temp_highest_frame_coord;
             board.communities[i] |= to_color;
             board.frames[i] |= temp;
             board.frames[i] &= ~board.communities[i];
@@ -120,20 +143,43 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
                     board.frames[i] |= board.frames[j];
                     board.frames[j].reset();
                     board.frames[i] &= ~board.communities[i];
+                    if (std::get<0>(board.start_end_communities[i]) > std::get<0>(board.start_end_communities[j]))
+                        std::get<0>(board.start_end_communities[i]) = std::get<0>(board.start_end_communities[j]);
+                    if (std::get<1>(board.start_end_communities[i]) < std::get<1>(board.start_end_communities[j]))
+                        std::get<1>(board.start_end_communities[i]) = std::get<1>(board.start_end_communities[j]);
+                    if (std::get<0>(board.start_end_frames[i]) > std::get<0>(board.start_end_frames[j]))
+                        std::get<0>(board.start_end_frames[i]) = std::get<0>(board.start_end_frames[j]);
+                    if (std::get<1>(board.start_end_frames[i]) < std::get<1>(board.start_end_frames[j]))
+                        std::get<1>(board.start_end_frames[i]) = std::get<1>(board.start_end_frames[j]);
                     merge = true;
                 }
 
         std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_communities;
         std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_frames;
+        std::vector<std::tuple<uint16_t, uint16_t>> temp_start_end_communities;
+        std::vector<std::tuple<uint16_t, uint16_t>> temp_start_end_frames;
         for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
             if (board.communities[i].count() != 0)
             {
                 temp_communities.push_back(board.communities[i]);
                 temp_frames.push_back(board.frames[i]);
+                temp_start_end_communities.push_back(board.start_end_communities[i]);
+                temp_start_end_frames.push_back(board.start_end_frames[i]);
             }
 
         board.communities = temp_communities;
         board.frames = temp_frames;
+        board.start_end_communities = temp_start_end_communities;
+        board.start_end_frames = temp_start_end_frames;
+        for (auto &community : board.communities)
+        {
+            uint8_t count = 0;
+            for (uint8_t i = 0; i < m_num_of_players; i++)
+                if ((community & board.player_sets[i]).count() != 0)
+                    count++;
+
+            board.num_of_players_in_community.push_back(count);
+        }
     }
 }
 
@@ -329,4 +375,3 @@ Board MoveExecuter::exec_bomb(uint8_t player, Board board, uint8_t strength)
     board.board_sets[MINUS] |= fields_to_remove;
     return board;
 }
-

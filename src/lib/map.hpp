@@ -63,6 +63,7 @@ public:
     void expand_community(Board &, std::bitset<MAX_NUM_OF_FIELDS> &, uint16_t, std::bitset<MAX_NUM_OF_FIELDS> &);
     void init_frames(Board &);
     void remove_double_communities(Board &);
+    void init_players_in_communities_count(Board &);
     void init_communities(Board &);
     Board init_boards_and_players();
     void generate_transitions();
