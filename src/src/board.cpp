@@ -7,6 +7,7 @@ Board::Board(Map &map)
       player_sets(map.get_player_count()),
       valid_moves(map.get_player_count()),
       wall_sets(),
+      border_sets(1),
       fixed_protected_fields(),
       protected_fields(map.get_player_count()),
       overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
@@ -31,6 +32,7 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       player_sets(board.player_sets),
       valid_moves(board.valid_moves),
       wall_sets(board.wall_sets),
+      border_sets(board.border_sets),
       fixed_protected_fields(board.fixed_protected_fields),
       protected_fields(board.protected_fields),
       overwrite_stones(board.overwrite_stones),
@@ -327,4 +329,3 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
 
     return total_moves;
 }
-
