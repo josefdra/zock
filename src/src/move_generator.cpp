@@ -158,7 +158,7 @@ void MoveGenerator::calculate_moves_from_frame_no_ow(Board &board, uint8_t playe
                 board.valid_moves[player_number][index].set(c);
 }
 
-void MoveGenerator::calculate_valid_no_ow_moves(Board &board, uint8_t player_number, Timer &timer, uint8_t &index)
+void MoveGenerator::calculate_valid_no_ow_moves(Board &board, uint8_t player_number, uint8_t &index)
 {
     if (2 * (board.communities[index] & board.player_sets[player_number]).count() < board.frames[index].count())
         calculate_moves_from_player_no_ow(board, player_number, index);
@@ -194,7 +194,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
         if ((board.communities[index] & board.player_sets[player]).count() != 0)
         {
             counter++;
-            calculate_valid_no_ow_moves(board, player, timer, index);
+            calculate_valid_no_ow_moves(board, player, index);
         }
 
     if (board.get_total_moves(player).count() == 0 && board.has_overwrite_stones(player))

@@ -326,3 +326,15 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
     return total_moves;
 }
 
+bool Board::check_if_more_than_two_players_in_community(uint8_t index)
+{
+    uint8_t count = 0;
+    for (uint8_t i = 0; i < m_player_count; i++)
+        for (uint8_t c = 1; c < m_num_of_fields; c++)
+            if ((player_sets[i] & communities[index]).test(c))
+            {
+                count++;
+                break;
+            }
+    return count > 2;
+}
