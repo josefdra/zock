@@ -36,7 +36,8 @@ public:
     void calculate_moves_from_player_ow(Board &, uint8_t, Timer &, uint8_t);
     void calculate_moves_from_frame_no_ow(Board &, uint8_t, uint8_t);
     void add_x_moves(Board &, uint8_t, uint8_t);
-    void calculate_valid_moves(Board &, uint8_t, Timer &, uint8_t &);
+    void calculate_valid_no_ow_moves(Board &, uint8_t, Timer &, uint8_t &);
+    void calculate_valid_ow_moves(Board &, uint8_t, Timer &, uint8_t &);
     uint32_t generate_move(Board &, Map &, Timer &, bool);
     void get_affected_by_bomb(uint8_t, uint16_t &);
     void sort_players_by_stones(std::vector<std::pair<uint8_t, uint16_t>> &, Board &);

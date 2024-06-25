@@ -26,7 +26,7 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
             board.valid_moves[next_player].clear();
             board.valid_moves[next_player].resize(board.get_num_of_communities());
             if ((board.communities[index] & board.player_sets[next_player]).count() != 0)
-                m_move_gen.calculate_valid_moves(board, next_player, timer, index);
+                m_move_gen.calculate_valid_no_ow_moves(board, next_player, timer, index);
         }
 
         if (next_player == player_num)
