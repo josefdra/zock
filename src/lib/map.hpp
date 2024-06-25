@@ -21,6 +21,8 @@
 #include <array>
 #include <unordered_set>
 #include <iomanip>
+#include <algorithm>
+#include <random>
 
 class Board;
 
@@ -61,6 +63,7 @@ public:
     void remove_double_communities(Board &);
     void init_communities(Board &);
     Board init_boards_and_players();
+    void generate_transitions();
 
 private:
     std::vector<char> m_numbers;
