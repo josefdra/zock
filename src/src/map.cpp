@@ -376,7 +376,7 @@ void Map::remove_double_communities(Board &board)
                 board.communities[i] |= board.communities[j];
                 board.communities[j].reset();
             }
-            
+
     for (auto &community : board.communities)
         if (community.count() != 0)
             temp_communities.push_back(community);
