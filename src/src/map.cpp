@@ -238,16 +238,27 @@ void Map::init_wall_values(Board &board)
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
-                if (next_coord == 0)
+                uint8_t prev_dir = d;
+                d = (d + 1) % NUM_OF_DIRECTIONS;
+                while (next_coord == 0 && d != prev_dir)
                 {
-                    counter++;
-                    if (counter > most)
-                        most = counter;
+                    next_coord = get_transition(c, d);
+                    d = (d + 1) % NUM_OF_DIRECTIONS;
+                    if (next_coord != 0)
+                        counter = 0;
+                    else
+                    {
+                        counter++;
+                        if (counter > most)
+                            most = counter;
+                    }
                 }
-                else
-                    counter = 0;
+                d = prev_dir;
             }
             board.wall_sets[most - 1].set(c);
+
+            if (most > 3)
+                board.fixed_protected_fields.set(c);
         }
 }
 
@@ -266,9 +277,9 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
     else
     {
         board.border_sets[0] = checked;
+        init_wall_values(board);
         return true;
-    }
-    void init_wall_values(Board & board);
+    }    
 }
 
 std::bitset<MAX_NUM_OF_FIELDS> Map::get_inside_of_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked, uint16_t counter)
@@ -320,6 +331,52 @@ void Map::init_evaluation(Board &board)
     }
 }
 
+void Map::check_if_protected_field(Board &board, uint8_t player, uint16_t coord)
+{
+    uint8_t counter = 0;
+    uint8_t most = 0;
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(coord, d);
+        uint8_t prev_dir = d;
+        d = (d + 1) % NUM_OF_DIRECTIONS;
+        while ((next_coord == 0 || board.player_sets[player].test(next_coord)) && d != prev_dir)
+        {
+            counter++;
+            if (counter > most)
+                most = counter;
+            next_coord = get_transition(coord, d);
+            d = (d + 1) % NUM_OF_DIRECTIONS;
+        }
+        counter = 0;
+        d = prev_dir;
+    }
+
+    if (most > 3)
+    {
+        board.protected_fields[player].set(coord);
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            uint16_t next_coord = get_transition(coord, d);
+            if (next_coord != 0 && board.player_sets[player].test(next_coord) && !board.protected_fields[player].test(next_coord))
+                check_if_protected_field(board, player, next_coord);
+        }
+    }
+}
+
+void Map::expand_protected_fields(Board &board, uint8_t player)
+{
+    board.protected_fields[player] = board.fixed_protected_fields & board.player_sets[player];
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        if (board.fixed_protected_fields.test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && board.player_sets[player].test(next_coord) && !board.protected_fields[player].test(next_coord))
+                    check_if_protected_field(board, player, next_coord);
+            }
+}
+
 void Map::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community, uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &checked_fields)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
@@ -327,6 +384,10 @@ void Map::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &communi
         uint16_t next_coord = get_transition(c, d);
         if (next_coord != 0 && !board.board_sets[EMPTY].test(next_coord) && !community.test(next_coord))
         {
+            if (std::get<0>(board.start_end_communities.back()) > next_coord)
+                std::get<0>(board.start_end_communities.back()) = next_coord;
+            if (std::get<1>(board.start_end_communities.back()) < next_coord)
+                std::get<1>(board.start_end_communities.back()) = next_coord;
             community.set(next_coord);
             if (checked_fields.test(next_coord))
                 continue;
@@ -348,7 +409,13 @@ void Map::init_frames(Board &board)
                 {
                     uint16_t next_coord = get_transition(c, d);
                     if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
+                    {
+                        if (std::get<0>(board.start_end_frames[i]) > next_coord)
+                            std::get<0>(board.start_end_frames[i]) = next_coord;
+                        if (std::get<1>(board.start_end_frames[i]) < next_coord)
+                            std::get<1>(board.start_end_frames[i]) = next_coord;
                         board.frames[i].set(next_coord);
+                    }
                 }
 
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
@@ -366,11 +433,25 @@ void Map::remove_double_communities(Board &board)
                 board.communities[i] |= board.communities[j];
                 board.communities[j].reset();
             }
+
     for (auto &community : board.communities)
         if (community.count() != 0)
             temp_communities.push_back(community);
 
     board.communities = temp_communities;
+}
+
+void Map::init_players_in_communities_count(Board &board)
+{
+    for (auto &community : board.communities)
+    {
+        uint8_t count = 0;
+        for (uint8_t i = 0; i < m_player_count; i++)
+            if ((community & board.player_sets[i]).count() != 0)
+                count++;
+
+        board.num_of_players_in_community.push_back(count);
+    }
 }
 
 void Map::init_communities(Board &board)
@@ -387,13 +468,17 @@ void Map::init_communities(Board &board)
         {
             board.communities.push_back(std::bitset<MAX_NUM_OF_FIELDS>(0));
             board.communities.back().set(c);
+            board.start_end_communities.push_back(std::make_tuple(c, c));
             expand_community(board, board.communities.back(), c, checked_fields);
         }
 
     remove_double_communities(board);
     board.frames.resize(board.get_num_of_communities());
+    board.start_end_frames.resize(board.get_num_of_communities(), std::make_tuple(65000, 0));
     init_frames(board);
+    init_players_in_communities_count(board);
 }
+
 
 Board Map::init_boards_and_players()
 {
@@ -408,7 +493,11 @@ Board Map::init_boards_and_players()
         ret_board.set_overwrite_stones(i, m_initial_overwrite_stones);
         ret_board.set_bombs(i, m_initial_bombs);
     }
+
     init_evaluation(ret_board);
+    for (uint8_t p = 0; p < get_player_count(); p++)
+        expand_protected_fields(ret_board, p);
+
     init_communities(ret_board);
     return ret_board;
 }

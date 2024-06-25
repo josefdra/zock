@@ -118,7 +118,6 @@ void Game::run(Network &net, bool sorting)
 {
     Map map;
     map.read_map(net.receive_map());
-    // map.generate_transitions();
     Board board = map.init_boards_and_players();
     board.print(0, false);
 
@@ -170,4 +169,3 @@ void Game::run(Network &net, bool sorting)
     }
     end(board, map.get_player_number());
 }
-

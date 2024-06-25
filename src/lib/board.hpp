@@ -71,7 +71,6 @@ public:
     void print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &);
     void reset_valid_moves(uint8_t);
     std::bitset<MAX_NUM_OF_FIELDS> get_total_moves(uint8_t);
-    void calculate_offsets();
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -85,6 +84,8 @@ public:
     // first 8 sets for 1 to 8 walls next to field
     std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> wall_sets;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> border_sets;
+    std::bitset<MAX_NUM_OF_FIELDS> fixed_protected_fields;
+    std::vector<std::bitset<MAX_NUM_OF_FIELDS>> protected_fields;
 
     std::vector<uint16_t> overwrite_stones;
     std::vector<uint16_t> bombs;
@@ -92,11 +93,10 @@ public:
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> communities;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> frames;
 
-    std::vector<std::tuple<uint16_t, uint16_t>> start_end_communities;
-    std::vector<std::tuple<uint16_t, uint16_t>> start_end_frames;
+    std::vector<uint8_t> num_of_players_in_community;
 
-    std::vector<uint8_t> communities_offset;
-    std::vector<uint8_t> frames_offset;
+    std::vector<std::tuple<uint16_t, uint16_t>> start_end_communities;
+    std::vector<std::tuple<uint16_t, uint16_t>> start_end_frames;    
 
     std::vector<bool> disqualified;
 

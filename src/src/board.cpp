@@ -8,10 +8,15 @@ Board::Board(Map &map)
       valid_moves(map.get_player_count()),
       wall_sets(),
       border_sets(1),
+      fixed_protected_fields(),
+      protected_fields(map.get_player_count()),
       overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
       bombs(map.get_player_count(), map.get_initial_bombs()),
       communities(0),
       frames(0),
+      num_of_players_in_community(0),
+      start_end_communities(0),
+      start_end_frames(0),
       disqualified(map.get_player_count(), false),
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
@@ -31,10 +36,15 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       valid_moves(board.valid_moves),
       wall_sets(board.wall_sets),
       border_sets(board.border_sets),
+      fixed_protected_fields(board.fixed_protected_fields),
+      protected_fields(board.protected_fields),
       overwrite_stones(board.overwrite_stones),
       bombs(board.bombs),
       communities(board.communities),
       frames(board.frames),
+      num_of_players_in_community(board.num_of_players_in_community),
+      start_end_communities(board.start_end_communities),
+      start_end_frames(board.start_end_frames),
       disqualified(board.disqualified),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
@@ -325,4 +335,3 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
 
     return total_moves;
 }
-

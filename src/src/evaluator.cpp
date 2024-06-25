@@ -47,10 +47,12 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
                 board.reset_valid_moves(i);
 
             if (i != player_num)
-                score -= board.get_total_moves(i).count() * ENEMY_MOVE_MULTIPLIER + board.player_sets[i].count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier;
+                score -= board.get_total_moves(i).count() * ENEMY_MOVE_MULTIPLIER + board.player_sets[i].count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier + board.protected_fields[i].count() * ENEMY_PROTECTED_FIELD_MULTIPLIER;
             else
-                score += board.get_total_moves(player_num).count() * MOVE_MULTIPLIER + board.player_sets[player_num].count() * STONE_MULTIPLIER * end_game_multiplier;
+                score += board.get_total_moves(player_num).count() * MOVE_MULTIPLIER + board.player_sets[player_num].count() * STONE_MULTIPLIER * end_game_multiplier + board.protected_fields[i].count() * PROTECTED_FIELD_MULTIPLIER;
         }
+
+        score += get_wall_value(board, player_num);
         for (uint16_t j = 0; j < border_set_size; j++)
             if (j == 0)
                 score += get_wall_value(board, player_num);
