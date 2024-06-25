@@ -108,6 +108,8 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
         LOG_INFO("Player " + std::to_string((int)player + 1) + " threw bomb at " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
         board = move_exec.exec_bomb(player, board, map.get_strength());
     }
+    for (auto &set : board.protected_fields)
+        board.print_bitset(set);
 
 #ifdef DEBUG
     board.print(player, (map.get_player_number() == player));
