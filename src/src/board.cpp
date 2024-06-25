@@ -12,6 +12,7 @@ Board::Board(Map &map)
       bombs(map.get_player_count(), map.get_initial_bombs()),
       communities(0),
       frames(0),
+      num_of_players_in_community(0),
       disqualified(map.get_player_count(), false),
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
@@ -35,6 +36,7 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       bombs(board.bombs),
       communities(board.communities),
       frames(board.frames),
+      num_of_players_in_community(board.num_of_players_in_community),
       disqualified(board.disqualified),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
@@ -324,17 +326,4 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
         total_moves |= moves;
 
     return total_moves;
-}
-
-bool Board::check_if_more_than_two_players_in_community(uint8_t index)
-{
-    uint8_t count = 0;
-    for (uint8_t i = 0; i < m_player_count; i++)
-        for (uint8_t c = 1; c < m_num_of_fields; c++)
-            if ((player_sets[i] & communities[index]).test(c))
-            {
-                count++;
-                break;
-            }
-    return count > 2;
 }

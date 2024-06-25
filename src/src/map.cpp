@@ -373,6 +373,19 @@ void Map::remove_double_communities(Board &board)
     board.communities = temp_communities;
 }
 
+void Map::init_players_in_communities_count(Board &board)
+{
+    for (auto &community : board.communities)
+    {
+        uint8_t count = 0;
+        for (uint8_t i = 0; i < m_player_count; i++)
+            if ((community & board.player_sets[i]).count() != 0)
+                count++;
+
+        board.num_of_players_in_community.push_back(count);
+    }
+}
+
 void Map::init_communities(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> all_players;
@@ -393,6 +406,7 @@ void Map::init_communities(Board &board)
     remove_double_communities(board);
     board.frames.resize(board.get_num_of_communities());
     init_frames(board);
+    init_players_in_communities_count(board);
 }
 
 Board Map::init_boards_and_players()

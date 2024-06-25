@@ -26,9 +26,11 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
             board.valid_moves[next_player].clear();
             board.valid_moves[next_player].resize(board.get_num_of_communities());
             if ((board.communities[index] & board.player_sets[next_player]).count() != 0)
+            {
                 m_move_gen.calculate_valid_no_ow_moves(board, next_player, index);
-            if (board.valid_moves[next_player][index].count() == 0)
-                m_move_gen.calculate_valid_ow_moves(board, next_player, timer, index);
+                if (board.valid_moves[next_player][index].count() == 0)
+                    m_move_gen.calculate_valid_ow_moves(board, next_player, timer, index);
+            }
         }
 
         if (next_player == player_num)
@@ -94,7 +96,7 @@ void Algorithms::get_eval_minimax(Board &board, moves &moves, int alpha, int bet
             throw TimeLimitExceededException("Timeout in get_eval_minimax");
 
         int eval;
-        if (board.check_if_more_than_two_players_in_community(index))
+        if (board.num_of_players_in_community[index] > 2)
         {
             uint8_t brs_m;
             if (next_player == m_move_exec.get_player_num())
@@ -136,7 +138,7 @@ void Algorithms::get_eval_brs(Board &board, moves &moves, int alpha, int beta, u
             throw TimeLimitExceededException("Timeout in get_eval_brs");
 
         int eval;
-        if (board.check_if_more_than_two_players_in_community(index))
+        if (board.num_of_players_in_community[index] > 2)
             eval = do_move_brs(board, m, alpha, beta, brs_m + 1, depth, timer, prev_board, next_player, sorting, index);
         else
             eval = do_move_minimax(board, m, alpha, beta, depth, timer, prev_board, next_player, sorting, index);
@@ -379,7 +381,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     board.set_spec(std::get<2>(m));
                     m_move_exec.exec_move(player_num, board, index);
                     int eval;
-                    if (board.check_if_more_than_two_players_in_community(index))
+                    if (board.num_of_players_in_community[index] > 2)
                         eval = brs(board, alpha, beta, 0, search_depth, m_move_exec.get_player_num(), timer, sorting, index);
                     else
                         eval = minimax(board, alpha, beta, search_depth, m_move_exec.get_player_num(), timer, sorting, index);

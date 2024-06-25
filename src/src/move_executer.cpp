@@ -133,6 +133,15 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
 
         board.communities = temp_communities;
         board.frames = temp_frames;
+        for (auto &community : board.communities)
+        {
+            uint8_t count = 0;
+            for (uint8_t i = 0; i < m_num_of_players; i++)
+                if ((community & board.player_sets[i]).count() != 0)
+                    count++;
+
+            board.num_of_players_in_community.push_back(count);
+        }
     }
 }
 
@@ -254,4 +263,3 @@ Board MoveExecuter::exec_bomb(uint8_t player, Board board, uint8_t strength)
     board.board_sets[MINUS] |= fields_to_remove;
     return board;
 }
-
