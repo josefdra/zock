@@ -30,6 +30,7 @@ public:
     void update_bits(std::bitset<MAX_NUM_OF_FIELDS> &, uint8_t, Board &);
     std::bitset<MAX_NUM_OF_FIELDS> get_bits_to_update(uint8_t, Board &);
     void update_communities_and_frames(std::bitset<MAX_NUM_OF_FIELDS> &, Board &);
+    void update_players_in_communities_count(Board &);
     void merge_communities(Board &, uint8_t &);
     void check_if_protected_field_with_extending(Board &, uint8_t, uint16_t);    
     void expand_protected_fields(Board &, uint8_t);
