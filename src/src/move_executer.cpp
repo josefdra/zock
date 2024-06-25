@@ -66,6 +66,7 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_bits_to_update(uint8_t player, 
         while (temp_transition != 0 && temp_transition != coord && !board.board_sets[EMPTY].test(temp_transition))
             if (board.player_sets[player].test(temp_transition))
             {
+                temp.set(temp_transition);
                 to_color |= temp;
                 break;
             }
@@ -183,7 +184,65 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
     }
 }
 
-void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, uint8_t &index)
+void MoveExecuter::check_if_protected_field_with_extending(Board &board, uint8_t player, uint16_t coord)
+{
+    uint8_t counter = 0;
+    uint8_t most = 0;
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(coord, d);
+        uint8_t prev_dir = d;
+        d = (d + 1) % NUM_OF_DIRECTIONS;
+        while ((next_coord == 0 || board.protected_fields[player].test(next_coord)) && d != prev_dir)
+        {
+            counter++;
+            if (counter > most)
+                most = counter;
+            next_coord = get_transition(coord, d);
+            d = (d + 1) % NUM_OF_DIRECTIONS;
+        }
+        counter = 0;
+        d = prev_dir;
+    }
+
+    if (most > 3)
+    {
+        board.protected_fields[player].set(coord);
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            uint16_t next_coord = get_transition(coord, d);
+            if (next_coord != 0 && board.player_sets[player].test(next_coord) && !board.protected_fields[player].test(next_coord))
+                check_if_protected_field_with_extending(board, player, next_coord);
+        }
+    }
+}
+
+void MoveExecuter::recalculate_protected_fields(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &to_color)
+{
+    for (uint8_t p = 0; p < m_num_of_players; p++)
+        if ((board.player_sets[p] & to_color).count() != 0)
+        {
+            board.protected_fields[p] = board.fixed_protected_fields & board.player_sets[p];
+            for (uint16_t c = 1; c < m_num_of_fields; c++)
+                if (board.fixed_protected_fields.test(c))
+                    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                    {
+                        uint16_t next_coord = get_transition(c, d);
+                        if (next_coord != 0 && board.player_sets[p].test(next_coord) && !board.protected_fields[p].test(next_coord))
+                            check_if_protected_field_with_extending(board, p, next_coord);
+                    }
+        }
+}
+
+void MoveExecuter::extend_protected_fields(Board &board, uint8_t player, std::bitset<MAX_NUM_OF_FIELDS> &to_color)
+{
+    if ((to_color & board.protected_fields[player]).count() != 0)
+        for (uint16_t c = 1; c < m_num_of_fields; c++)
+            if (to_color.test(c))
+                check_if_protected_field_with_extending(board, player, c);
+}
+
+void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, uint8_t &index, bool overwrite_move)
 {
     uint16_t coord = board.get_coord();
     bool inversion = false;
@@ -199,20 +258,32 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     if (board.get_num_of_communities() > 1)
         merge_communities(board, index);
 
+    if (overwrite_move)
+        recalculate_protected_fields(board, to_color);
+    else
+        extend_protected_fields(board, player, to_color);
+
     if (inversion)
     {
         uint16_t player_count = board.get_player_count();
         std::bitset<MAX_NUM_OF_FIELDS> temp_board = board.player_sets[player_count - 1];
+        std::bitset<MAX_NUM_OF_FIELDS> temp_protected_fields = board.protected_fields[player_count - 1];
         for (uint8_t i = player_count - 1; i > 0; i--)
+        {
             board.player_sets[i] = board.player_sets[i - 1];
-
+            board.protected_fields[i] = board.protected_fields[i - 1];
+        }
+        board.protected_fields[0] = temp_protected_fields;
         board.player_sets[0] = temp_board;
     }
     else if (change_stones)
     {
         std::bitset<MAX_NUM_OF_FIELDS> temp_board = board.player_sets[player];
+        std::bitset<MAX_NUM_OF_FIELDS> temp_protected_fields = board.protected_fields[player];
         board.player_sets[player] = board.player_sets[change_stones - 1];
+        board.protected_fields[player] = board.protected_fields[change_stones - 1];
         board.player_sets[change_stones - 1] = temp_board;
+        board.protected_fields[change_stones - 1] = temp_protected_fields;
     }
 }
 
@@ -221,8 +292,12 @@ void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
     uint16_t coord = board.get_coord();
     uint8_t spec = board.get_spec();
     uint8_t change_stones = 0;
+    bool overwrite_move = false;
     if (!board.board_sets[EMPTY].test(coord))
+    {
         board.decrement_overwrite_stones(player);
+        overwrite_move = true;
+    }
 
     if (spec == BOMB_SPEC)
     {
@@ -242,7 +317,7 @@ void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
         board.board_sets[C].reset(coord);
         change_stones = spec;
     }
-    update_boards(player, change_stones, board, index);
+    update_boards(player, change_stones, board, index, overwrite_move);
 }
 
 void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<MAX_NUM_OF_FIELDS> &mask, Board &board, std::bitset<MAX_NUM_OF_FIELDS> &fields_to_remove)

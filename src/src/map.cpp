@@ -228,31 +228,43 @@ void Map::set_values(Board &board, uint16_t c)
         board.player_sets[get_symbol(c) - '0' - 1].set(c);
 }
 
-void Map::init_wall_values(Board &board)
+void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        if (board.border_sets[0].test(c))
+        if (checked.test(c))
         {
             uint8_t counter = 0;
             uint8_t most = 0;
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
-                if (next_coord == 0)
+                uint8_t prev_dir = d;
+                d = (d + 1) % NUM_OF_DIRECTIONS;
+                while (next_coord == 0 && d != prev_dir)
                 {
-                    counter++;
-                    if (counter > most)
-                        most = counter;
+                    next_coord = get_transition(c, d);
+                    d = (d + 1) % NUM_OF_DIRECTIONS;
+                    if (next_coord != 0)
+                        counter = 0;
+                    else
+                    {
+                        counter++;
+                        if (counter > most)
+                            most = counter;
+                    }
                 }
-                else
-                    counter = 0;
+                d = prev_dir;
             }
             board.wall_sets[most - 1].set(c);
+
+            if (most > 3)
+                board.fixed_protected_fields.set(c);
         }
 }
 
-bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
+void Map::get_walls(Board &board)
 {
+    std::bitset<MAX_NUM_OF_FIELDS> checked;
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             if (get_transition(c, d) == 0 && !board.board_sets[MINUS].test(c))
@@ -261,63 +273,53 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
                 break;
             }
 
-    if (checked.count() == 0)
-        return false;
-    else
+    init_wall_values(board, checked);
+}
+
+void Map::check_if_protected_field(Board &board, uint8_t player, uint16_t coord)
+{
+    uint8_t counter = 0;
+    uint8_t most = 0;
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
-        board.border_sets[0] = checked;
-        return true;
-    }
-    void init_wall_values(Board & board);
-}
-
-std::bitset<MAX_NUM_OF_FIELDS> Map::get_inside_of_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked, uint16_t counter)
-{
-    std::bitset<MAX_NUM_OF_FIELDS> set;
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-        if (board.border_sets[counter].test(c))
-            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                if (get_transition(c, d) != 0)
-                    if (checked.test(c))
-                    {
-                        uint16_t trans1 = get_transition(c, get_reverse_direction(d + 7));
-                        uint16_t trans2 = get_transition(c, get_reverse_direction(d));
-                        uint16_t trans3 = get_transition(c, get_reverse_direction(d + 1));
-                        if (trans1 != 0 && !checked.test(trans1))
-                            set.set(trans1);
-
-                        if (trans2 != 0 && !checked.test(trans2))
-                            set.set(trans2);
-
-                        if (trans3 != 0 && !checked.test(trans3))
-                            set.set(trans3);
-                    }
-
-    checked |= set;
-    return set;
-}
-
-bool Map::set_player_border_sets(Board &board, std::bitset<MAX_NUM_OF_FIELDS> set)
-{
-    if (set.count() == 0)
-        return false;
-    board.border_sets.push_back(set);
-    return true;
-}
-
-void Map::init_evaluation(Board &board)
-{
-    std::bitset<MAX_NUM_OF_FIELDS> checked;
-    if (get_walls(board, checked))
-    {
-        uint16_t counter = 0;
-        while (set_player_border_sets(board, get_inside_of_walls(board, checked, counter)))
+        uint16_t next_coord = get_transition(coord, d);
+        uint8_t prev_dir = d;
+        d = (d + 1) % NUM_OF_DIRECTIONS;
+        while ((next_coord == 0 || board.player_sets[player].test(next_coord)) && d != prev_dir)
         {
             counter++;
-            if (counter == 2)
-                break;
+            if (counter > most)
+                most = counter;
+            next_coord = get_transition(coord, d);
+            d = (d + 1) % NUM_OF_DIRECTIONS;
+        }
+        counter = 0;
+        d = prev_dir;
+    }
+
+    if (most > 3)
+    {
+        board.protected_fields[player].set(coord);
+        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+        {
+            uint16_t next_coord = get_transition(coord, d);
+            if (next_coord != 0 && board.player_sets[player].test(next_coord) && !board.protected_fields[player].test(next_coord))
+                check_if_protected_field(board, player, next_coord);
         }
     }
+}
+
+void Map::expand_protected_fields(Board &board, uint8_t player)
+{
+    board.protected_fields[player] = board.fixed_protected_fields & board.player_sets[player];
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        if (board.fixed_protected_fields.test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && board.player_sets[player].test(next_coord) && !board.protected_fields[player].test(next_coord))
+                    check_if_protected_field(board, player, next_coord);
+            }
 }
 
 void Map::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community, uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &checked_fields)
@@ -435,7 +437,10 @@ Board Map::init_boards_and_players()
         ret_board.set_overwrite_stones(i, m_initial_overwrite_stones);
         ret_board.set_bombs(i, m_initial_bombs);
     }
-    init_evaluation(ret_board);
+    get_walls(ret_board);
+    for (uint8_t p = 0; p < get_player_count(); p++)
+        expand_protected_fields(ret_board, p);
+
     init_communities(ret_board);
     return ret_board;
 }
