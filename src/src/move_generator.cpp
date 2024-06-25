@@ -189,20 +189,17 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     player = map.get_player_number();
     board.valid_moves[player].clear();
     board.valid_moves[player].resize(board.get_num_of_communities());
-    uint8_t counter = 0;
+
     for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
         if ((board.communities[index] & board.player_sets[player]).count() != 0)
-        {
-            counter++;
             calculate_valid_no_ow_moves(board, player, index);
-        }
 
     if (board.get_total_moves(player).count() == 0 && board.has_overwrite_stones(player))
         for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
             if ((board.communities[index] & board.player_sets[player]).count() != 0)
                 calculate_valid_ow_moves(board, player, timer, index);
 
-    if (counter == 0)
+    if (board.get_total_moves(player).count() == 0 && board.has_overwrite_stones(player))
         for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
             if ((board.communities[index] & board.board_sets[X]).count() != 0 && board.has_overwrite_stones(player))
                 add_x_moves(board, player, index);
