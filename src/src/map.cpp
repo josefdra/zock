@@ -253,6 +253,7 @@ void Map::init_wall_values(Board &board)
                             most = counter;
                     }
                 }
+                counter = 0;
                 d = prev_dir;
             }
             if (most > 0)
