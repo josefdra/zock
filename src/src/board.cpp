@@ -12,6 +12,7 @@ Board::Board(Map &map)
       bombs(map.get_player_count(), map.get_initial_bombs()),
       communities(0),
       frames(0),
+      num_of_players_in_community(0),
       disqualified(map.get_player_count(), false),
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
@@ -35,6 +36,7 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       bombs(board.bombs),
       communities(board.communities),
       frames(board.frames),
+      num_of_players_in_community(board.num_of_players_in_community),
       disqualified(board.disqualified),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
@@ -325,4 +327,3 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
 
     return total_moves;
 }
-

@@ -35,7 +35,6 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
 
     try
     {
-        uint16_t border_set_size = board.border_sets.size();
         int score = 0;
 
         for (uint8_t i = 0; i < board.get_player_count(); i++)
@@ -51,15 +50,8 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
             else
                 score += board.get_total_moves(player_num).count() * MOVE_MULTIPLIER + board.player_sets[player_num].count() * STONE_MULTIPLIER * end_game_multiplier;
         }
-        for (uint16_t j = 0; j < border_set_size; j++)
-            if (j == 0)
-                score += get_wall_value(board, player_num);
-
-            else if (j == 1)
-                score -= border_set_size * BEFORE_WALL_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();
-
-            else
-                score += (border_set_size - j) * NORMAL_FIELD_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();
+        
+        score += get_wall_value(board, player_num);
 
         if (board.is_overwrite_move(player_num))
             score -= OVERWRITE_VALUE;
@@ -70,4 +62,3 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
         throw;
     }
 }
-
