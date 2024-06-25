@@ -134,12 +134,10 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
         merge = false;
         for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
             for (uint8_t j = 0; j < board.get_num_of_communities(); j++)
-                if (i != j && (board.communities[i] & board.frames[j]).count() != 0)
+                if (i != j && (board.communities[j] & board.frames[i]).count() != 0)
                 {
                     if (index == j)
                         index = i;
-                    else if(index == i)
-                        index--;
                     board.communities[i] |= board.communities[j];
                     board.communities[j].reset();
                     board.frames[i] |= board.frames[j];
