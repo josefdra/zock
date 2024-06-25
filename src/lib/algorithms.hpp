@@ -28,23 +28,20 @@ public:
     ~Algorithms();
 
     uint8_t get_next_player(uint8_t, Board &, Timer &, uint8_t &);
-    int set_up_best_eval_minimax(uint8_t);
-    int set_up_best_eval_brs(uint8_t &, uint8_t);
-    int do_move_minimax(Board &, move &, int, int, uint8_t, Timer &, Board &, uint8_t, bool, uint8_t &);
-    int do_move_brs(Board &, move &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, bool, uint8_t &);
-    void get_eval_minimax(Board &, moves &, int, int, uint8_t, Timer &, Board &, uint8_t, int &, bool, uint8_t &);
-    void get_eval_brs(Board &, moves &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, int &, bool, uint8_t &);
+    int set_up_best_eval(uint8_t &, uint8_t);
+    int do_move(Board &, move &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, bool, uint8_t &);
+    void get_eval(Board &, moves &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, int &, bool, uint8_t &);
     move get_first_move(moves &);
-    int minimax(Board &, int, int, uint8_t, uint8_t, Timer &, bool, uint8_t &);
+    int minimaxOrParanoidWithPruning(Board &, int, int, int8_t, uint8_t, bool, Timer &, uint8_t &);
     int brs(Board &, int, int, uint8_t, uint8_t, uint8_t, Timer &, bool, uint8_t &);
     void set_up_killer(moves &, uint8_t);
     void sort_valid_moves(Board &, uint8_t, moves &, Timer &, uint8_t);
     void set_up_moves(Board &, uint8_t, moves &, uint8_t);
     void init_best_board(Board &);
     Board get_best_coord(Board &, Timer &, bool);
-    void calculate_average_branching_factor(uint16_t, uint32_t, bool);    
-    void track_number_of_nodes(bool);
+    void calculate_average_branching_factor(uint16_t, uint32_t, bool);
     double estimate_runtime_next_depth(uint8_t &, Timer &);
+    void track_number_of_nodes(bool);
 
     std::vector<std::vector<uint16_t>> killer_moves;
 
