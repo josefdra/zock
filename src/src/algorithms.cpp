@@ -259,7 +259,6 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     int alpha = INT32_MIN;
     int beta = INT32_MAX;
     uint8_t search_depth;
-    uint16_t total_search_depths = 0;
     try
     {
         for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
@@ -295,17 +294,14 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     break;
                 }
             }
-            total_search_depths += search_depth;
         }
     }
     catch (TimeLimitExceededException &e)
     {
-        total_search_depths += search_depth;
         board = prev_board;
         LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }
-    LOG_INFO("average reached depth: " + std::to_string((float)total_search_depths / (float)board.get_num_of_communities()));
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
 }
