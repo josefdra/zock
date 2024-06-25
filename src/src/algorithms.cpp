@@ -72,9 +72,11 @@ int Algorithms::do_move_minimax(Board &board, move &m, int alpha, int beta, uint
 {
     board.set_coord(std::get<1>(m));
     board.set_spec(std::get<2>(m));
+    uint8_t prev_index = index;
     m_move_exec.exec_move(next_player, board, index);
     int eval = minimax(board, alpha, beta, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
+    index = prev_index;
     return eval;
 }
 
@@ -82,9 +84,11 @@ int Algorithms::do_move_brs(Board &board, move &m, int alpha, int beta, uint8_t 
 {
     board.set_coord(std::get<1>(m));
     board.set_spec(std::get<2>(m));
+    uint8_t prev_index = index;
     m_move_exec.exec_move(next_player, board, index);
     int eval = brs(board, alpha, beta, brs_m, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
+    index = prev_index;
     return eval;
 }
 
@@ -365,7 +369,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     {
         for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
         {
-            if((board.communities[index] & board.player_sets[player_num]).count() == 0)
+            if ((board.communities[index] & board.player_sets[player_num]).count() == 0)
                 continue;
             set_up_moves(board, player_num, moves[index], index);
             if (sorting)
@@ -373,7 +377,6 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
             {
                 Timer measure_depth_search(timer.return_rest_time());
-
                 for (auto &m : moves[index])
                 {
                     if (timer.return_rest_time() < timer.exception_time)
@@ -381,6 +384,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
 
                     board.set_coord(std::get<1>(m));
                     board.set_spec(std::get<2>(m));
+                    uint8_t prev_index = index;
                     m_move_exec.exec_move(player_num, board, index);
                     int eval;
                     if (board.num_of_players_in_community[index] > 2)
@@ -393,6 +397,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                         best_board = board;
                     }
                     board = prev_board;
+                    index = prev_index;
                 }
 
                 double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
