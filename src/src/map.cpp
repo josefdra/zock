@@ -255,7 +255,8 @@ void Map::init_wall_values(Board &board)
                 }
                 d = prev_dir;
             }
-            board.wall_sets[most - 1].set(c);
+            if (most > 0)
+                board.wall_sets[most - 1].set(c);
 
             if (most > 3)
                 board.fixed_protected_fields.set(c);
@@ -279,7 +280,7 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
         board.border_sets[0] = checked;
         init_wall_values(board);
         return true;
-    }    
+    }
 }
 
 std::bitset<MAX_NUM_OF_FIELDS> Map::get_inside_of_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked, uint16_t counter)
@@ -478,7 +479,6 @@ void Map::init_communities(Board &board)
     init_frames(board);
     init_players_in_communities_count(board);
 }
-
 
 Board Map::init_boards_and_players()
 {
