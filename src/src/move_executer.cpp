@@ -138,6 +138,8 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
                 {
                     if (index == j)
                         index = i;
+                    else if(index == i)
+                        index--;
                     board.communities[i] |= board.communities[j];
                     board.communities[j].reset();
                     board.frames[i] |= board.frames[j];
