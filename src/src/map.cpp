@@ -327,6 +327,10 @@ void Map::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &communi
         uint16_t next_coord = get_transition(c, d);
         if (next_coord != 0 && !board.board_sets[EMPTY].test(next_coord) && !community.test(next_coord))
         {
+            if (std::get<0>(board.start_end_communities.back()) > next_coord)
+                std::get<0>(board.start_end_communities.back()) = next_coord;
+            if (std::get<1>(board.start_end_communities.back()) < next_coord)
+                std::get<1>(board.start_end_communities.back()) = next_coord;
             community.set(next_coord);
             if (checked_fields.test(next_coord))
                 continue;
@@ -348,7 +352,13 @@ void Map::init_frames(Board &board)
                 {
                     uint16_t next_coord = get_transition(c, d);
                     if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
+                    {
+                        if (std::get<0>(board.start_end_frames[i]) > next_coord)
+                            std::get<0>(board.start_end_frames[i]) = next_coord;
+                        if (std::get<1>(board.start_end_frames[i]) < next_coord)
+                            std::get<1>(board.start_end_frames[i]) = next_coord;
                         board.frames[i].set(next_coord);
+                    }
                 }
 
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
@@ -366,6 +376,7 @@ void Map::remove_double_communities(Board &board)
                 board.communities[i] |= board.communities[j];
                 board.communities[j].reset();
             }
+            
     for (auto &community : board.communities)
         if (community.count() != 0)
             temp_communities.push_back(community);
@@ -400,11 +411,13 @@ void Map::init_communities(Board &board)
         {
             board.communities.push_back(std::bitset<MAX_NUM_OF_FIELDS>(0));
             board.communities.back().set(c);
+            board.start_end_communities.push_back(std::make_tuple(c, c));
             expand_community(board, board.communities.back(), c, checked_fields);
         }
 
     remove_double_communities(board);
     board.frames.resize(board.get_num_of_communities());
+    board.start_end_frames.resize(board.get_num_of_communities(), std::make_tuple(65000, 0));
     init_frames(board);
     init_players_in_communities_count(board);
 }

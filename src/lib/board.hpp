@@ -96,9 +96,6 @@ public:
     std::vector<std::tuple<uint16_t, uint16_t>> start_end_communities;
     std::vector<std::tuple<uint16_t, uint16_t>> start_end_frames;
 
-    std::vector<uint8_t> communities_offset;
-    std::vector<uint8_t> frames_offset;
-
     std::vector<bool> disqualified;
 
 private:
