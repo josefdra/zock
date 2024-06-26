@@ -63,8 +63,8 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
             else
                 score += (border_set_size - j) * BEFORE_BEFORE_WALL_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();
 
-        score -= (board.before_bonus_fields & board.player_sets[player_num]).count() *  BEFORE_BONUS_VALUE;
-        score += (board.before_choice_fields & board.player_sets[player_num]).count() * BEFORE_CHOICE_VALUE;
+        score -= (board.before_bonus_fields & board.player_sets[player_num]).count() *  BONUS_VALUE;
+        score -= (board.before_choice_fields & board.player_sets[player_num]).count() * CHOICE_VALUE;
 
         if (board.is_overwrite_move(player_num))
             score -= OVERWRITE_VALUE;
