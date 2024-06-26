@@ -184,9 +184,7 @@ int Algorithms::minimax(Board &board, int alpha, int beta, uint8_t depth, uint8_
     {
         static int call_count = 0;
         call_count++;
-#ifdef DEBUG
-        LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
-#endif
+
         uint8_t next_player = get_next_player(player_num, board, timer, index);
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer);
@@ -217,9 +215,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
     {
         static int call_count = 0;
         call_count++;
-#ifdef DEBUG
-        LOG_INFO("trying move: " + std::to_string(board.get_coord()) + " by player " + std::to_string(player_num + 1) + " depth: " + std::to_string(depth) + " time left: " + std::to_string(timer.return_rest_time()) + " elapsed time " + std::to_string(timer.get_elapsed_time()));
-#endif
+
         uint8_t next_player = get_next_player(player_num, board, timer, index);
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer);
@@ -357,33 +353,36 @@ void Algorithms::init_best_board(Board &board)
         }
 }
 
-void Algorithms::sort_best_moves_and_communities_to_front(Board &board, std::vector<uint16_t> &best_move_in_community_index, uint8_t &best_community_index, moves_vector &moves)
+void Algorithms::sort_best_moves_and_communities_to_front(Board &board, std::vector<uint16_t> &best_move_in_community_index, uint8_t &best_community_index, moves_vector &valid_moves)
 {
     if (board.get_num_of_communities() > 1)
     {
         std::bitset<MAX_NUM_OF_FIELDS> temp_community = board.communities[best_community_index];
         std::bitset<MAX_NUM_OF_FIELDS> temp_frame = board.frames[best_community_index];
         uint16_t temp_move_index = best_move_in_community_index[best_community_index];
+        moves temp_moves = valid_moves[best_community_index];
         for (uint8_t i = best_community_index; i > 0; i--)
         {
             board.communities[i] = board.communities[i - 1];
             board.frames[i] = board.frames[i - 1];
             best_move_in_community_index[i] = best_move_in_community_index[i - 1];
+            valid_moves[i] = valid_moves[i - 1];
         }
         board.communities[0] = temp_community;
         board.frames[0] = temp_frame;
         best_move_in_community_index[0] = temp_move_index;
+        valid_moves[0] = temp_moves;
     }
 
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
     {
-        if (moves[i].size() == 0)
+        if (valid_moves[i].size() == 0)
             continue;
-        std::tuple<int, uint16_t, uint8_t> temp_move = moves[i][best_move_in_community_index[i]];
+        std::tuple<int, uint16_t, uint8_t> temp_move = valid_moves[i][best_move_in_community_index[i]];
         for (uint8_t j = best_move_in_community_index[i]; j > 0; j--)
-            moves[i][j] = moves[i][j - 1];
+            valid_moves[i][j] = valid_moves[i][j - 1];
 
-        moves[i][0] = temp_move;
+        valid_moves[i][0] = temp_move;
     }
 }
 
@@ -422,7 +421,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     continue;
                 
                 if (search_depth == 0)
-                    total_valid_moves += board.valid_moves[player_num][community_index].count();
+                    total_valid_moves += moves[community_index].size();
+                    
                 for (uint16_t move_index = 0; move_index < moves[community_index].size(); move_index++)
                 {
                     if (timer.return_rest_time() < timer.exception_time)
