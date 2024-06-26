@@ -5,7 +5,7 @@
 #include "evaluator.hpp"
 #include "logging.hpp"
 
-#define MAX_SEARCH_DEPTH 15
+#define MAX_SEARCH_DEPTH 5
 #define ESTIMATED_TIME_DIVISOR 1.75
 #define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
 
@@ -371,15 +371,15 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     uint8_t search_depth;
     try
     {
-        for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
+        for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
-            if ((board.communities[index] & board.player_sets[player_num]).count() == 0)
-                continue;
-            set_up_moves(board, player_num, moves[index], index);
-            if (sorting)
-                sort_valid_moves(board, player_num, moves[index], timer, 0);
-            for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
+            for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
             {
+                if ((board.communities[index] & board.player_sets[player_num]).count() == 0)
+                    continue;
+                set_up_moves(board, player_num, moves[index], index);
+                if (sorting)
+                    sort_valid_moves(board, player_num, moves[index], timer, 0);
                 Timer measure_depth_search(timer.return_rest_time());
                 if (search_depth == 0)
                     total_valid_moves += board.valid_moves[player_num][index].count();
