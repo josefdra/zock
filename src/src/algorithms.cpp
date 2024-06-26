@@ -361,17 +361,23 @@ void Algorithms::sort_best_moves_and_communities_to_front(Board &board, std::vec
         std::bitset<MAX_NUM_OF_FIELDS> temp_frame = board.frames[best_community_index];
         uint16_t temp_move_index = best_move_in_community_index[best_community_index];
         moves temp_moves = valid_moves[best_community_index];
+        std::tuple<uint16_t, uint16_t> temp_start_end_community = board.start_end_communities[best_community_index];
+        std::tuple<uint16_t, uint16_t> temp_start_end_frame = board.start_end_frames[best_community_index];
         for (uint8_t i = best_community_index; i > 0; i--)
         {
             board.communities[i] = board.communities[i - 1];
             board.frames[i] = board.frames[i - 1];
             best_move_in_community_index[i] = best_move_in_community_index[i - 1];
             valid_moves[i] = valid_moves[i - 1];
+            board.start_end_communities[i] = board.start_end_communities[i - 1];
+            board.start_end_frames[i] = board.start_end_frames[i - 1];
         }
         board.communities[0] = temp_community;
         board.frames[0] = temp_frame;
         best_move_in_community_index[0] = temp_move_index;
         valid_moves[0] = temp_moves;
+        board.start_end_communities[0] = temp_start_end_community;
+        board.start_end_frames[0] = temp_start_end_frame;
     }
 
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
@@ -422,7 +428,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                 
                 if (search_depth == 0)
                     total_valid_moves += moves[community_index].size();
-                    
+
                 for (uint16_t move_index = 0; move_index < moves[community_index].size(); move_index++)
                 {
                     if (timer.return_rest_time() < timer.exception_time)
