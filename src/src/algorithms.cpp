@@ -5,7 +5,7 @@
 #include "evaluator.hpp"
 #include "logging.hpp"
 
-#define MAX_SEARCH_DEPTH 5
+#define MAX_SEARCH_DEPTH 15
 #define ESTIMATED_TIME_DIVISOR 1.75
 #define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
 

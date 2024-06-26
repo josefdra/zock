@@ -61,7 +61,7 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
                 score -= border_set_size * BEFORE_WALL_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();
 
             else
-                score += (border_set_size - j) * NORMAL_FIELD_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();
+                score += (border_set_size - j) * BEFORE_BEFORE_WALL_MULTIPLIER * (board.border_sets[j] & board.player_sets[player_num]).count();
 
         if (board.is_overwrite_move(player_num))
             score -= OVERWRITE_VALUE;
@@ -72,4 +72,3 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer)
         throw;
     }
 }
-
