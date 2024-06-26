@@ -148,7 +148,7 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
         merge = false;
         for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
             for (uint8_t j = 0; j < board.get_num_of_communities(); j++)
-                if (i != j && (board.communities[j] & board.frames[i]).count() != 0)
+                if (i != j && (board.communities[i] & board.frames[j]).count() != 0)
                 {
                     if (index == j)
                         index = i;
@@ -172,6 +172,7 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
         std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_frames;
         std::vector<std::tuple<uint16_t, uint16_t>> temp_start_end_communities;
         std::vector<std::tuple<uint16_t, uint16_t>> temp_start_end_frames;
+        uint8_t temp_index = index;
         for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
             if (board.communities[i].count() != 0)
             {
@@ -180,6 +181,8 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
                 temp_start_end_communities.push_back(board.start_end_communities[i]);
                 temp_start_end_frames.push_back(board.start_end_frames[i]);
             }
+            else if (i < temp_index)
+                index--;
 
         board.communities = temp_communities;
         board.frames = temp_frames;
