@@ -236,11 +236,19 @@ void MoveExecuter::check_if_protected_field_with_extending(Board &board, uint8_t
 
 void MoveExecuter::recalculate_protected_fields(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &to_color)
 {
+    board.before_bonus_fields.reset();
+    board.before_choice_fields.reset();
     for (uint8_t p = 0; p < m_num_of_players; p++)
         if ((board.player_sets[p] & to_color).count() != 0)
         {
             board.protected_fields[p] = board.fixed_protected_fields & board.player_sets[p];
             for (uint16_t c = 1; c < m_num_of_fields; c++)
+            {
+                if (board.board_sets[C].test(c))
+                    calculcate_choice_and_bonus_fields(c, board.before_choice_fields);
+                else if (board.board_sets[B].test(c))
+                    calculcate_choice_and_bonus_fields(c, board.before_bonus_fields);
+
                 if (board.fixed_protected_fields.test(c))
                     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
                     {
@@ -248,16 +256,36 @@ void MoveExecuter::recalculate_protected_fields(Board &board, std::bitset<MAX_NU
                         if (next_coord != 0 && board.player_sets[p].test(next_coord) && !board.protected_fields[p].test(next_coord))
                             check_if_protected_field_with_extending(board, p, next_coord);
                     }
+            }
         }
+}
+
+void MoveExecuter::calculcate_choice_and_bonus_fields(uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &bitset)
+{
+    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+    {
+        uint16_t next_coord = get_transition(c, d);
+        if (next_coord != 0)
+            bitset.set(next_coord);
+    }
 }
 
 void MoveExecuter::extend_protected_fields(Board &board, uint8_t player, std::bitset<MAX_NUM_OF_FIELDS> &to_color)
 {
+    board.before_bonus_fields.reset();
+    board.before_choice_fields.reset();
     board.protected_fields[player] |= board.fixed_protected_fields & board.player_sets[player];
     if ((to_color & board.protected_fields[player]).count() != 0)
         for (uint16_t c = 1; c < m_num_of_fields; c++)
+        {
+            if (board.board_sets[C].test(c))
+                calculcate_choice_and_bonus_fields(c, board.before_choice_fields);
+            else if (board.board_sets[B].test(c))
+                calculcate_choice_and_bonus_fields(c, board.before_bonus_fields);
+
             if (to_color.test(c))
                 check_if_protected_field_with_extending(board, player, c);
+        }
 }
 
 void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, uint8_t &index, bool overwrite_move)
@@ -311,6 +339,8 @@ void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
     uint8_t spec = board.get_spec();
     uint8_t change_stones = 0;
     bool overwrite_move = false;
+    board.reset_bonus_field();
+    board.reset_choice_field();
     if (!board.board_sets[EMPTY].test(coord))
     {
         board.decrement_overwrite_stones(player);
@@ -322,18 +352,21 @@ void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
         board.board_sets[EMPTY].reset(coord);
         board.board_sets[B].reset(coord);
         board.increment_bombs(player);
+        board.set_bonus_field();
     }
     else if (spec == OVERWRITE_SPEC)
     {
         board.board_sets[EMPTY].reset(coord);
         board.board_sets[B].reset(coord);
         board.increment_overwrite_stones(player);
+        board.set_bonus_field();
     }
     else if (spec != 0)
     {
         board.board_sets[EMPTY].reset(coord);
         board.board_sets[C].reset(coord);
         change_stones = spec;
+        board.set_choice_field();
     }
     update_boards(player, change_stones, board, index, overwrite_move);
 }

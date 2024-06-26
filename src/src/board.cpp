@@ -90,6 +90,16 @@ void Board::set_final_state()
     final_state = true;
 }
 
+void Board::set_bonus_field()
+{
+    m_bonus_field = true;
+}
+
+void Board::set_choice_field()
+{
+    m_choice_field = true;
+}
+
 uint8_t Board::get_player_count()
 {
     return m_player_count;
@@ -175,9 +185,29 @@ bool Board::is_final_state()
     return final_state;
 }
 
+bool Board::check_bonus_field()
+{
+    return m_bonus_field;
+}
+
+bool Board::check_choice_field()
+{
+    return m_choice_field;
+}
+
 void Board::reset_overwrite_moves()
 {
     m_overwrite_move = std::vector<bool>(m_player_count, false);
+}
+
+void Board::reset_bonus_field()
+{
+    m_bonus_field = false;
+}
+
+void Board::reset_choice_field()
+{
+    m_choice_field = false;
 }
 
 void Board::one_dimension_2_second_dimension(uint16_t _1D_coord, uint8_t &x, uint8_t &y)

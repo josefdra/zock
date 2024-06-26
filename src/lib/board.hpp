@@ -5,7 +5,7 @@
 #define NUM_OF_BOARD_SETS 6
 #define NUM_OF_WALL_SETS 8
 #define MINUS 0
-#define EMPTY 1 
+#define EMPTY 1
 #define I 2
 #define C 3
 #define B 4
@@ -44,6 +44,8 @@ public:
     void set_bombs(uint8_t, uint16_t);
     void set_overwrite_move(uint8_t);
     void set_final_state();
+    void set_bonus_field();
+    void set_choice_field();
     uint8_t get_player_count();
     uint16_t get_num_of_fields();
     uint8_t get_width();
@@ -61,7 +63,11 @@ public:
     bool has_overwrite_stones(uint8_t);
     bool is_overwrite_move(uint8_t);
     bool is_final_state();
+    bool check_bonus_field();
+    bool check_choice_field();
     void reset_overwrite_moves();
+    void reset_bonus_field();
+    void reset_choice_field();
     void one_dimension_2_second_dimension(uint16_t, uint8_t &, uint8_t &);
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
     std::string get_color_string(Colors);
@@ -96,9 +102,12 @@ public:
     std::vector<uint8_t> num_of_players_in_community;
 
     std::vector<std::tuple<uint16_t, uint16_t>> start_end_communities;
-    std::vector<std::tuple<uint16_t, uint16_t>> start_end_frames;    
+    std::vector<std::tuple<uint16_t, uint16_t>> start_end_frames;
 
     std::vector<bool> disqualified;
+
+    std::bitset<MAX_NUM_OF_FIELDS> before_bonus_fields;
+    std::bitset<MAX_NUM_OF_FIELDS> before_choice_fields;
 
 private:
     uint8_t m_player_count;
@@ -110,6 +119,8 @@ private:
     std::vector<bool> m_overwrite_move;
     int evaluation;
     bool final_state;
+    bool m_bonus_field;
+    bool m_choice_field;
 };
 
 #endif // BOARD_HPP
