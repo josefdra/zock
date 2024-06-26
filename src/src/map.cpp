@@ -20,9 +20,9 @@ Map::Map()
     m_initial_bombs = 0;
     m_num_of_fields = 0;
     m_player_number = 0;
-};
+}
 
-Map::~Map(){};
+Map::~Map(){}
 
 /**
  * @brief Calculation of all possible transitions and their coordinates depending on their direction
