@@ -41,6 +41,7 @@ public:
     void sort_valid_moves(Board &, uint8_t, moves &, Timer &, uint8_t);
     void set_up_moves(Board &, uint8_t, moves &, uint8_t);
     void init_best_board(Board &);
+    void sort_best_moves_and_communities_to_front(Board &, std::vector<uint16_t> &, uint8_t &, moves_vector &);
     Board get_best_coord(Board &, Timer &, bool);
     void calculate_average_branching_factor(bool);
     double estimate_runtime_next_depth(uint8_t &, Timer &);
