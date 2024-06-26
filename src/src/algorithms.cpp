@@ -415,11 +415,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         }
         for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
+            Timer measure_depth_search(timer.return_rest_time());
             for (uint8_t community_index = 0; community_index < board.get_num_of_communities(); community_index++)
             {
                 if (moves[community_index].size() == 0)
                     continue;
-                Timer measure_depth_search(timer.return_rest_time());
+                
                 if (search_depth == 0)
                     total_valid_moves += board.valid_moves[player_num][community_index].count();
                 for (uint16_t move_index = 0; move_index < moves[community_index].size(); move_index++)
@@ -451,15 +452,14 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     board = prev_board;
                     community_index = prev_index;
                 }
-
-                double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
-                if (estimated_runtime > timer.return_rest_time())
-                {
-                    LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
-                    break;
-                }
             }
             sort_best_moves_and_communities_to_front(board, best_move_in_community_index, best_community_index, moves);
+            double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
+            if (estimated_runtime > timer.return_rest_time())
+            {
+                LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                break;
+            }
         }
     }
     catch (TimeLimitExceededException &e)
