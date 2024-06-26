@@ -117,7 +117,7 @@ void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, ui
             prev_coord = next_coord;
             prev_direction = next_direction;
             next_coord = get_transition(prev_coord, prev_direction);
-            if (next_coord == 0 || board.board_sets[EMPTY].test(next_coord))
+            if (next_coord == 0 || board.board_sets[EMPTY].test(next_coord) || next_coord == c)
                 break;
 
             board.valid_moves[player_number][index].set(next_coord);
