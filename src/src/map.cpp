@@ -228,24 +228,6 @@ void Map::set_values(Board &board, uint16_t c)
         board.player_sets[get_symbol(c) - '0' - 1].set(c);
 }
 
-void Map::init_before_wall_values(Board &board, uint16_t c, uint8_t most)
-{
-    for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-    {
-        uint16_t next_coord = get_transition(c, d);
-        if (next_coord != 0 && !board.wall_sets[most - 1].test(next_coord))
-        {
-            board.before_wall_sets[most - 1].set(next_coord);
-            for (uint8_t d2 = 0; d2 < NUM_OF_DIRECTIONS; d2++)
-            {
-                uint16_t next_coord2 = get_transition(next_coord, d2);
-                if (next_coord2 != 0 && !board.wall_sets[most - 1].test(next_coord2) && !board.before_wall_sets[most - 1].test(next_coord2))
-                    board.before_before_wall_sets[most - 1].set(next_coord2);
-            }
-        }
-    }
-}
-
 void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
@@ -260,29 +242,48 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
                 d = (d + 1) % NUM_OF_DIRECTIONS;
                 while (next_coord == 0 && d != prev_dir)
                 {
+                    counter++;
+                    if (counter > most)
+                        most = counter;
+
                     next_coord = get_transition(c, d);
                     d = (d + 1) % NUM_OF_DIRECTIONS;
-                    if (next_coord != 0)
-                        counter = 0;
-                    else
-                    {
-                        counter++;
-                        if (counter > most)
-                            most = counter;
-                    }
                 }
                 counter = 0;
                 d = prev_dir;
             }
             if (most > 0)
-            {
                 board.wall_sets[most - 1].set(c);
-                init_before_wall_values(board, c, most);
-            }
 
             if (most > 3)
                 board.fixed_protected_fields.set(c);
         }
+}
+
+void Map::init_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+            if (board.wall_sets[i].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord))
+                        board.before_wall_sets[i].set(next_coord);
+                }
+}
+
+void Map::init_before_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+            if (board.before_wall_sets[i].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord))
+                        board.before_before_wall_sets[i].set(next_coord);
+                }
 }
 
 bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
@@ -300,6 +301,8 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
     else
     {
         init_wall_values(board, checked);
+        init_before_wall_values(board);
+        init_before_before_wall_values(board);
         return true;
     }
 }

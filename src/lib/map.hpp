@@ -53,8 +53,9 @@ public:
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
     bool check_players(char);
     void set_values(Board &, uint16_t);
-    void init_before_wall_values(Board &, uint16_t, uint8_t);
+    void init_before_wall_values(Board &);
     void init_wall_values(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
+    void init_before_before_wall_values(Board &);
     bool get_walls(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
     void check_if_protected_field(Board &, uint8_t, uint16_t);
     void expand_protected_fields(Board &, uint8_t);
