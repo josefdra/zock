@@ -448,12 +448,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     {
                         best_eval = eval;
                         best_board = board;
-                        best_community_index = community_index;
+                        best_community_index = prev_index;
                     }
-                    if (eval > best_community_eval[community_index])
+                    if (eval > best_community_eval[prev_index])
                     {
-                        best_community_eval[community_index] = eval;
-                        best_move_in_community_index[community_index] = move_index;
+                        best_community_eval[prev_index] = eval;
+                        best_move_in_community_index[prev_index] = move_index;
                     }
                     board = prev_board;
                     community_index = prev_index;
