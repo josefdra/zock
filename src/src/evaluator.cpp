@@ -215,6 +215,7 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 {
     // print_static_evaluation(board);
     // exit(0);
+    
     uint8_t end_game_multiplier = 1;
 
     if (sqrt(board.get_num_of_fields()) > board.board_sets[EMPTY].count())
