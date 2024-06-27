@@ -299,6 +299,32 @@ void Map::init_before_before_before_wall_values(Board &board)
                 }
 }
 
+void Map::init_four_times_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+            if (board.before_before_before_wall_sets[i].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord) && !board.before_before_wall_sets[i].test(next_coord)  && !board.before_before_before_wall_sets[i].test(next_coord))
+                        board.four_times_before_wall_sets[i].set(next_coord);
+                }
+}
+
+void Map::init_five_times_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+            if (board.four_times_before_wall_sets[i].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord) && !board.before_before_wall_sets[i].test(next_coord)  && !board.before_before_before_wall_sets[i].test(next_coord) && !board.four_times_before_wall_sets[i].test(next_coord))
+                        board.five_times_before_wall_sets[i].set(next_coord);
+                }
+}
+
 bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
@@ -317,6 +343,8 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
         init_before_wall_values(board);
         init_before_before_wall_values(board);
         init_before_before_before_wall_values(board);
+        init_four_times_before_wall_values(board);
+        init_five_times_before_wall_values(board);
         return true;
     }
 

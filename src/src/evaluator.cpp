@@ -59,6 +59,34 @@ int get_before_before_before_wall_value(Board &board, uint8_t player_num)
     return value * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
 }
 
+int get_four_times_before_wall_value(Board &board, uint8_t player_num)
+{
+    int value = 0;
+    value += (board.player_sets[player_num] & board.four_times_before_wall_sets[ONE_WALL]).count() * ONE_WALL_VALUE;
+    value += (board.player_sets[player_num] & board.four_times_before_wall_sets[TWO_WALLS]).count() * TWO_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.four_times_before_wall_sets[THREE_WALLS]).count() * THREE_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.four_times_before_wall_sets[FOUR_WALLS]).count() * FOUR_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.four_times_before_wall_sets[FIVE_WALLS]).count() * FIVE_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.four_times_before_wall_sets[SIX_WALLS]).count() * SIX_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.four_times_before_wall_sets[SEVEN_WALLS]).count() * SEVEN_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.four_times_before_wall_sets[EIGHT_WALLS]).count() * EIGHT_WALLS_VALUE;
+    return value * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+}
+
+int get_five_times_before_wall_value(Board &board, uint8_t player_num)
+{
+    int value = 0;
+    value += (board.player_sets[player_num] & board.five_times_before_wall_sets[ONE_WALL]).count() * ONE_WALL_VALUE;
+    value += (board.player_sets[player_num] & board.five_times_before_wall_sets[TWO_WALLS]).count() * TWO_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.five_times_before_wall_sets[THREE_WALLS]).count() * THREE_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.five_times_before_wall_sets[FOUR_WALLS]).count() * FOUR_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.five_times_before_wall_sets[FIVE_WALLS]).count() * FIVE_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.five_times_before_wall_sets[SIX_WALLS]).count() * SIX_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.five_times_before_wall_sets[SEVEN_WALLS]).count() * SEVEN_WALLS_VALUE;
+    value += (board.player_sets[player_num] & board.five_times_before_wall_sets[EIGHT_WALLS]).count() * EIGHT_WALLS_VALUE;
+    return value * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+}
+
 void adjust_wall_values(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> all_stones = board.board_sets[X];
@@ -70,6 +98,8 @@ void adjust_wall_values(Board &board)
         board.before_wall_sets[i] &= all_stones;
         board.before_before_wall_sets[i] &= all_stones;
         board.before_before_before_wall_sets[i] &= all_stones;
+        board.four_times_before_wall_sets[i] &= all_stones;
+        board.five_times_before_wall_sets[i] &= all_stones;
     }
 }
 
@@ -141,7 +171,39 @@ void print_static_evaluation(Board &board)
         if (board.before_before_before_wall_sets[SEVEN_WALLS].test(c))
             field_score += SEVEN_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
         if (board.before_before_before_wall_sets[EIGHT_WALLS].test(c))
-            field_score += EIGHT_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
+            field_score += EIGHT_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.four_times_before_wall_sets[ONE_WALL].test(c))
+            field_score += ONE_WALL_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.four_times_before_wall_sets[TWO_WALLS].test(c))
+            field_score += TWO_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.four_times_before_wall_sets[THREE_WALLS].test(c))
+            field_score += THREE_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.four_times_before_wall_sets[FOUR_WALLS].test(c))
+            field_score += FOUR_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.four_times_before_wall_sets[FIVE_WALLS].test(c))
+            field_score += FIVE_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.four_times_before_wall_sets[SIX_WALLS].test(c))
+            field_score += SIX_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.four_times_before_wall_sets[SEVEN_WALLS].test(c))
+            field_score += SEVEN_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.four_times_before_wall_sets[EIGHT_WALLS].test(c))
+            field_score += EIGHT_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.five_times_before_wall_sets[ONE_WALL].test(c))
+            field_score += ONE_WALL_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.five_times_before_wall_sets[TWO_WALLS].test(c))
+            field_score += TWO_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.five_times_before_wall_sets[THREE_WALLS].test(c))
+            field_score += THREE_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.five_times_before_wall_sets[FOUR_WALLS].test(c))
+            field_score += FOUR_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.five_times_before_wall_sets[FIVE_WALLS].test(c))
+            field_score += FIVE_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.five_times_before_wall_sets[SIX_WALLS].test(c))
+            field_score += SIX_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.five_times_before_wall_sets[SEVEN_WALLS].test(c))
+            field_score += SEVEN_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+        if (board.five_times_before_wall_sets[EIGHT_WALLS].test(c))
+            field_score += EIGHT_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
 
         std::cout << std::setw(4) << field_score << " ";
         if (c % board.get_width() == 0)
@@ -185,6 +247,8 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
         score += get_wall_value(board, player_num);
         score += get_before_wall_value(board, player_num);
         score += get_before_before_wall_value(board, player_num);
+        score += get_four_times_before_wall_value(board, player_num);
+        score += get_five_times_before_wall_value(board, player_num);
 
         adjust_wall_values(board);
 
