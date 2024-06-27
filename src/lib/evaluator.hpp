@@ -32,6 +32,7 @@
 #define CHOICE_VALUE 200
 #define MAX_NUM_OF_DIRECTIONS 8
 #define BETWEEN_PLAYERS_VALUE 20;
+#define NO_MOVE_VALUE 1000
 
 #include <bitset>
 #include <stdint.h>
@@ -47,6 +48,6 @@ int get_before_wall_value(Board &, uint8_t);
 int get_before_before_wall_value(Board &, uint8_t);
 void adjust_wall_values(Board &);
 void print_static_evaluation(Board &);
-int get_evaluation(Board &, uint8_t, Timer &, MoveGenerator &);
+int get_evaluation(Board &, uint8_t, Timer &, MoveGenerator &, uint8_t);
 
 #endif // EVALUATOR_HPP

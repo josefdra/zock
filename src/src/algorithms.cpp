@@ -187,7 +187,7 @@ int Algorithms::minimax(Board &board, int alpha, int beta, uint8_t depth, uint8_
 
         uint8_t next_player = get_next_player(player_num, board, timer, index);
         if (depth == 0 || board.is_final_state())
-            return get_evaluation(board, player_num, timer, m_move_gen);
+            return get_evaluation(board, player_num, timer, m_move_gen, index);
 
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
@@ -218,7 +218,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
 
         uint8_t next_player = get_next_player(player_num, board, timer, index);
         if (depth == 0 || board.is_final_state())
-            return get_evaluation(board, player_num, timer, m_move_gen);
+            return get_evaluation(board, player_num, timer, m_move_gen, index);
 
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);

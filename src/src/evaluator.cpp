@@ -118,7 +118,7 @@ void print_static_evaluation(Board &board)
     }
 }
 
-int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator &move_gen)
+int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator &move_gen, uint8_t index)
 {
     // print_static_evaluation(board);
     // exit(0);
@@ -136,11 +136,17 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
             if (timer.return_rest_time() < timer.exception_time)
                 throw TimeLimitExceededException("Timeout in evaluation");
 
+            if ((board.communities[index] & board.player_sets[i]).count() == 0)
+                continue;
+
             if (board.disqualified[i])
                 board.reset_valid_moves(i);
 
             if (i != player_num)
+            {
+                move_gen.calculate_valid_no_ow_moves(board, i, index);
                 score -= board.get_total_moves(i).count() * ENEMY_MOVE_MULTIPLIER + board.player_sets[i].count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier + board.protected_fields[i].count() * ENEMY_PROTECTED_FIELD_MULTIPLIER;
+            }
             else
                 score += board.get_total_moves(player_num).count() * MOVE_MULTIPLIER + board.player_sets[player_num].count() * STONE_MULTIPLIER * end_game_multiplier + board.protected_fields[i].count() * PROTECTED_FIELD_MULTIPLIER;
         }
@@ -156,6 +162,9 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
         if (board.is_overwrite_move(player_num))
             score -= OVERWRITE_VALUE;
+
+        if (board.valid_moves[player_num][index].count() == 0)
+            score -= NO_MOVE_VALUE;
         else if (board.check_bonus_field())
             score += BONUS_VALUE;
         else if (board.check_choice_field())
