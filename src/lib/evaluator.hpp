@@ -33,7 +33,7 @@
 #define BONUS_VALUE 2000
 #define CHOICE_VALUE 200
 #define MAX_NUM_OF_DIRECTIONS 8
-#define BETWEEN_PLAYERS_VALUE 100
+#define BETWEEN_PLAYERS_VALUE 50
 
 #include <bitset>
 #include <stdint.h>
