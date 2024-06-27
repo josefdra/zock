@@ -125,7 +125,7 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, uint8_t commu
     uint8_t end_game_multiplier = 1;
 
     if (sqrt(board.get_num_of_fields()) > board.board_sets[EMPTY].count())
-        end_game_multiplier = 10;
+        end_game_multiplier = 50;
 
     try
     {
