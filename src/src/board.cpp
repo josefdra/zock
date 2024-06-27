@@ -7,6 +7,8 @@ Board::Board(Map &map)
       player_sets(map.get_player_count()),
       valid_moves(map.get_player_count()),
       wall_sets(),
+      before_wall_sets(),
+      before_before_wall_sets(),
       fixed_protected_fields(),
       protected_fields(map.get_player_count()),
       overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
@@ -17,6 +19,10 @@ Board::Board(Map &map)
       start_end_communities(0),
       start_end_frames(0),
       disqualified(map.get_player_count(), false),
+      before_bonus_fields(),
+      before_choice_fields(),
+      num_of_players_eliminated(0),
+      no_moves(0),
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
       m_width(map.get_width()),
@@ -25,7 +31,9 @@ Board::Board(Map &map)
       m_spec(0),
       m_overwrite_move(map.get_player_count(), false),
       evaluation(0),
-      final_state(false)
+      final_state(false),
+      m_bonus_field(false),
+      m_choice_field(false)
 {
 }
 
@@ -34,6 +42,8 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       player_sets(board.player_sets),
       valid_moves(board.valid_moves),
       wall_sets(board.wall_sets),
+      before_wall_sets(board.before_wall_sets),
+      before_before_wall_sets(board.before_before_wall_sets),
       fixed_protected_fields(board.fixed_protected_fields),
       protected_fields(board.protected_fields),
       overwrite_stones(board.overwrite_stones),
@@ -44,6 +54,10 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       start_end_communities(board.start_end_communities),
       start_end_frames(board.start_end_frames),
       disqualified(board.disqualified),
+      before_bonus_fields(board.before_bonus_fields),
+      before_choice_fields(board.before_choice_fields),
+      num_of_players_eliminated(board.num_of_players_eliminated),
+      no_moves(board.no_moves),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
       m_width(board.m_width),
@@ -52,7 +66,9 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       m_spec(spec),
       m_overwrite_move(board.m_overwrite_move),
       evaluation(board.evaluation),
-      final_state(board.final_state)
+      final_state(board.final_state),
+      m_bonus_field(board.m_bonus_field),
+      m_choice_field(board.m_choice_field)
 {
 }
 
