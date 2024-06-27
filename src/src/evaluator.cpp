@@ -118,54 +118,41 @@ void print_static_evaluation(Board &board)
     }
 }
 
-int get_evaluation(Board &board, uint8_t player_num, Timer &timer, uint8_t community_index, MoveGenerator &move_gen)
+int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator &move_gen)
 {
     // print_static_evaluation(board);
     // exit(0);
     uint8_t end_game_multiplier = 1;
 
     if (sqrt(board.get_num_of_fields()) > board.board_sets[EMPTY].count())
-        end_game_multiplier = 50;
+        end_game_multiplier = 10;
 
     try
     {
         int score = 0;
 
-        uint16_t coord = board.get_coord();
-        for(uint8_t d = 0; d < MAX_NUM_OF_DIRECTIONS / 2; d++)
-        {
-            uint16_t trans1 = move_gen.get_transition(coord, d);
-            uint16_t trans2 = move_gen.get_transition(coord, move_gen.get_reverse_direction(d));
-            for(uint8_t i = 0; i < board.get_player_count(); i++)
-                if(trans1 != 0 && trans2 != 0 && board.player_sets[i].test(trans1) && board.player_sets[i].test(trans2))
-                    score += BETWEEN_PLAYERS_VALUE;
-        }
+        // uint16_t coord = board.get_coord();
+        // for(uint8_t d = 0; d < MAX_NUM_OF_DIRECTIONS / 2; d++)
+        // {
+        //     uint16_t trans1 = move_gen.get_transition(coord, d);
+        //     uint16_t trans2 = move_gen.get_transition(coord, move_gen.get_reverse_direction(d));
+        //     for(uint8_t i = 0; i < board.get_player_count(); i++)
+        //         if(trans1 != 0 && trans2 != 0 && board.player_sets[i].test(trans1) && board.player_sets[i].test(trans2))
+        //             score += BETWEEN_PLAYERS_VALUE;
+        // }
 
         for (uint8_t i = 0; i < board.get_player_count(); i++)
         {
             if (timer.return_rest_time() < timer.exception_time)
                 throw TimeLimitExceededException("Timeout in evaluation");
 
-            if ((board.communities[community_index] & board.player_sets[i]).count() == 0)
-                continue;
-
-            score += board.num_of_players_eliminated[community_index] * ELIMINATE_PLAYER_VALUE;
-
-            if (!(board.no_moves & (1 << i)))
-                move_gen.calculate_valid_no_ow_moves(board, i, community_index);
-
-            if (board.valid_moves[i][community_index].count() == 0)
-                board.no_moves |= (1 << i);
+            if (board.disqualified[i])
+                board.reset_valid_moves(i);
 
             if (i != player_num)
-                if (board.no_moves & (1 << i))
-                    score += ENEMY_NO_MOVE_VALUE;
-                else
-                    score -= board.valid_moves[i][community_index].count() * ENEMY_MOVE_MULTIPLIER + board.player_sets[i].count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier + board.protected_fields[i].count() * ENEMY_PROTECTED_FIELD_MULTIPLIER;
-            else if (board.no_moves & (1 << i))
-                score -= NO_MOVE_VALUE;
+                score -= board.get_total_moves(i).count() * ENEMY_MOVE_MULTIPLIER + board.player_sets[i].count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier + board.protected_fields[i].count() * ENEMY_PROTECTED_FIELD_MULTIPLIER;
             else
-                score += board.valid_moves[i][community_index].count() * MOVE_MULTIPLIER + board.player_sets[player_num].count() * STONE_MULTIPLIER * end_game_multiplier + board.protected_fields[i].count() * PROTECTED_FIELD_MULTIPLIER;
+                score += board.get_total_moves(player_num).count() * MOVE_MULTIPLIER + board.player_sets[player_num].count() * STONE_MULTIPLIER * end_game_multiplier + board.protected_fields[i].count() * PROTECTED_FIELD_MULTIPLIER;
         }
 
         score += get_wall_value(board, player_num);

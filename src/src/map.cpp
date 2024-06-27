@@ -305,18 +305,6 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
         init_before_before_wall_values(board);
         return true;
     }
-
-    std::bitset<MAX_NUM_OF_FIELDS> all_stones;
-    for (auto &set : board.player_sets)
-        all_stones |= set;
-
-    all_stones |= board.board_sets[X];
-
-    for (auto &set : board.before_wall_sets)
-        set &= ~all_stones;
-
-    for (auto &set : board.before_before_wall_sets)
-        set &= ~all_stones;
 }
 
 void Map::check_if_protected_field(Board &board, uint8_t player, uint16_t coord)
@@ -464,8 +452,6 @@ void Map::init_communities(Board &board)
     board.frames.resize(board.get_num_of_communities());
     board.start_end_frames.resize(board.get_num_of_communities(), std::make_tuple(65000, 0));
     init_frames(board);
-    for (uint8_t p = 0; p < m_player_count; p++)
-        board.valid_moves[p].resize(board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>(0));
     init_players_in_communities_count(board);
 }
 
