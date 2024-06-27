@@ -110,10 +110,6 @@ public:
     std::bitset<MAX_NUM_OF_FIELDS> before_bonus_fields;
     std::bitset<MAX_NUM_OF_FIELDS> before_choice_fields;
 
-    std::vector<uint8_t> num_of_players_eliminated;
-
-    uint8_t no_moves;
-
 private:
     uint8_t m_player_count;
     uint16_t m_num_of_fields;

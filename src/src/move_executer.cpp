@@ -128,18 +128,15 @@ void MoveExecuter::update_communities_and_frames(std::bitset<MAX_NUM_OF_FIELDS> 
 
 void MoveExecuter::update_players_in_communities_count(Board &board)
 {
-    std::vector<uint8_t> temp_num_of_players_in_communities = board.num_of_players_in_community;
     board.num_of_players_in_community.clear();
-    board.num_of_players_eliminated.clear();
-    for(uint8_t i = 0; i < board.get_num_of_communities(); i++)
+    for (auto &community : board.communities)
     {
         uint8_t count = 0;
         for (uint8_t i = 0; i < m_num_of_players; i++)
-            if ((board.communities[i] & board.player_sets[i]).count() != 0)
+            if ((community & board.player_sets[i]).count() != 0)
                 count++;
 
         board.num_of_players_in_community.push_back(count);
-        board.num_of_players_eliminated.push_back(temp_num_of_players_in_communities[i] - count);
     }
 }
 
@@ -200,7 +197,8 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
 
             board.num_of_players_in_community.push_back(count);
         }
-    }    
+    }
+    update_players_in_communities_count(board);
 }
 
 void MoveExecuter::check_if_protected_field_with_extending(Board &board, uint8_t player, uint16_t coord)
@@ -305,8 +303,6 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     update_bits(to_color, player, board);
     if (board.get_num_of_communities() > 1)
         merge_communities(board, index);
-
-    update_players_in_communities_count(board);
 
     if (overwrite_move)
         recalculate_protected_fields(board, to_color);

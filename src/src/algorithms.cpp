@@ -18,27 +18,20 @@ Algorithms::~Algorithms() {}
 uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &timer, uint8_t &index)
 {
     uint8_t next_player = player_num;
-    board.no_moves = 0;
     do
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
-        board.valid_moves[next_player].clear();
-        board.valid_moves[next_player].resize(board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>());
-        if (!board.disqualified[next_player] && (board.player_sets[next_player] & board.communities[index]).count() != 0)
+        if (!board.disqualified[next_player])
         {
+            board.valid_moves[next_player].clear();
+            board.valid_moves[next_player].resize(board.get_num_of_communities());
             if ((board.communities[index] & board.player_sets[next_player]).count() != 0)
             {
-                board.no_moves |= (1 << next_player);
                 m_move_gen.calculate_valid_no_ow_moves(board, next_player, index);
-                if (board.has_overwrite_stones(player_num) && board.valid_moves[next_player][index].count() == 0)
-                {
+                if (board.valid_moves[next_player][index].count() == 0)
                     m_move_gen.calculate_valid_ow_moves(board, next_player, timer, index);
-                    board.valid_moves[next_player][index] |= (board.board_sets[X] & board.communities[index]);
-                }
             }
         }
-        else
-            board.no_moves |= (1 << next_player);
 
         if (next_player == player_num)
         {
@@ -194,7 +187,7 @@ int Algorithms::minimax(Board &board, int alpha, int beta, uint8_t depth, uint8_
 
         uint8_t next_player = get_next_player(player_num, board, timer, index);
         if (depth == 0 || board.is_final_state())
-            return get_evaluation(board, player_num, timer, index, m_move_gen);
+            return get_evaluation(board, player_num, timer, m_move_gen);
 
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
@@ -225,7 +218,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
 
         uint8_t next_player = get_next_player(player_num, board, timer, index);
         if (depth == 0 || board.is_final_state())
-            return get_evaluation(board, player_num, timer, index, m_move_gen);
+            return get_evaluation(board, player_num, timer, m_move_gen);
 
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
@@ -432,7 +425,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             {
                 if (moves[community_index].size() == 0)
                     continue;
-
+                
                 if (search_depth == 0)
                     total_valid_moves += moves[community_index].size();
 
