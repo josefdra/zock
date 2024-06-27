@@ -131,6 +131,16 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, uint8_t commu
     {
         int score = 0;
 
+        uint16_t coord = board.get_coord();
+        for(uint8_t d = 0; d < MAX_NUM_OF_DIRECTIONS / 2; d++)
+        {
+            uint16_t trans1 = move_gen.get_transition(coord, d);
+            uint16_t trans2 = move_gen.get_transition(coord, move_gen.get_reverse_direction(d));
+            for(uint8_t i = 0; i < board.get_player_count(); i++)
+                if(trans1 != 0 && trans2 != 0 && board.player_sets[i].test(trans1) && board.player_sets[i].test(trans2))
+                    score += BETWEEN_PLAYERS_VALUE;
+        }
+
         for (uint8_t i = 0; i < board.get_player_count(); i++)
         {
             if (timer.return_rest_time() < timer.exception_time)
