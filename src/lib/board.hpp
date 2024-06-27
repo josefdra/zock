@@ -89,7 +89,8 @@ public:
     std::vector<std::vector<std::bitset<MAX_NUM_OF_FIELDS>>> valid_moves;
     // first 8 sets for 1 to 8 walls next to field
     std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> wall_sets;
-    std::vector<std::bitset<MAX_NUM_OF_FIELDS>> border_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_wall_sets;
     std::bitset<MAX_NUM_OF_FIELDS> fixed_protected_fields;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> protected_fields;
 
@@ -108,6 +109,10 @@ public:
 
     std::bitset<MAX_NUM_OF_FIELDS> before_bonus_fields;
     std::bitset<MAX_NUM_OF_FIELDS> before_choice_fields;
+
+    std::vector<uint8_t> num_of_players_eliminated;
+
+    uint8_t no_moves;
 
 private:
     uint8_t m_player_count;

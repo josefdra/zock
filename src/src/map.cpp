@@ -22,7 +22,7 @@ Map::Map()
     m_player_number = 0;
 }
 
-Map::~Map(){}
+Map::~Map() {}
 
 /**
  * @brief Calculation of all possible transitions and their coordinates depending on their direction
@@ -228,10 +228,10 @@ void Map::set_values(Board &board, uint16_t c)
         board.player_sets[get_symbol(c) - '0' - 1].set(c);
 }
 
-void Map::init_wall_values(Board &board)
+void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        if (board.border_sets[0].test(c))
+        if (checked.test(c))
         {
             uint8_t counter = 0;
             uint8_t most = 0;
@@ -242,16 +242,12 @@ void Map::init_wall_values(Board &board)
                 d = (d + 1) % NUM_OF_DIRECTIONS;
                 while (next_coord == 0 && d != prev_dir)
                 {
+                    counter++;
+                    if (counter > most)
+                        most = counter;
+
                     next_coord = get_transition(c, d);
                     d = (d + 1) % NUM_OF_DIRECTIONS;
-                    if (next_coord != 0)
-                        counter = 0;
-                    else
-                    {
-                        counter++;
-                        if (counter > most)
-                            most = counter;
-                    }
                 }
                 counter = 0;
                 d = prev_dir;
@@ -262,6 +258,32 @@ void Map::init_wall_values(Board &board)
             if (most > 3)
                 board.fixed_protected_fields.set(c);
         }
+}
+
+void Map::init_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+            if (board.wall_sets[i].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord))
+                        board.before_wall_sets[i].set(next_coord);
+                }
+}
+
+void Map::init_before_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+            if (board.before_wall_sets[i].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord))
+                        board.before_before_wall_sets[i].set(next_coord);
+                }
 }
 
 bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
@@ -278,58 +300,10 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
         return false;
     else
     {
-        board.border_sets[0] = checked;
-        init_wall_values(board);
+        init_wall_values(board, checked);
+        init_before_wall_values(board);
+        init_before_before_wall_values(board);
         return true;
-    }
-}
-
-std::bitset<MAX_NUM_OF_FIELDS> Map::get_inside_of_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked, uint16_t counter)
-{
-    std::bitset<MAX_NUM_OF_FIELDS> set;
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-        if (board.border_sets[counter].test(c))
-            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                if (get_transition(c, d) != 0)
-                    if (checked.test(c))
-                    {
-                        uint16_t trans1 = get_transition(c, get_reverse_direction(d + 7));
-                        uint16_t trans2 = get_transition(c, get_reverse_direction(d));
-                        uint16_t trans3 = get_transition(c, get_reverse_direction(d + 1));
-                        if (trans1 != 0 && !checked.test(trans1))
-                            set.set(trans1);
-
-                        if (trans2 != 0 && !checked.test(trans2))
-                            set.set(trans2);
-
-                        if (trans3 != 0 && !checked.test(trans3))
-                            set.set(trans3);
-                    }
-
-    checked |= set;
-    return set;
-}
-
-bool Map::set_player_border_sets(Board &board, std::bitset<MAX_NUM_OF_FIELDS> set)
-{
-    if (set.count() == 0)
-        return false;
-    board.border_sets.push_back(set);
-    return true;
-}
-
-void Map::init_evaluation(Board &board)
-{
-    std::bitset<MAX_NUM_OF_FIELDS> checked;
-    if (get_walls(board, checked))
-    {
-        uint16_t counter = 0;
-        while (set_player_border_sets(board, get_inside_of_walls(board, checked, counter)))
-        {
-            counter++;
-            if (counter == 2)
-                break;
-        }
     }
 }
 
@@ -495,7 +469,8 @@ Board Map::init_boards_and_players()
         ret_board.set_bombs(i, m_initial_bombs);
     }
 
-    init_evaluation(ret_board);
+    std::bitset<MAX_NUM_OF_FIELDS> checked;
+    get_walls(ret_board, checked);
     for (uint8_t p = 0; p < get_player_count(); p++)
         expand_protected_fields(ret_board, p);
 

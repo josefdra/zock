@@ -2,10 +2,10 @@
 #define EVALUATOR_HPP
 
 #define ONE_WALL_VALUE 2
-#define TWO_WALLS_VALUE 3
-#define THREE_WALLS_VALUE 5
-#define FOUR_WALLS_VALUE 9
-#define FIVE_WALLS_VALUE 7
+#define TWO_WALLS_VALUE 2
+#define THREE_WALLS_VALUE 4
+#define FOUR_WALLS_VALUE 17
+#define FIVE_WALLS_VALUE 14
 #define SIX_WALLS_VALUE 3
 #define SEVEN_WALLS_VALUE 1
 #define EIGHT_WALLS_VALUE -5
@@ -18,31 +18,35 @@
 #define SEVEN_WALLS 6
 #define EIGHT_WALLS 7
 #define WALL_MULTIPLIER 50
-#define MOVE_MULTIPLIER 100
-#define STONE_MULTIPLIER 50
-#define ENEMY_MOVE_MULTIPLIER 50
-#define ENEMY_STONE_MULTIPLIER 25
+#define BEFORE_WALL_MULTIPLIER -20
+#define BEFORE_BEFORE_WALL_MULTIPLIER 20
+#define MOVE_MULTIPLIER 50
+#define STONE_MULTIPLIER 5
+#define ENEMY_MOVE_MULTIPLIER 15
+#define ENEMY_STONE_MULTIPLIER 2
 #define ELIMINATE_PLAYER_VALUE 10000
-#define BEFORE_WALL_MULTIPLIER 100
-#define BEFORE_BEFORE_WALL_MULTIPLIER 100
+#define ENEMY_NO_MOVE_VALUE 10000
+#define NO_MOVE_VALUE 100000
 #define OVERWRITE_VALUE 100000
-#define ENEMY_PROTECTED_FIELD_MULTIPLIER 20
-#define PROTECTED_FIELD_MULTIPLIER 150
+#define ENEMY_PROTECTED_FIELD_MULTIPLIER 10
+#define PROTECTED_FIELD_MULTIPLIER 50
 #define BONUS_VALUE 1000
 #define CHOICE_VALUE 200
-#define BEFORE_BONUS_VALUE 500
-#define BEFORE_CHOICE_VALUE 100
 
 #include <bitset>
 #include <stdint.h>
 #include <cmath>
+#include <iomanip>
 
 class Board;
 class MoveGenerator;
 class Timer;
 
 int get_wall_value(Board &, uint8_t);
-int get_eliminate_player_score(Board &, uint8_t);
-int get_evaluation(Board &, uint8_t, Timer &);
+int get_before_wall_value(Board &, uint8_t);
+int get_before_before_wall_value(Board &, uint8_t);
+void adjust_wall_values(Board &);
+void print_static_evaluation(Board &);
+int get_evaluation(Board &, uint8_t, Timer &, uint8_t, MoveGenerator &);
 
 #endif // EVALUATOR_HPP

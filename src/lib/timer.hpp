@@ -53,7 +53,7 @@ public:
         return duration.count();
     }
 
-    uint32_t exception_time = 100000;
+    uint32_t exception_time = 200000;
 
 private:
     std::chrono::time_point<std::chrono::high_resolution_clock> m_start_time;
