@@ -65,19 +65,19 @@ void print_static_evaluation(Board &board)
         int field_score = 0;
         if (board.wall_sets[ONE_WALL].test(c))
             field_score += ONE_WALL_VALUE * WALL_MULTIPLIER;
-        if (board.wall_sets[TWO_WALLS].test(c))
+        else if (board.wall_sets[TWO_WALLS].test(c))
             field_score += TWO_WALLS_VALUE * WALL_MULTIPLIER;
-        if (board.wall_sets[THREE_WALLS].test(c))
+        else if (board.wall_sets[THREE_WALLS].test(c))
             field_score += THREE_WALLS_VALUE * WALL_MULTIPLIER;
-        if (board.wall_sets[FOUR_WALLS].test(c))
+        else if (board.wall_sets[FOUR_WALLS].test(c))
             field_score += FOUR_WALLS_VALUE * WALL_MULTIPLIER;
-        if (board.wall_sets[FIVE_WALLS].test(c))
+        else if (board.wall_sets[FIVE_WALLS].test(c))
             field_score += FIVE_WALLS_VALUE * WALL_MULTIPLIER;
-        if (board.wall_sets[SIX_WALLS].test(c))
+        else if (board.wall_sets[SIX_WALLS].test(c))
             field_score += SIX_WALLS_VALUE * WALL_MULTIPLIER;
-        if (board.wall_sets[SEVEN_WALLS].test(c))
+        else if (board.wall_sets[SEVEN_WALLS].test(c))
             field_score += SEVEN_WALLS_VALUE * WALL_MULTIPLIER;
-        if (board.wall_sets[EIGHT_WALLS].test(c))
+        else if (board.wall_sets[EIGHT_WALLS].test(c))
             field_score += EIGHT_WALLS_VALUE * WALL_MULTIPLIER;
         if (board.before_wall_sets[ONE_WALL].test(c))
             field_score += ONE_WALL_VALUE * BEFORE_WALL_MULTIPLIER;

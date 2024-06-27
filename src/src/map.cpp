@@ -452,6 +452,8 @@ void Map::init_communities(Board &board)
     board.frames.resize(board.get_num_of_communities());
     board.start_end_frames.resize(board.get_num_of_communities(), std::make_tuple(65000, 0));
     init_frames(board);
+    for (uint8_t p = 0; p < m_player_count; p++)
+        board.valid_moves[p].resize(board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>(0));
     init_players_in_communities_count(board);
 }
 
