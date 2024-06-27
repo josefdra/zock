@@ -50,6 +50,12 @@ void MoveExecuter::update_bits(std::bitset<MAX_NUM_OF_FIELDS> &to_color, uint8_t
     for (auto &bitset : board.player_sets)
         bitset &= ~to_color;
 
+    for (auto &set : board.before_wall_sets)
+        set &= ~to_color;
+
+    for (auto &set : board.before_before_wall_sets)
+        set &= ~to_color;
+
     board.player_sets[player] |= to_color;
 }
 
