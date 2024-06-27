@@ -130,7 +130,7 @@ void MoveExecuter::update_players_in_communities_count(Board &board)
 {
     std::vector<uint8_t> temp_num_of_players_in_communities = board.num_of_players_in_community;
     board.num_of_players_in_community.clear();
-    board.num_of_players_eliminated.resize(board.get_num_of_communities(), 0);
+    board.num_of_players_eliminated.clear();
     for(uint8_t i = 0; i < board.get_num_of_communities(); i++)
     {
         uint8_t count = 0;
@@ -139,7 +139,7 @@ void MoveExecuter::update_players_in_communities_count(Board &board)
                 count++;
 
         board.num_of_players_in_community.push_back(count);
-        board.num_of_players_eliminated[i] = temp_num_of_players_in_communities[i] - count;
+        board.num_of_players_eliminated.push_back(temp_num_of_players_in_communities[i] - count);
     }
 }
 
