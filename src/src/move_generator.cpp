@@ -172,14 +172,6 @@ void MoveGenerator::calculate_valid_ow_moves(Board &board, uint8_t player_number
     calculate_moves_from_player_ow(board, player_number, timer, index);
 }
 
-void MoveGenerator::add_x_moves(Board &board, uint8_t player_number, uint8_t index)
-{
-    for (uint16_t c = 1; c < m_num_of_fields; c++)
-        if ((board.board_sets[X] & board.communities[index]).test(c))
-            board.valid_moves[player_number][index].set(c);
-    board.set_overwrite_move(player_number);
-}
-
 uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool sorting)
 {
     MoveExecuter move_exec(map);
@@ -196,13 +188,11 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
 
     if (board.get_total_moves(player).count() == 0 && board.has_overwrite_stones(player))
         for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
+        {
             if ((board.communities[index] & board.player_sets[player]).count() != 0)
                 calculate_valid_ow_moves(board, player, timer, index);
-
-    if (board.get_total_moves(player).count() == 0 && board.has_overwrite_stones(player))
-        for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
-            if ((board.communities[index] & board.board_sets[X]).count() != 0 && board.has_overwrite_stones(player))
-                add_x_moves(board, player, index);
+            board.valid_moves[player][index] |= (board.board_sets[X] & board.communities[index]);
+        }
 
     Board res = algorithms.get_best_coord(board, timer, sorting);
     if (board.board_sets[C].test(res.get_coord()))

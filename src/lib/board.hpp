@@ -91,6 +91,7 @@ public:
     std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> wall_sets;
     std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_wall_sets;
     std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_before_wall_sets;
     std::bitset<MAX_NUM_OF_FIELDS> fixed_protected_fields;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> protected_fields;
 

@@ -286,6 +286,19 @@ void Map::init_before_before_wall_values(Board &board)
                 }
 }
 
+void Map::init_before_before_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+            if (board.before_before_wall_sets[i].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord) && !board.before_before_wall_sets[i].test(next_coord))
+                        board.before_before_before_wall_sets[i].set(next_coord);
+                }
+}
+
 bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
@@ -303,8 +316,10 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
         init_wall_values(board, checked);
         init_before_wall_values(board);
         init_before_before_wall_values(board);
+        init_before_before_before_wall_values(board);
         return true;
     }
+
 }
 
 void Map::check_if_protected_field(Board &board, uint8_t player, uint16_t coord)
