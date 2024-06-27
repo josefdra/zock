@@ -22,10 +22,10 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
     do
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
+        board.valid_moves[next_player].clear();
+        board.valid_moves[next_player].resize(board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>());
         if (!board.disqualified[next_player] && (board.player_sets[next_player] & board.communities[index]).count() != 0)
         {
-            board.valid_moves[next_player].clear();
-            board.valid_moves[next_player].resize(board.get_num_of_communities());
             if ((board.communities[index] & board.player_sets[next_player]).count() != 0)
             {
                 board.no_moves |= (1 << next_player);
@@ -37,7 +37,7 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
                 }
             }
         }
-        else 
+        else
             board.no_moves |= (1 << next_player);
 
         if (next_player == player_num)
@@ -46,7 +46,7 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
                 board.set_final_state();
             return player_num;
         }
-    } while (board.disqualified[next_player] || board.valid_moves[next_player].size() == 0 || board.valid_moves[next_player][index].count() == 0);
+    } while (board.disqualified[next_player] || board.valid_moves[next_player][index].count() == 0);
     return next_player;
 }
 
