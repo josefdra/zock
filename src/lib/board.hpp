@@ -3,7 +3,6 @@
 
 #define MAX_NUM_OF_FIELDS 2501
 #define NUM_OF_BOARD_SETS 6
-#define NUM_OF_WALL_SETS 8
 #define MINUS 0
 #define EMPTY 1
 #define I 2
@@ -38,6 +37,7 @@ public:
     Board(Board &, uint16_t, uint8_t);
     ~Board();
 
+    void set_our_player(uint8_t);
     void set_coord(uint16_t);
     void set_spec(uint8_t);
     void set_overwrite_stones(uint8_t, uint16_t);
@@ -46,6 +46,7 @@ public:
     void set_final_state();
     void set_bonus_field();
     void set_choice_field();
+    uint8_t get_our_player();
     uint8_t get_player_count();
     uint16_t get_num_of_fields();
     uint8_t get_width();
@@ -88,12 +89,8 @@ public:
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> player_sets;
     std::vector<std::vector<std::bitset<MAX_NUM_OF_FIELDS>>> valid_moves;
     // first 8 sets for 1 to 8 walls next to field
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_before_wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> four_times_before_wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> five_times_before_wall_sets;
+    
+    std::vector<int> static_evaluation;
     std::bitset<MAX_NUM_OF_FIELDS> fixed_protected_fields;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> protected_fields;
 
@@ -114,6 +111,7 @@ public:
     std::bitset<MAX_NUM_OF_FIELDS> before_choice_fields;
 
 private:
+    uint8_t m_our_player;
     uint8_t m_player_count;
     uint16_t m_num_of_fields;
     uint8_t m_width;

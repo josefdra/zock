@@ -12,6 +12,29 @@
 #define LOWER_LEFT 5
 #define LEFT 6
 #define UPPER_LEFT 7
+#define NUM_OF_WALL_SETS 8
+#define ONE_WALL_VALUE 2
+#define TWO_WALLS_VALUE 2
+#define THREE_WALLS_VALUE 4
+#define FOUR_WALLS_VALUE 17
+#define FIVE_WALLS_VALUE 14
+#define SIX_WALLS_VALUE 3
+#define SEVEN_WALLS_VALUE 1
+#define EIGHT_WALLS_VALUE -5
+#define ONE_WALL 0
+#define TWO_WALLS 1
+#define THREE_WALLS 2
+#define FOUR_WALLS 3
+#define FIVE_WALLS 4
+#define SIX_WALLS 5
+#define SEVEN_WALLS 6
+#define EIGHT_WALLS 7
+#define WALL_MULTIPLIER 50
+#define BEFORE_WALL_MULTIPLIER -20
+#define BEFORE_BEFORE_WALL_MULTIPLIER 20
+#define BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER -10
+#define FOUR_TIMES_BEFORE_WALL_MULTIPLIER 5
+#define FIVE_TIMES_BEFORE_WALL_MULTIPLIER -1
 
 #include <stdint.h>
 #include <sstream>
@@ -48,6 +71,8 @@ public:
     uint16_t get_initial_bombs();
     std::vector<uint16_t> get_transitions();
     uint8_t get_reverse_direction(uint8_t);
+    void expand_coord(uint16_t, uint8_t, uint16_t);
+    void init_next_coords();
     void read_map(std::stringstream);
     void one_dimension_2_second_dimension(uint16_t, uint8_t &, uint8_t &);
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
@@ -67,8 +92,18 @@ public:
     void remove_double_communities(Board &);
     void init_players_in_communities_count(Board &);
     void init_communities(Board &);
+    void init_static_evaluation(Board &);
     Board init_boards_and_players();
     void generate_transitions();
+
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_before_wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> four_times_before_wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> five_times_before_wall_sets;
+
+    std::vector<std::vector<uint16_t>> next_coords;
 
 private:
     std::vector<char> m_numbers;

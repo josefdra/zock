@@ -9,10 +9,10 @@ MoveExecuter::MoveExecuter() {}
 
 MoveExecuter::MoveExecuter(Map &map)
 {
+    next_coords = map.next_coords;
     m_transitions = map.get_transitions();
     m_num_of_fields = map.get_num_of_fields();
     m_num_of_players = map.get_player_count();
-    m_player_num = map.get_player_number();
 }
 
 MoveExecuter::~MoveExecuter() {}
@@ -37,11 +37,6 @@ uint8_t MoveExecuter::get_num_of_players()
     return m_num_of_players;
 }
 
-uint8_t MoveExecuter::get_player_num()
-{
-    return m_player_num;
-}
-
 void MoveExecuter::update_bits(std::bitset<MAX_NUM_OF_FIELDS> &to_color, uint8_t player, Board &board)
 {
     for (auto &bitset : board.board_sets)
@@ -60,23 +55,21 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_bits_to_update(uint8_t player, 
     to_color.set(coord);
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
-        uint16_t temp_transition = get_transition(coord, d);
-        uint8_t temp_direction = get_direction(coord, d);
         std::bitset<MAX_NUM_OF_FIELDS> temp;
-        while (temp_transition != 0 && temp_transition != coord && !board.board_sets[EMPTY].test(temp_transition))
-            if (board.player_sets[player].test(temp_transition))
+        std::vector<uint16_t> next_coords_vector = next_coords[(coord - 1) * NUM_OF_DIRECTIONS + d];
+        for (uint16_t i = 0; i < next_coords_vector.size(); i++)
+        {
+            uint16_t next_coord = next_coords_vector[i];
+            if (board.board_sets[EMPTY].test(next_coord))
+                break;
+            else if (board.player_sets[player].test(next_coord))
             {
                 to_color |= temp;
                 break;
             }
             else
-            {
-                temp.set(temp_transition);
-                uint16_t next_transition = get_transition(temp_transition, temp_direction);
-                uint8_t next_direction = get_direction(temp_transition, temp_direction);
-                temp_transition = next_transition;
-                temp_direction = next_direction;
-            }
+                temp.set(next_coords_vector[i]);
+        }
     }
     return to_color;
 }

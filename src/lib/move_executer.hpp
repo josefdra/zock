@@ -26,7 +26,6 @@ public:
     uint8_t get_direction(uint16_t, uint8_t);
     uint16_t get_num_of_fields();
     uint8_t get_num_of_players();
-    uint8_t get_player_num();
     void update_bits(std::bitset<MAX_NUM_OF_FIELDS> &, uint8_t, Board &);
     std::bitset<MAX_NUM_OF_FIELDS> get_bits_to_update(uint8_t, Board &);
     void update_communities_and_frames(std::bitset<MAX_NUM_OF_FIELDS> &, Board &);
@@ -42,11 +41,12 @@ public:
     std::bitset<MAX_NUM_OF_FIELDS> get_fields_to_remove(Board &, uint16_t, uint8_t, std::bitset<MAX_NUM_OF_FIELDS> &);
     Board exec_bomb(uint8_t, Board, uint8_t);
 
+    std::vector<std::vector<uint16_t>> next_coords;
+
 private:
     std::vector<uint16_t> m_transitions;
     uint16_t m_num_of_fields;
     uint8_t m_num_of_players;
-    uint8_t m_player_num;
 };
 
 #endif // MOVE_EXECUTER_HPP
