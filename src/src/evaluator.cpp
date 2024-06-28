@@ -25,8 +25,8 @@ int get_static_eval(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community_play
 
 int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator &move_gen, uint8_t index)
 {
-    // print_static_evaluation(board);
-    // exit(0);
+    print_static_evaluation(board);
+    exit(0);
 
     uint8_t end_game_multiplier = 1;
 

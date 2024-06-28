@@ -284,7 +284,7 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
                 counter = 0;
                 d = prev_dir;
             }
-            if (most == 5 || most == 4)
+            if (most == 5 || most == 4 || most == 3)
                 wall_sets[most - 1].set(c);
 
             if (most > 3)
@@ -295,7 +295,7 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
 void Map::init_before_wall_values(Board &board)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+        for (uint8_t i = 3; i < 5; i++)
             if (wall_sets[i].test(c))
                 for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
                 {
@@ -308,7 +308,7 @@ void Map::init_before_wall_values(Board &board)
 void Map::init_before_before_wall_values(Board &board)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
+        for (uint8_t i = 3; i < 5; i++)
             if (before_wall_sets[i].test(c))
                 for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
                 {
@@ -374,7 +374,7 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
         init_wall_values(board, checked);
         init_before_wall_values(board);
         init_before_before_wall_values(board);
-        init_before_before_before_wall_values(board);
+        // init_before_before_before_wall_values(board);
         // init_four_times_before_wall_values(board);
         // init_five_times_before_wall_values(board);
         return true;
@@ -535,102 +535,20 @@ void Map::init_static_evaluation(Board &board)
     {
         if (board.board_sets[MINUS].test(c))
             continue;
-        if (wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * WALL_MULTIPLIER;
         else if (wall_sets[THREE_WALLS].test(c))
             board.static_evaluation[c] += THREE_WALLS_VALUE * WALL_MULTIPLIER;
         else if (wall_sets[FOUR_WALLS].test(c))
             board.static_evaluation[c] += FOUR_WALLS_VALUE * WALL_MULTIPLIER;
         else if (wall_sets[FIVE_WALLS].test(c))
             board.static_evaluation[c] += FIVE_WALLS_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * WALL_MULTIPLIER;
-        if (before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
         if (before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
+            board.static_evaluation[c] += BEFORE_FOUR_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
         if (before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
+            board.static_evaluation[c] += BEFORE_FIVE_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
         if (before_before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
+            board.static_evaluation[c] += BEFORE_BEFORE_FOUR_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
         if (before_before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+            board.static_evaluation[c] += BEFORE_BEFORE_FIVE_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
     }
 }
 

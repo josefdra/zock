@@ -82,6 +82,7 @@ void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bo
         net.send_move(move_gen.generate_move(board, algorithms, timer, sorting));
     else
         net.send_move(move_gen.generate_bomb(board, map, timer));
+    board.print(board.get_our_player(), true);
 }
 
 void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
