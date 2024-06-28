@@ -180,7 +180,7 @@ uint32_t MoveGenerator::generate_move(Board &board, Map &map, Timer &timer, bool
     uint8_t x, y, player;
     player = map.get_player_number();
     board.valid_moves[player].clear();
-    board.valid_moves[player].resize(board.get_num_of_communities());
+    board.valid_moves[player].resize(board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>(0));
 
     for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
         if ((board.communities[index] & board.player_sets[player]).count() != 0)

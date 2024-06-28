@@ -21,15 +21,19 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
     do
     {
         next_player = (next_player + 1) % m_move_exec.get_num_of_players();
+        board.valid_moves[next_player].clear();
+        board.valid_moves[next_player].resize(board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>(0));
+
         if (!board.disqualified[next_player])
         {
-            board.valid_moves[next_player].clear();
-            board.valid_moves[next_player].resize(board.get_num_of_communities());
             if ((board.communities[index] & board.player_sets[next_player]).count() != 0)
             {
                 m_move_gen.calculate_valid_no_ow_moves(board, next_player, index);
-                if (board.valid_moves[next_player][index].count() == 0)
+                if (board.has_overwrite_stones(player_num) && board.valid_moves[next_player][index].count() == 0)
+                {
                     m_move_gen.calculate_valid_ow_moves(board, next_player, timer, index);
+                    board.valid_moves[next_player][index] |= (board.board_sets[X] & board.communities[index]);
+                }
             }
         }
 
@@ -425,7 +429,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             {
                 if (moves[community_index].size() == 0)
                     continue;
-                
+
                 if (search_depth == 0)
                     total_valid_moves += moves[community_index].size();
 

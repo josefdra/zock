@@ -307,7 +307,7 @@ void Map::init_four_times_before_wall_values(Board &board)
                 for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
                 {
                     uint16_t next_coord = get_transition(c, d);
-                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord) && !board.before_before_wall_sets[i].test(next_coord)  && !board.before_before_before_wall_sets[i].test(next_coord))
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord) && !board.before_before_wall_sets[i].test(next_coord) && !board.before_before_before_wall_sets[i].test(next_coord))
                         board.four_times_before_wall_sets[i].set(next_coord);
                 }
 }
@@ -320,7 +320,7 @@ void Map::init_five_times_before_wall_values(Board &board)
                 for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
                 {
                     uint16_t next_coord = get_transition(c, d);
-                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord) && !board.before_before_wall_sets[i].test(next_coord)  && !board.before_before_before_wall_sets[i].test(next_coord) && !board.four_times_before_wall_sets[i].test(next_coord))
+                    if (next_coord != 0 && !board.wall_sets[i].test(next_coord) && !board.before_wall_sets[i].test(next_coord) && !board.before_before_wall_sets[i].test(next_coord) && !board.before_before_before_wall_sets[i].test(next_coord) && !board.four_times_before_wall_sets[i].test(next_coord))
                         board.five_times_before_wall_sets[i].set(next_coord);
                 }
 }
@@ -347,7 +347,6 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
         init_five_times_before_wall_values(board);
         return true;
     }
-
 }
 
 void Map::check_if_protected_field(Board &board, uint8_t player, uint16_t coord)
@@ -518,6 +517,9 @@ Board Map::init_boards_and_players()
         expand_protected_fields(ret_board, p);
 
     init_communities(ret_board);
+    for (uint8_t p = 0; p < get_player_count(); p++)
+        ret_board.valid_moves[p].resize(ret_board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>(0));
+
     return ret_board;
 }
 
