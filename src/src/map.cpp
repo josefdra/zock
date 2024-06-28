@@ -284,7 +284,7 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
                 counter = 0;
                 d = prev_dir;
             }
-            if (most > 0)
+            if (most == 5 || most == 4)
                 wall_sets[most - 1].set(c);
 
             if (most > 3)
@@ -375,8 +375,8 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
         init_before_wall_values(board);
         init_before_before_wall_values(board);
         init_before_before_before_wall_values(board);
-        init_four_times_before_wall_values(board);
-        init_five_times_before_wall_values(board);
+        // init_four_times_before_wall_values(board);
+        // init_five_times_before_wall_values(board);
         return true;
     }
 }
