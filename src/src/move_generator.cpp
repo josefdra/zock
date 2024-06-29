@@ -143,6 +143,58 @@ void MoveGenerator::calculate_moves_from_frame_no_ow(Board &board, uint8_t playe
                 board.valid_moves[player_number][index].set(c);
 }
 
+bool MoveGenerator::check_no_ow_moves_from_player(Board &board, uint8_t player_number, uint8_t index)
+{
+    for (uint16_t c = std::get<0>(board.start_end_communities[index]); c < std::get<1>(board.start_end_communities[index]) + 1; c++)
+        if ((board.player_sets[player_number] & board.communities[index]).test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                std::vector<uint16_t> next_coords_vector = next_coords[(c - 1) * NUM_OF_DIRECTIONS + d];
+                bool first = true;
+                for (uint16_t i = 0; i < next_coords_vector.size(); i++)
+                {
+                    uint16_t next_coord = next_coords_vector[i];
+                    if (board.player_sets[player_number].test(next_coord))
+                        break;
+                    if (first)
+                    {
+                        if (board.board_sets[EMPTY].test(next_coord))
+                            break;
+                        else
+                            first = false;
+                    }
+
+                    if (board.board_sets[EMPTY].test(next_coord))
+                        return true;
+                }
+            }
+
+    return false;
+}
+
+bool MoveGenerator::check_no_ow_moves_from_frame(Board &board, uint8_t player_number, uint8_t index)
+{
+    for (uint16_t c = std::get<0>(board.start_end_frames[index]); c < std::get<1>(board.start_end_frames[index]) + 1; c++)
+        if (board.frames[index].test(c))
+            if (check_if_valid_move(board, c, player_number))
+                return true;
+
+    return false;
+}
+
+bool MoveGenerator::check_if_player_has_no_overwrite_move(Board &board, uint8_t player_number, uint8_t index)
+{
+    if (2 * (board.communities[index] & board.player_sets[player_number]).count() < board.frames[index].count())
+    {
+        if (check_no_ow_moves_from_player(board, player_number, index))
+            return true;
+    }
+    else if (check_no_ow_moves_from_frame(board, player_number, index))
+        return true;
+        
+    return false;
+}
+
 void MoveGenerator::calculate_valid_no_ow_moves(Board &board, uint8_t player_number, uint8_t &index)
 {
     if (2 * (board.communities[index] & board.player_sets[player_number]).count() < board.frames[index].count())

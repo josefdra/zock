@@ -14,6 +14,8 @@
 #define MAX_NUM_OF_DIRECTIONS 8
 #define NO_MOVE_VALUE 100000
 #define MAX_NUM_OF_FIELDS 2501
+#define ENEMY_HAS_MOVE_VALUE -5000
+#define ENEMY_HAS_NO_MOVE_VALUE 10000
 
 #include <bitset>
 #include <stdint.h>

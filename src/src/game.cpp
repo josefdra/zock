@@ -4,6 +4,7 @@
 #include "board.hpp"
 #include "timer.hpp"
 #include "logging.hpp"
+#include "statistics.hpp"
 
 Game::Game()
 {
@@ -71,6 +72,7 @@ void Game::end(Board &board, uint8_t player_number)
 
     else
         calculate_winner(board);
+    print_total_statistics();
 }
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)

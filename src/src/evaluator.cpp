@@ -2,6 +2,7 @@
 #include "board.hpp"
 #include "move_generator.hpp"
 #include "timer.hpp"
+#include "statistics.hpp"
 
 void print_static_evaluation(Board &board)
 {
@@ -25,6 +26,8 @@ int get_static_eval(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community_play
 
 int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator &move_gen, uint8_t index)
 {
+    Timer evaluation_time;
+    leafs_calculated++;
     // print_static_evaluation(board);
     // exit(0);
 
@@ -59,22 +62,26 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
             if (i != player_num)
             {
-                move_gen.calculate_valid_no_ow_moves(board, i, index);
-                enemy_move_value += board.valid_moves[i][index].count() * ENEMY_MOVE_MULTIPLIER;
+                if (move_gen.check_if_player_has_no_overwrite_move(board, i, index))
+                    enemy_move_value += ENEMY_HAS_MOVE_VALUE;
+                else 
+                    enemy_move_value += ENEMY_HAS_NO_MOVE_VALUE;
+
                 enemy_stone_value += player_stones_in_community.count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier;
                 enemy_protected_fields_value += board.protected_fields[i].count() * ENEMY_PROTECTED_FIELD_MULTIPLIER;
-                enemy_static_eval += get_static_eval(board, player_stones_in_community, index);
-                score -= enemy_move_value + enemy_stone_value + enemy_protected_fields_value + enemy_static_eval;
+                enemy_static_eval += get_static_eval(board, player_stones_in_community, index);                
             }
             else
             {
                 our_move_value += board.valid_moves[i][index].count() * MOVE_MULTIPLIER;
                 our_stone_value += player_stones_in_community.count() * STONE_MULTIPLIER * end_game_multiplier;
                 our_protected_fields_value += board.protected_fields[i].count() * PROTECTED_FIELD_MULTIPLIER;
-                our_static_eval += get_static_eval(board, player_stones_in_community, index);
-                score += our_move_value + our_stone_value + our_protected_fields_value + our_static_eval;
+                our_static_eval += get_static_eval(board, player_stones_in_community, index);                
             }
         }
+
+        score += enemy_move_value - enemy_stone_value - enemy_protected_fields_value - enemy_static_eval;
+        score += our_move_value + our_stone_value + our_protected_fields_value + our_static_eval;
 
         // std::cout << "Our move value: " << our_move_value << std::endl;
         // std::cout << "Our stone value: " << our_stone_value << std::endl;
@@ -100,6 +107,7 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
         // std::cout << "Score: " << score << std::endl;
 
+        average_evaluation_time += evaluation_time.get_elapsed_time();
         return score;
     }
     catch (const TimeLimitExceededException &)
