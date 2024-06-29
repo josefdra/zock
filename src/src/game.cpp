@@ -112,12 +112,14 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
 void Game::run(Network &net, bool sorting)
 {
     Map map;
+    Timer timer;
     map.read_map(net.receive_map());
     Board board = map.init_boards_and_players();
     board.print(0, false);
     move_gen = MoveGenerator(map);
     move_exec = MoveExecuter(map);
     algorithms = Algorithms(move_exec, move_gen);
+    std::cout << "Time: " << timer.get_elapsed_time() << std::endl;
 
     while (!is_game_over() && !board.disqualified[map.get_player_number()])
     {
