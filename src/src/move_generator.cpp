@@ -110,6 +110,8 @@ void MoveGenerator::calculate_valid_overwrite_moves_from_player(Board &board, ui
                 break;
             else
                 board.valid_moves[player_number][index].set(next_coord);
+            if (board.player_sets[player_number].test(next_coord))
+                break;
         }
     }
 }
@@ -168,7 +170,8 @@ uint32_t MoveGenerator::generate_move(Board &board, Algorithms &algorithms, Time
         if ((board.communities[index] & board.player_sets[player]).count() != 0)
             calculate_valid_no_ow_moves(board, player, index);
 
-    if (board.get_total_moves(player).count() == 0 && board.has_overwrite_stones(player))
+    // board.get_total_moves(player).count() == 0 && 
+    if (board.has_overwrite_stones(player))
         for (uint8_t index = 0; index < board.get_num_of_communities(); index++)
         {
             if ((board.communities[index] & board.player_sets[player]).count() != 0)
