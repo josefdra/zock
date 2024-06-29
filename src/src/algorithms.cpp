@@ -9,7 +9,7 @@
 #define ESTIMATED_TIME_DIVISOR 1.75
 #define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
 
-Algorithms::Algorithms(){};
+Algorithms::Algorithms(){}
 
 Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields()))), m_move_exec(move_exec), m_move_gen(move_gen)
 {

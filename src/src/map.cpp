@@ -149,8 +149,10 @@ void Map::expand_coord(uint16_t c, uint8_t d, uint16_t next_coords_pos)
     uint8_t next_direction = get_direction(c, d);
     uint16_t prev_coord = c;
     uint8_t prev_direction = d;
-    while (next_coord != 0 && next_coord != c && get_reverse_direction(prev_direction) != next_direction)
+    while (next_coord != 0 && next_coord != c)
     {
+        if (next_coord == prev_coord && get_reverse_direction(prev_direction) == next_direction)
+            break;
         prev_coord = next_coord;
         prev_direction = next_direction;
         next_coords[next_coords_pos].push_back(next_coord);
