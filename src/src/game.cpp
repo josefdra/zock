@@ -1,11 +1,10 @@
 #include "game.hpp"
 #include "map.hpp"
 #include "network.hpp"
-#include "move_generator.hpp"
-#include "move_executer.hpp"
 #include "board.hpp"
 #include "timer.hpp"
 #include "logging.hpp"
+#include "statistics.hpp"
 
 Game::Game()
 {
@@ -73,17 +72,16 @@ void Game::end(Board &board, uint8_t player_number)
 
     else
         calculate_winner(board);
+    print_total_statistics();
 }
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
 {
     if (((data >> BYTE) & FOUR_SET_BYTES) != 0)
         m_initial_time_limit = ((data >> BYTE) & FOUR_SET_BYTES);
-
     Timer timer(m_initial_time_limit);
-    MoveGenerator move_gen(map);
     if (!bomb_phase)
-        net.send_move(move_gen.generate_move(board, map, timer, sorting));
+        net.send_move(move_gen.generate_move(board, algorithms, timer, sorting));
     else
         net.send_move(move_gen.generate_bomb(board, map, timer));
 }
@@ -94,7 +92,6 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     board.set_coord(map.two_dimension_2_one_dimension((data >> FOUR_BYTES) & ONE_SET_BYTE, (data >> TWO_BYTES) & ONE_SET_BYTE));
     board.set_spec((data >> BYTE) & ONE_SET_BYTE);
     uint8_t player = (data & ONE_SET_BYTE) - 1;
-    MoveExecuter move_exec(map);
     if (!bomb_phase)
     {
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
@@ -128,7 +125,10 @@ void Game::run(Network &net, bool sorting)
         {
         case TYPE_RECEIVE_PLAYERNUM:
         {
-            map.set_player_number(data & ONE_SET_BYTE);
+            board.set_our_player(data & ONE_SET_BYTE);
+            move_gen = MoveGenerator(map);
+            move_exec = MoveExecuter(map);
+            algorithms = Algorithms(move_exec, move_gen);
             break;
         }
         case TYPE_RECEIVE_TURN_REQUEST:

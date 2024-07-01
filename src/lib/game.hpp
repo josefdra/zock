@@ -14,6 +14,10 @@
 #include <vector>
 #include <timer.hpp>
 
+#include "move_generator.hpp"
+#include "move_executer.hpp"
+#include "algorithms.hpp"
+
 class Network;
 class Map;
 class Board;
@@ -34,6 +38,10 @@ public:
     void turn_request(Network &, uint64_t &, Map &, Board &, bool, bool);
     void receive_turn(Map &, uint64_t &, Board &, bool);
     void run(Network &, bool);
+
+    MoveGenerator move_gen;
+    MoveExecuter move_exec;
+    Algorithms algorithms;
 
 private:
     bool m_game_over;

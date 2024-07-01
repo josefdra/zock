@@ -24,12 +24,13 @@ typedef std::tuple<int, uint16_t, uint8_t> move_tuple;
 class Algorithms
 {
 public:
+    Algorithms();
     Algorithms(MoveExecuter &, MoveGenerator &);
     ~Algorithms();
 
     uint8_t get_next_player(uint8_t, Board &, Timer &, uint8_t &);
-    int set_up_best_eval_minimax(uint8_t);
-    int set_up_best_eval_brs(uint8_t &, uint8_t);
+    int set_up_best_eval_minimax(Board &, uint8_t);
+    int set_up_best_eval_brs(Board &, uint8_t &, uint8_t);
     int do_move_minimax(Board &, move &, int, int, uint8_t, Timer &, Board &, uint8_t, bool, uint8_t &);
     int do_move_brs(Board &, move &, int, int, uint8_t, uint8_t, Timer &, Board &, uint8_t, bool, uint8_t &);
     void get_eval_minimax(Board &, moves &, int, int, uint8_t, Timer &, Board &, uint8_t, int &, bool, uint8_t &);
@@ -43,7 +44,7 @@ public:
     void init_best_board(Board &);
     void sort_best_moves_and_communities_to_front(Board &, std::vector<uint16_t> &, uint8_t &, moves_vector &);
     Board get_best_coord(Board &, Timer &, bool);
-    void calculate_average_branching_factor(bool);
+    void calculate_average_branching_factor();
     double estimate_runtime_next_depth(uint8_t &, Timer &);
 
     std::vector<std::vector<uint16_t>> killer_moves;
