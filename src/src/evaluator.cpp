@@ -2,7 +2,6 @@
 #include "board.hpp"
 #include "move_generator.hpp"
 #include "timer.hpp"
-#include "statistics.hpp"
 
 void print_static_evaluation(Board &board)
 {
@@ -26,8 +25,6 @@ int get_static_eval(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community_play
 
 int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator &move_gen, uint8_t index)
 {
-    Timer evaluation_time;
-    leafs_calculated++;
     // print_static_evaluation(board);
     // exit(0);
 
@@ -107,7 +104,6 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
         // std::cout << "Score: " << score << std::endl;
 
-        average_evaluation_time += evaluation_time.get_elapsed_time();
         return score;
     }
     catch (const TimeLimitExceededException &)

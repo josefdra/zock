@@ -4,7 +4,6 @@
 #include "board.hpp"
 #include "evaluator.hpp"
 #include "logging.hpp"
-#include "statistics.hpp"
 
 #define MAX_SEARCH_DEPTH 15
 #define ESTIMATED_TIME_DIVISOR 1.75
@@ -80,9 +79,7 @@ int Algorithms::do_move_minimax(Board &board, move &m, int alpha, int beta, uint
     board.set_coord(std::get<1>(m));
     board.set_spec(std::get<2>(m));
     uint8_t prev_index = index;
-    Timer move_execution_timer;
     m_move_exec.exec_move(next_player, board, index);
-    move_execution_time += move_execution_timer.get_elapsed_time();
     int eval = minimax(board, alpha, beta, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
     index = prev_index;
@@ -94,9 +91,7 @@ int Algorithms::do_move_brs(Board &board, move &m, int alpha, int beta, uint8_t 
     board.set_coord(std::get<1>(m));
     board.set_spec(std::get<2>(m));
     uint8_t prev_index = index;
-    Timer move_execution_timer;
     m_move_exec.exec_move(next_player, board, index);
-    move_execution_time += move_execution_timer.get_elapsed_time();
     int eval = brs(board, alpha, beta, brs_m, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
     index = prev_index;
@@ -195,27 +190,20 @@ int Algorithms::minimax(Board &board, int alpha, int beta, uint8_t depth, uint8_
     {
         static int call_count = 0;
         call_count++;
-        nodes_calculated++;
 
-        Timer get_next_player_timer;
         uint8_t next_player = get_next_player(player_num, board, timer, index);
-        average_next_player_calculation_time += get_next_player_timer.get_elapsed_time();
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer, m_move_gen, index);
 
-        Timer set_up_moves_timer;
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
         set_up_moves(board, next_player, moves, index);
-        set_up_moves_time += set_up_moves_timer.get_elapsed_time();
         total_nodes += moves.size();
         total_valid_moves++;
         calculate_average_branching_factor();
 
-        Timer sorting_timer;
         if (sorting)
             sort_valid_moves(board, next_player, moves, timer, depth);
-        sorting_time += sorting_timer.get_elapsed_time();
         int best_eval = set_up_best_eval_minimax(board, player_num);
         get_eval_minimax(board, moves, alpha, beta, depth, timer, prev_board, next_player, best_eval, sorting, index);
         return best_eval;
@@ -233,27 +221,20 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
     {
         static int call_count = 0;
         call_count++;
-        nodes_calculated++;
 
-        Timer get_next_player_timer;
         uint8_t next_player = get_next_player(player_num, board, timer, index);
-        average_next_player_calculation_time += get_next_player_timer.get_elapsed_time();
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer, m_move_gen, index);
 
-        Timer set_up_moves_timer;
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
         set_up_moves(board, next_player, moves, index);
-        set_up_moves_time += set_up_moves_timer.get_elapsed_time();
         total_nodes += moves.size();
         total_valid_moves++;
         calculate_average_branching_factor();
 
-        Timer sorting_timer;
         if (sorting)
             sort_valid_moves(board, next_player, moves, timer, depth);
-        sorting_time += sorting_timer.get_elapsed_time();
         int best_eval = set_up_best_eval_brs(board, brs_m, player_num);
         if (brs_m < 2)
             get_eval_brs(board, moves, alpha, beta, brs_m, depth, timer, prev_board, next_player, best_eval, sorting, index);
@@ -439,13 +420,9 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         {
             if (board.valid_moves[player_num][community_index].count() == 0)
                 continue;
-            Timer set_up_moves_timer;
             set_up_moves(board, player_num, moves[community_index], community_index);
-            set_up_moves_time += set_up_moves_timer.get_elapsed_time();
-            Timer sorting_timer;
             if (sorting)
                 sort_valid_moves(board, player_num, moves[community_index], timer, 0);
-            sorting_time += sorting_timer.get_elapsed_time();
         }
         for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
         {
@@ -463,13 +440,10 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     if (timer.return_rest_time() < timer.exception_time)
                         throw TimeLimitExceededException(("Timeout in get_best_coord"));
 
-                    nodes_calculated++;
                     board.set_coord(std::get<1>(moves[community_index][move_index]));
                     board.set_spec(std::get<2>(moves[community_index][move_index]));
                     uint8_t prev_index = community_index;
-                    Timer move_execution_timer;
                     m_move_exec.exec_move(player_num, board, community_index);
-                    move_execution_time += move_execution_timer.get_elapsed_time();
                     int eval;
                     if (board.num_of_players_in_community[community_index] > 2)
                         eval = brs(board, alpha, beta, 0, search_depth, player_num, timer, sorting, community_index);
@@ -506,7 +480,9 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }
+#ifdef DEBUG
     print_statistics();
+#endif // DEBUG
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
 }
