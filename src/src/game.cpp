@@ -72,8 +72,9 @@ void Game::end(Board &board, uint8_t player_number)
 
     else
         calculate_winner(board);
-    
-    print_total_statistics();
+
+    print_total_time_statistics();
+    print_total_evaluation_statistics();
 }
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)

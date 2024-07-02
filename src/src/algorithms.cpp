@@ -506,7 +506,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }
-    print_statistics();
+    // print_evaluation_statistics();
+    // print_time_statistics();    
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
 }
