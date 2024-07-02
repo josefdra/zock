@@ -11,7 +11,8 @@
 
 Map::Map() : wall_sets(),
              before_wall_sets(),
-             next_coords()
+             next_coords(),
+             middle_set()
 {
 
     m_numbers = std::vector<char>();
@@ -222,7 +223,8 @@ void Map::set_values(Board &board, uint16_t c)
     if (get_symbol(c) == '0')
         board.board_sets[EMPTY].set(c);
 
-    else if (get_symbol(c) == '-'){
+    else if (get_symbol(c) == '-')
+    {
         board.board_sets[MINUS].set(c);
         board.decrement_not_minus_fields();
     }
@@ -303,6 +305,14 @@ void Map::init_before_wall_values(Board &board)
                 if (next_coord != 0 && !wall_sets[FOUR_WALLS].test(next_coord) && !wall_sets[FIVE_WALLS].test(next_coord))
                     before_wall_sets[FIVE_WALLS].set(next_coord);
             }
+}
+
+void Map::init_middle_values()
+{
+    middle_set.set(28);
+    middle_set.set(29);
+    middle_set.set(36);
+    middle_set.set(37);
 }
 
 bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
@@ -494,6 +504,10 @@ void Map::init_static_evaluation(Board &board)
     all_stones |= board.board_sets[X];
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
     {
+        if (c >= 19 && c <= 22 || c >= 27 && c <= 30 || c >= 35 && c <= 38 || c >= 43 && c <= 46)
+            board.static_evaluation[c] += OUTER_MIDDLE_VALUE;
+        if (c == 28 || c == 29 || c == 36 || c == 37)
+            board.static_evaluation[c] += MIDDLE_VALUE;
         if (board.board_sets[MINUS].test(c))
             continue;
         else if (wall_sets[FOUR_WALLS].test(c))

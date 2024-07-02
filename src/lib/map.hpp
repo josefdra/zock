@@ -16,6 +16,8 @@
 #define FIVE_WALLS_VALUE 440
 #define BEFORE_FOUR_WALLS_VALUE -50
 #define BEFORE_FIVE_WALLS_VALUE -50
+#define MIDDLE_VALUE 0
+#define OUTER_MIDDLE_VALUE 0
 #define FOUR_WALLS 0
 #define FIVE_WALLS 1
 
@@ -61,6 +63,7 @@ public:
     void set_values(Board &, uint16_t);
     void init_wall_values(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
     void init_before_wall_values(Board &);
+    void init_middle_values();
     bool get_walls(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
     void check_if_protected_field(Board &, uint8_t, uint16_t);
     void expand_protected_fields(Board &, uint8_t);
@@ -79,6 +82,8 @@ public:
     std::vector<std::vector<uint16_t>> next_coords;
 
     std::bitset<MAX_NUM_OF_FIELDS * NUM_OF_DIRECTIONS> checked_coords;
+
+    std::bitset<MAX_NUM_OF_FIELDS> middle_set;
 
 private:
     std::vector<char> m_numbers;
