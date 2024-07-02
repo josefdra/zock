@@ -92,6 +92,7 @@ public:
     
     std::vector<int> static_evaluation;
     std::bitset<MAX_NUM_OF_FIELDS> fixed_protected_fields;
+    std::bitset<MAX_NUM_OF_FIELDS> corners;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> protected_fields;
 
     std::vector<uint16_t> overwrite_stones;

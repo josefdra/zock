@@ -11,16 +11,16 @@ void init_print(bool quietMode, const char *ip, int port, bool sorting)
 {
     LOG_INFO("Gruppe01 | Dräxl, Koch, Kuhn");
     if (sorting)
-        LOG_INFO("Zugsortierung aktiviert");
+        LOG_INFO("Move ordering active");
 
     else
-        LOG_INFO("Zugsortierung deaktiviert");
+        LOG_INFO("Move ordering disabled");
 
     if (quietMode)
-        LOG_INFO("Quiet mode aktiviert");
+        LOG_INFO("Quiet mode active");
 
     if (ip != nullptr)
-        LOG_INFO(std::string("IP-Adresse: ") + ip);
+        LOG_INFO(std::string("IP-Adress: ") + ip);
 
     if (port != -1)
         LOG_INFO("Port: " + std::to_string(port));
@@ -99,6 +99,6 @@ int main(int argc, char *argv[])
     Game game;
     game.run(net, sorting);
 
-    LOG_INFO("terminated without errors");
+    LOG_INFO("Terminated without errors");
     return 0;
 }

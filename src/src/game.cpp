@@ -38,7 +38,7 @@ void Game::set_disqualified(Board &board, uint8_t player_number)
 
 void Game::set_bomb_phase()
 {
-    LOG_INFO("\nbomb phase starting\n");
+    LOG_INFO("Bomb phase starting\n");
     m_bomb_phase = true;
 }
 
@@ -108,6 +108,8 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
         LOG_INFO("Player " + std::to_string((int)player + 1) + " threw bomb at " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
         board = move_exec.exec_bomb(player, board, map.get_strength());
     }
+    if (!board.corners.test(board.get_coord()))
+        board.static_evaluation[board.get_coord()] = 0;
 
 #ifdef DEBUG
     board.print(player, (board.get_our_player() == player));
