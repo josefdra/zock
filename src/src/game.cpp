@@ -119,6 +119,8 @@ void Game::run(Network &net, bool sorting)
     map.read_map(net.receive_map());
     Board board = map.init_boards_and_players();
     board.print(0, false);
+    move_gen = MoveGenerator(map);
+    move_exec = MoveExecuter(map);
 
     while (!is_game_over() && !board.disqualified[board.get_our_player()])
     {
@@ -128,8 +130,6 @@ void Game::run(Network &net, bool sorting)
         case TYPE_RECEIVE_PLAYERNUM:
         {
             board.set_our_player(data & ONE_SET_BYTE);
-            move_gen = MoveGenerator(map);
-            move_exec = MoveExecuter(map);
             algorithms = Algorithms(move_exec, move_gen);
             break;
         }

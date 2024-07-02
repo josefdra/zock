@@ -71,6 +71,7 @@ Board::~Board() {}
 void Board::set_our_player(uint8_t player)
 {
     m_our_player = player - 1;
+    LOG_INFO("Our player: " + std::to_string(m_our_player + 1));
 }
 
 void Board::set_coord(uint16_t coord)
