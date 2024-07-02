@@ -33,6 +33,7 @@ void Game::set_game_over()
 void Game::set_disqualified(Board &board, uint8_t player_number)
 {
     board.disqualified[player_number] = true;
+    LOG_INFO("Player " + std::to_string(player_number + 1) + " is disqualified");
 }
 
 void Game::set_bomb_phase()
@@ -135,7 +136,6 @@ void Game::run(Network &net, bool sorting)
         }
         case TYPE_RECEIVE_TURN_REQUEST:
         {
-
             turn_request(net, data, map, board, sorting, m_bomb_phase);
             break;
         }
