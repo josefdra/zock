@@ -64,12 +64,11 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_bits_to_update(uint8_t player, 
                 break;
             else if (board.player_sets[player].test(next_coord))
             {
-                temp.set(next_coord);
                 to_color |= temp;
                 break;
             }
             else
-                temp.set(next_coord);
+                temp.set(next_coords_vector[i]);
         }
     }
     return to_color;
@@ -285,7 +284,6 @@ void MoveExecuter::extend_protected_fields(Board &board, uint8_t player, std::bi
 void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, uint8_t &index, bool overwrite_move)
 {
     uint16_t coord = board.get_coord();
-
     bool inversion = false;
     if (board.board_sets[I].test(coord))
     {
@@ -299,7 +297,7 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     if (board.get_num_of_communities() > 1)
         merge_communities(board, index);
 
-    if (overwrite_move && board.protected_fields[player].test(coord))
+    if (overwrite_move)
         recalculate_protected_fields(board, to_color);
     else
         extend_protected_fields(board, player, to_color);
