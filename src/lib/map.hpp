@@ -57,8 +57,6 @@ public:
     void check_neighbours(uint16_t);
     void set_symbol(uint16_t, unsigned char);
     void set_transition(uint16_t, uint8_t, uint16_t);
-    void set_player_number(uint8_t);
-    uint8_t get_player_number();
     char get_symbol(uint16_t);
     uint16_t get_transition(uint16_t, uint8_t);
     uint8_t get_direction(uint16_t, uint8_t);
@@ -115,7 +113,6 @@ private:
     uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
     uint16_t m_num_of_fields;
-    uint8_t m_player_number;
 };
 
 #endif // MAP_HPP

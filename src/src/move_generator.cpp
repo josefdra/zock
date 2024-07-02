@@ -191,7 +191,7 @@ bool MoveGenerator::check_if_player_has_no_overwrite_move(Board &board, uint8_t 
     }
     else if (check_no_ow_moves_from_frame(board, player_number, index))
         return true;
-        
+
     return false;
 }
 
@@ -290,9 +290,9 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
         // Sort players by number of stones in ascending order
         std::vector<std::pair<uint8_t, uint16_t>> player_stones;
         sort_players_by_stones(player_stones, board);
-        uint8_t target_player = map.get_player_number(), player_index = 0;
+        uint8_t target_player = board.get_our_player(), player_index = 0;
         select_target_player(target_player, player_index, board, player_stones);
-        if ((player_stones[target_player].second - player_stones[map.get_player_number()].second) > affected_by_bomb * board.get_bombs(map.get_player_number()) && (player_index + 1) < static_cast<int>(player_stones.size()))
+        if ((player_stones[target_player].second - player_stones[board.get_our_player()].second) > affected_by_bomb * board.get_bombs(board.get_our_player()) && (player_index + 1) < static_cast<int>(player_stones.size()))
             target_player = player_stones[player_index + 1].first;
 
         uint8_t counter = board.get_player_count();
@@ -321,8 +321,8 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
 
             std::bitset<MAX_NUM_OF_FIELDS> fields_to_remove(move_exec.get_fields_to_remove(board, c, map.get_strength(), mask));
             uint16_t target_deleted_stones = (board.player_sets[target_player] & fields_to_remove).count();
-            uint16_t current_player_deleted_stones = (board.player_sets[map.get_player_number()] & fields_to_remove).count();
-            if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (board.player_sets[map.get_player_number()] & fields_to_remove).count()))
+            uint16_t current_player_deleted_stones = (board.player_sets[board.get_our_player()] & fields_to_remove).count();
+            if (target_deleted_stones > most_deleted_stones || (target_deleted_stones == most_deleted_stones && current_player_deleted_stones < (board.player_sets[board.get_our_player()] & fields_to_remove).count()))
             {
                 most_deleted_stones = target_deleted_stones;
                 coord = c;
@@ -338,7 +338,7 @@ uint32_t MoveGenerator::generate_bomb(Board &board, Map &map, Timer &timer)
 
         if (coord == 0)
             for (uint16_t c = 1; c < m_num_of_fields; c++)
-                if (board.player_sets[map.get_player_number()].test(c))
+                if (board.player_sets[board.get_our_player()].test(c))
                 {
                     coord = c;
                     break;

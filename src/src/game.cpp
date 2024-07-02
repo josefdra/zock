@@ -105,7 +105,7 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     }
 
 #ifdef DEBUG
-    board.print(player, (map.get_player_number() == player));
+    board.print(player, (board.get_our_player() == player));
 #endif // DEBUG
 }
 
@@ -116,7 +116,7 @@ void Game::run(Network &net, bool sorting)
     Board board = map.init_boards_and_players();
     board.print(0, false);
 
-    while (!is_game_over() && !board.disqualified[map.get_player_number()])
+    while (!is_game_over() && !board.disqualified[board.get_our_player()])
     {
         uint64_t data = net.receive_data();
         switch (data >> SEVEN_BYTES)
@@ -165,5 +165,5 @@ void Game::run(Network &net, bool sorting)
         }
         }
     }
-    end(board, map.get_player_number());
+    end(board, board.get_our_player());
 }

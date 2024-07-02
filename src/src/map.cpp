@@ -26,7 +26,6 @@ Map::Map() : wall_sets(),
     m_initial_overwrite_stones = 0;
     m_initial_bombs = 0;
     m_num_of_fields = 0;
-    m_player_number = 0;
 }
 
 Map::~Map() {}
@@ -71,16 +70,6 @@ void Map::set_symbol(uint16_t c, unsigned char s)
 void Map::set_transition(uint16_t c, uint8_t d, uint16_t t)
 {
     m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] = t;
-}
-
-void Map::set_player_number(uint8_t n)
-{
-    m_player_number = n - 1;
-}
-
-uint8_t Map::get_player_number()
-{
-    return m_player_number;
 }
 
 char Map::get_symbol(uint16_t c)

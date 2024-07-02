@@ -5,7 +5,7 @@
 Board::Board(Map &map)
     : board_sets(),
       player_sets(map.get_player_count()),
-      valid_moves(map.get_player_count()),      
+      valid_moves(map.get_player_count()),
       static_evaluation(map.get_num_of_fields(), 0),
       fixed_protected_fields(),
       protected_fields(map.get_player_count()),
@@ -19,7 +19,7 @@ Board::Board(Map &map)
       disqualified(map.get_player_count(), false),
       before_bonus_fields(),
       before_choice_fields(),
-      m_our_player(map.get_player_number()),
+      m_our_player(0),
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
       m_width(map.get_width()),
