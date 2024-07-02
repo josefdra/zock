@@ -49,6 +49,7 @@ public:
     uint8_t get_our_player();
     uint8_t get_player_count();
     uint16_t get_num_of_fields();
+    uint16_t get_num_of_not_minus_fields();
     uint8_t get_width();
     uint8_t get_height();
     uint16_t get_overwrite_stones(uint8_t);
@@ -61,6 +62,7 @@ public:
     void increment_bombs(uint8_t);
     void decrement_overwrite_stones(uint8_t);
     void decrement_bombs(uint8_t);
+    void decrement_not_minus_fields();
     bool has_overwrite_stones(uint8_t);
     bool is_overwrite_move(uint8_t);
     bool is_final_state();
@@ -115,6 +117,7 @@ private:
     uint8_t m_our_player;
     uint8_t m_player_count;
     uint16_t m_num_of_fields;
+    uint16_t m_num_of_not_minus_fields;
     uint8_t m_width;
     uint8_t m_height;
     uint16_t m_coord;

@@ -222,8 +222,10 @@ void Map::set_values(Board &board, uint16_t c)
     if (get_symbol(c) == '0')
         board.board_sets[EMPTY].set(c);
 
-    else if (get_symbol(c) == '-')
+    else if (get_symbol(c) == '-'){
         board.board_sets[MINUS].set(c);
+        board.decrement_not_minus_fields();
+    }
 
     else if (get_symbol(c) == 'i')
     {

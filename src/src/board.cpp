@@ -23,6 +23,7 @@ Board::Board(Map &map)
       m_our_player(0),
       m_player_count(map.get_player_count()),
       m_num_of_fields(map.get_num_of_fields()),
+      m_num_of_not_minus_fields(map.get_num_of_fields()),
       m_width(map.get_width()),
       m_height(map.get_height()),
       m_coord(0),
@@ -56,6 +57,7 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       m_our_player(board.m_our_player),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
+      m_num_of_not_minus_fields(board.m_num_of_not_minus_fields),
       m_width(board.m_width),
       m_height(board.m_height),
       m_coord(coord),
@@ -131,6 +133,11 @@ uint16_t Board::get_num_of_fields()
     return m_num_of_fields;
 }
 
+uint16_t Board::get_num_of_not_minus_fields()
+{
+    return m_num_of_not_minus_fields;
+}
+
 uint8_t Board::get_width()
 {
     return m_width;
@@ -189,6 +196,11 @@ void Board::decrement_overwrite_stones(uint8_t player)
 void Board::decrement_bombs(uint8_t player)
 {
     bombs[player]--;
+}
+
+void Board::decrement_not_minus_fields()
+{
+    m_num_of_not_minus_fields--;
 }
 
 bool Board::has_overwrite_stones(uint8_t player)
