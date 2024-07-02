@@ -12,29 +12,10 @@
 #define LOWER_LEFT 5
 #define LEFT 6
 #define UPPER_LEFT 7
-#define NUM_OF_WALL_SETS 8
-#define ONE_WALL_VALUE 2
-#define TWO_WALLS_VALUE 2
-#define THREE_WALLS_VALUE 4
-#define FOUR_WALLS_VALUE 17
-#define FIVE_WALLS_VALUE 14
-#define SIX_WALLS_VALUE 3
-#define SEVEN_WALLS_VALUE 1
-#define EIGHT_WALLS_VALUE -5
-#define ONE_WALL 0
-#define TWO_WALLS 1
-#define THREE_WALLS 2
-#define FOUR_WALLS 3
-#define FIVE_WALLS 4
-#define SIX_WALLS 5
-#define SEVEN_WALLS 6
-#define EIGHT_WALLS 7
-#define WALL_MULTIPLIER 50
-#define BEFORE_WALL_MULTIPLIER -20
-#define BEFORE_BEFORE_WALL_MULTIPLIER 20
-#define BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER -10
-#define FOUR_TIMES_BEFORE_WALL_MULTIPLIER 5
-#define FIVE_TIMES_BEFORE_WALL_MULTIPLIER -1
+#define FOUR_WALLS_VALUE 350
+#define FIVE_WALLS_VALUE 250
+#define FOUR_WALLS 0
+#define FIVE_WALLS 1
 
 #include <stdint.h>
 #include <sstream>
@@ -89,7 +70,7 @@ public:
     Board init_boards_and_players();
     void generate_transitions();
 
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, 2> wall_sets;
 
     std::vector<std::vector<uint16_t>> next_coords;
 

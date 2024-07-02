@@ -72,6 +72,7 @@ void print_time_statistics();
 void print_total_evaluation_statistics();
 void print_evaluation_statistics();
 
+void ajdust_time_values();
 void adjust_evaluation_values();
 
 #endif // STATISTICS_HPP

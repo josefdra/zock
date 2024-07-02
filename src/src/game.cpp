@@ -114,6 +114,18 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
 #endif // DEBUG
 }
 
+void Game::print_static_evaluation(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+    {
+        std::cout << std::setw(4) << board.static_evaluation[c] << " ";
+
+        if (c % board.get_width() == 0)
+            std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+
 void Game::run(Network &net, bool sorting)
 {
     Map map;
@@ -122,6 +134,7 @@ void Game::run(Network &net, bool sorting)
     board.print(0, false);
     move_gen = MoveGenerator(map);
     move_exec = MoveExecuter(map);
+    print_static_evaluation(board);
 
     while (!is_game_over() && !board.disqualified[board.get_our_player()])
     {

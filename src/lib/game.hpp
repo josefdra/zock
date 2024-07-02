@@ -37,6 +37,7 @@ public:
     void end(Board &, uint8_t);
     void turn_request(Network &, uint64_t &, Map &, Board &, bool, bool);
     void receive_turn(Map &, uint64_t &, Board &, bool);
+    void print_static_evaluation(Board &);
     void run(Network &, bool);
 
     MoveGenerator move_gen;

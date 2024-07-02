@@ -4,16 +4,6 @@
 #include "timer.hpp"
 #include "statistics.hpp"
 
-void print_static_evaluation(Board &board)
-{
-    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-    {
-        std::cout << std::setw(4) << board.static_evaluation[c] << " ";
-        if (c % board.get_width() == 0)
-            std::cout << std::endl;
-    }
-}
-
 int get_static_eval(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community_player_stones, uint8_t index)
 {
     int return_value = 0;
@@ -28,8 +18,6 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 {
     Timer evaluation_time;
     leafs_calculated++;
-    // print_static_evaluation(board);
-    // exit(0);
 
     uint8_t end_game_multiplier = 1;
 

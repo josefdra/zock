@@ -179,6 +179,24 @@ void print_evaluation_statistics()
     this_calculation_choice_value = 0;
 }
 
+void ajdust_time_values()
+{
+    total_nodes_calculated += nodes_calculated;
+    nodes_calculated = 0;
+    total_leafs_calculated += leafs_calculated;
+    leafs_calculated = 0;
+    total_average_next_player_calculation_time += average_next_player_calculation_time;
+    average_next_player_calculation_time = 0;
+    total_average_evaluation_time += average_evaluation_time;
+    average_evaluation_time = 0;
+    total_set_up_moves_time += set_up_moves_time;
+    set_up_moves_time = 0;
+    total_sorting_time += sorting_time;
+    sorting_time = 0;
+    total_move_execution_time += move_execution_time;
+    move_execution_time = 0;
+}
+
 void adjust_evaluation_values()
 {
     this_calculation_score += score;

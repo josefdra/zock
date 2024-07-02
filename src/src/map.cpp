@@ -270,8 +270,11 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
                 counter = 0;
                 d = prev_dir;
             }
-            if (most > 0)
-                wall_sets[most - 1].set(c);
+            if (most == 4)
+                wall_sets[FOUR_WALLS].set(c);
+
+            if (most == 5)
+                wall_sets[FIVE_WALLS].set(c);
 
             if (most > 3)
                 board.fixed_protected_fields.set(c);
@@ -393,6 +396,19 @@ void Map::remove_double_communities(Board &board)
 {
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_communities;
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+    {
+        bool not_empty = false;
+        if ((board.communities[i] & board.board_sets[X]).count() != 0)
+            not_empty = true;
+
+        for (auto &p : board.player_sets)
+            if ((board.communities[i] & p).count() != 0)
+                not_empty = true;
+
+        if (!not_empty)
+            board.communities[i].reset();
+    }
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
         for (uint8_t j = 0; j < board.get_num_of_communities(); j++)
             if (i != j && (board.communities[i] & board.communities[j]).count() != 0)
             {
@@ -452,9 +468,9 @@ void Map::init_static_evaluation(Board &board)
         if (board.board_sets[MINUS].test(c))
             continue;
         else if (wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * WALL_MULTIPLIER;
+            board.static_evaluation[c] += FOUR_WALLS_VALUE;
         else if (wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * WALL_MULTIPLIER;
+            board.static_evaluation[c] += FIVE_WALLS_VALUE;
     }
 }
 
