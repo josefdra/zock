@@ -99,5 +99,6 @@ int main(int argc, char *argv[])
     Game game;
     game.run(net, sorting);
 
+    std::cout << "terminated without errors" << std::endl;
     return 0;
 }
