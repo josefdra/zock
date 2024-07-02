@@ -14,7 +14,7 @@
 #define ENEMY_STONE_VALUE -2
 #define ENEMY_PROTECTED_FIELD_VALUE -12
 #define MOVE_VALUE 10
-#define STONE_VALUE 50
+#define STONE_VALUE 5
 #define PROTECTED_FIELD_VALUE 25
 
 #include <bitset>
