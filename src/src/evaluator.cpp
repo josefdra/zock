@@ -79,6 +79,7 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
         average_evaluation_time += evaluation_time.get_elapsed_time();
         int return_value = score;
         adjust_evaluation_values();
+        ajdust_time_values();
         return return_value;
     }
     catch (const TimeLimitExceededException &)

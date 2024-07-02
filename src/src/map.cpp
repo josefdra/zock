@@ -2,6 +2,7 @@
 #include "board.hpp"
 #include "move_generator.hpp"
 #include "logging.hpp"
+#include "timer.hpp"
 
 /**
  * @brief map.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships
@@ -9,6 +10,7 @@
  */
 
 Map::Map() : wall_sets(),
+             before_wall_sets(),
              next_coords()
 {
 
@@ -281,6 +283,25 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
         }
 }
 
+void Map::init_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+        if (wall_sets[FOUR_WALLS].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && !wall_sets[FOUR_WALLS].test(next_coord) && !wall_sets[FIVE_WALLS].test(next_coord))
+                    before_wall_sets[FOUR_WALLS].set(next_coord);
+            }
+        else if (wall_sets[FIVE_WALLS].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && !wall_sets[FOUR_WALLS].test(next_coord) && !wall_sets[FIVE_WALLS].test(next_coord))
+                    before_wall_sets[FIVE_WALLS].set(next_coord);
+            }
+}
+
 bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
@@ -296,6 +317,7 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
     else
     {
         init_wall_values(board, checked);
+        init_before_wall_values(board);
         return true;
     }
 }
@@ -471,6 +493,10 @@ void Map::init_static_evaluation(Board &board)
             board.static_evaluation[c] += FOUR_WALLS_VALUE;
         else if (wall_sets[FIVE_WALLS].test(c))
             board.static_evaluation[c] += FIVE_WALLS_VALUE;
+        else if (before_wall_sets[FOUR_WALLS].test(c))
+            board.static_evaluation[c] += BEFORE_FOUR_WALLS_VALUE;
+        else if (before_wall_sets[FIVE_WALLS].test(c))
+            board.static_evaluation[c] += BEFORE_FIVE_WALLS_VALUE;
     }
 }
 
