@@ -49,7 +49,6 @@ public:
     uint8_t get_our_player();
     uint8_t get_player_count();
     uint16_t get_num_of_fields();
-    uint16_t get_num_of_not_minus_fields();
     uint8_t get_width();
     uint8_t get_height();
     uint16_t get_overwrite_stones(uint8_t);
@@ -62,7 +61,6 @@ public:
     void increment_bombs(uint8_t);
     void decrement_overwrite_stones(uint8_t);
     void decrement_bombs(uint8_t);
-    void decrement_not_minus_fields();
     bool has_overwrite_stones(uint8_t);
     bool is_overwrite_move(uint8_t);
     bool is_final_state();
@@ -94,7 +92,6 @@ public:
     
     std::vector<int> static_evaluation;
     std::bitset<MAX_NUM_OF_FIELDS> fixed_protected_fields;
-    std::bitset<MAX_NUM_OF_FIELDS> corners;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> protected_fields;
 
     std::vector<uint16_t> overwrite_stones;
@@ -117,7 +114,6 @@ private:
     uint8_t m_our_player;
     uint8_t m_player_count;
     uint16_t m_num_of_fields;
-    uint16_t m_num_of_not_minus_fields;
     uint8_t m_width;
     uint8_t m_height;
     uint16_t m_coord;
