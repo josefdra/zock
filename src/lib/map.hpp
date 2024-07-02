@@ -76,12 +76,7 @@ public:
     uint16_t two_dimension_2_one_dimension(uint8_t, uint8_t);
     bool check_players(char);
     void set_values(Board &, uint16_t);
-    void init_before_wall_values(Board &);
     void init_wall_values(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
-    void init_before_before_wall_values(Board &);
-    void init_before_before_before_wall_values(Board &);
-    void init_four_times_before_wall_values(Board &);
-    void init_five_times_before_wall_values(Board &);
     bool get_walls(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
     void check_if_protected_field(Board &, uint8_t, uint16_t);
     void expand_protected_fields(Board &, uint8_t);
@@ -95,11 +90,6 @@ public:
     void generate_transitions();
 
     std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> before_before_before_wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> four_times_before_wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, NUM_OF_WALL_SETS> five_times_before_wall_sets;
 
     std::vector<std::vector<uint16_t>> next_coords;
 
