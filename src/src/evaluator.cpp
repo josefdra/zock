@@ -14,20 +14,6 @@ int get_static_eval(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community_play
     return return_value;
 }
 
-bool check_if_all_stones_can_be_overwriten_at_once(Board &board, uint8_t player_num, uint8_t index, MoveGenerator &move_gen)
-{
-    for (uint8_t i = 0; i < board.get_player_count(); i++)
-    {
-        if (i == player_num)
-            continue;
-
-        if (board.valid_moves[i][index].count() == 0)
-            return false;
-    }
-
-    return true;
-}
-
 int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator &move_gen, uint8_t index)
 {
     Timer evaluation_time;
@@ -35,7 +21,7 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
     uint8_t end_game_multiplier = 1;
 
-    if (sqrt(board.get_num_of_not_minus_fields()) > board.board_sets[EMPTY].count())
+    if (board.get_num_of_not_minus_fields() / 4 > board.board_sets[EMPTY].count())
         end_game_multiplier = 100;
 
     try
