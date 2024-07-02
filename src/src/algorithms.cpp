@@ -6,7 +6,7 @@
 #include "logging.hpp"
 
 #define MAX_SEARCH_DEPTH 15
-#define ESTIMATED_TIME_DIVISOR 1.5
+#define ESTIMATED_TIME_DIVISOR 1.75
 #define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
 
 Algorithms::Algorithms() {}
@@ -480,9 +480,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }
-#ifdef DEBUG
+    
     print_statistics();
-#endif // DEBUG
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
 }
@@ -508,7 +507,7 @@ double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &ti
 #endif // DEBUG
         calculate_average_branching_factor();
         average_branching_factor = 1;
-        return ((estimated_nodes_next_depth * time_per_node) /*/ ESTIMATED_TIME_DIVISOR*/);
+        return (estimated_nodes_next_depth * time_per_node);
     }
     else
     {
