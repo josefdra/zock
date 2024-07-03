@@ -80,6 +80,8 @@ public:
     void calculate_before_protected_fields(Board &);
     Board init_boards_and_players();
     void generate_transitions();
+    void init_possible_fields();
+    uint16_t get_sum_possible_fields();
 
     std::array<std::bitset<MAX_NUM_OF_FIELDS>, 3> wall_sets;
     std::array<std::bitset<MAX_NUM_OF_FIELDS>, 3> before_wall_sets;
@@ -101,6 +103,7 @@ private:
     uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
     uint16_t m_num_of_fields;
+    uint16_t m_possible_fields = 0;
 };
 
 #endif // MAP_HPP

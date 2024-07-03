@@ -80,6 +80,7 @@ public:
     void print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &);
     void reset_valid_moves(uint8_t);
     std::bitset<MAX_NUM_OF_FIELDS> get_total_moves(uint8_t);
+    void calc_occupied_percentage(uint16_t);
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -91,7 +92,7 @@ public:
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> player_sets;
     std::vector<std::vector<std::bitset<MAX_NUM_OF_FIELDS>>> valid_moves;
     // first 8 sets for 1 to 8 walls next to field
-    
+
     std::vector<int> static_evaluation;
     std::bitset<MAX_NUM_OF_FIELDS> fixed_protected_fields;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> protected_fields;
@@ -113,6 +114,9 @@ public:
 
     std::bitset<MAX_NUM_OF_FIELDS> before_bonus_fields;
     std::bitset<MAX_NUM_OF_FIELDS> before_choice_fields;
+
+    uint16_t occupied_fields = 0;
+    uint8_t occupied_percentage = 0;
 
 private:
     uint8_t m_our_player;

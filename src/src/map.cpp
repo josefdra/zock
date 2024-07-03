@@ -196,6 +196,7 @@ void Map::read_map(std::stringstream mapfile)
         set_transition(pos2, r2, pos1r);
     }
     init_next_coords();
+    init_possible_fields();
 }
 
 void Map::one_dimension_2_second_dimension(uint16_t _1D_coord, uint8_t &x, uint8_t &y)
@@ -649,4 +650,14 @@ void Map::generate_transitions()
     {
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
+}
+void Map::init_possible_fields()
+{
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if (get_symbol(c) != '-')
+            m_possible_fields++;
+}
+uint16_t Map::get_sum_possible_fields()
+{
+    return m_possible_fields;
 }
