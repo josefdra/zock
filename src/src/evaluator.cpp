@@ -65,6 +65,29 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
         score += before_bonus_value + before_choice_value;
 
+        uint16_t coord = board.get_coord();
+        for (uint8_t p = 0; p < board.get_player_count(); p++)
+            if (board.before_protected_fields[p].test(coord))
+            {
+                if (p != player_num)
+                {
+                    score -= BEFORE_ENEMY_PROTECTED_FIELDS_VALUE;
+                    if (board.corners_and_walls.test(coord))
+                        for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                        {
+                            uint16_t next_coord = move_gen.next_coords[(coord - 1) * NUM_OF_DIRECTIONS + d].size() > 0 ? move_gen.next_coords[(coord - 1) * NUM_OF_DIRECTIONS + d][0] : 0;
+                            if (next_coord != 0 && board.player_sets[p].test(next_coord))
+                            {
+                                uint16_t other_direction_next_coord = move_gen.next_coords[(coord - 1) * NUM_OF_DIRECTIONS + d].size() > 0 ? move_gen.next_coords[(coord - 1) * NUM_OF_DIRECTIONS + (d + 4) % NUM_OF_DIRECTIONS][0] : 0;
+                                if (other_direction_next_coord != 0 && board.player_sets[p].test(other_direction_next_coord))
+                                    score += BLOCKED_ENEMIES_PROTECTED_FIELDS_VALUE;
+                            }
+                        }
+                }
+                else
+                    score += BEFORE_OUR_PROTECTED_FIELDS_VALUE;
+            }
+
         uint16_t max = 0;
         uint8_t winner = 0;
 
@@ -83,7 +106,7 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
             }
         }
 
-        if(winner == player_num)
+        if (winner == player_num)
             score += WINNER_VALUE * end_game_multiplier;
         else
             score += NOT_WINNER_VALUE * end_game_multiplier;

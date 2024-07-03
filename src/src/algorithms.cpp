@@ -6,13 +6,14 @@
 #include "logging.hpp"
 #include "statistics.hpp"
 
-#define MAX_SEARCH_DEPTH 15
+#define MAX_SEARCH_DEPTH 20
 #define ESTIMATED_TIME_DIVISOR 1.75
 #define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
+#define _30SECONDS 30000000
 
 Algorithms::Algorithms() {}
 
-Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields()))), m_move_exec(move_exec), m_move_gen(move_gen)
+Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields()))), move_exec(move_exec), m_move_gen(move_gen)
 {
 }
 
@@ -23,7 +24,7 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
     uint8_t next_player = player_num;
     do
     {
-        next_player = (next_player + 1) % m_move_exec.get_num_of_players();
+        next_player = (next_player + 1) % move_exec.get_num_of_players();
         board.valid_moves[next_player].clear();
         board.valid_moves[next_player].resize(board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>(0));
 
@@ -81,7 +82,7 @@ int Algorithms::do_move_minimax(Board &board, move &m, int alpha, int beta, uint
     board.set_spec(std::get<2>(m));
     uint8_t prev_index = index;
     Timer move_execution_timer;
-    m_move_exec.exec_move(next_player, board, index);
+    move_exec.exec_move(next_player, board, index);
     move_execution_time += move_execution_timer.get_elapsed_time();
     int eval = minimax(board, alpha, beta, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
@@ -95,7 +96,7 @@ int Algorithms::do_move_brs(Board &board, move &m, int alpha, int beta, uint8_t 
     board.set_spec(std::get<2>(m));
     uint8_t prev_index = index;
     Timer move_execution_timer;
-    m_move_exec.exec_move(next_player, board, index);
+    move_exec.exec_move(next_player, board, index);
     move_execution_time += move_execution_timer.get_elapsed_time();
     int eval = brs(board, alpha, beta, brs_m, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
@@ -245,7 +246,9 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
 
         if (!board.corners_and_walls.test(board.get_coord()))
             board.static_evaluation[board.get_coord()] = 0;
-            
+
+        move_exec.calculate_before_protected_fields(board, player_num);
+
         nodes_calculated++;
         Timer set_up_moves_timer;
         moves moves;
@@ -281,7 +284,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
 void Algorithms::set_up_killer(moves &moves, uint8_t depth)
 {
     std::vector<std::tuple<uint16_t, uint8_t>> temp_killer;
-    for (uint16_t c = 1; c < m_move_exec.get_num_of_fields(); c++)
+    for (uint16_t c = 1; c < move_exec.get_num_of_fields(); c++)
         if (killer_moves[depth][c] > 0)
             temp_killer.push_back(std::make_tuple(c, killer_moves[depth][c]));
 
@@ -328,7 +331,7 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves
 
             board.set_coord(std::get<1>(m));
             board.set_spec(std::get<2>(m));
-            std::get<0>(m) += m_move_exec.get_bits_to_update(player_num, board).count();
+            std::get<0>(m) += move_exec.get_bits_to_update(player_num, board).count();
         }
         if (player_num == board.get_our_player())
             std::sort(moves.begin(), moves.end(), [](const move_tuple &a, const move_tuple &b)
@@ -349,11 +352,11 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves
 
 void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, uint8_t index)
 {
-    for (uint16_t c = 1; c < m_move_exec.get_num_of_fields(); c++)
+    for (uint16_t c = 1; c < move_exec.get_num_of_fields(); c++)
         if (board.valid_moves[player_num][index].test(c))
         {
             if (board.board_sets[C].test(c))
-                for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
+                for (uint8_t j = 0; j < move_exec.get_num_of_players(); j++)
                     moves.push_back(std::make_tuple(ZERO_EVALUATION, c, j));
 
             else if (board.board_sets[B].test(c))
@@ -438,6 +441,10 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     std::vector<int> best_community_eval(board.get_num_of_communities(), INT32_MIN);
     std::vector<uint16_t> best_move_in_community_index(board.get_num_of_communities(), 0);
     uint8_t best_community_index = 0;
+    static uint8_t max_search_depth = 1;
+
+    if (max_search_depth != MAX_SEARCH_DEPTH)
+        adapt_depth_to_map_progress(max_search_depth, board.occupied_percentage);
 
     try
     {
@@ -453,7 +460,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                 sort_valid_moves(board, player_num, moves[community_index], timer, 0);
             sorting_time += sorting_timer.get_elapsed_time();
         }
-        for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
+        for (search_depth = 0; search_depth < max_search_depth; search_depth++)
         {
             Timer measure_depth_search(timer.return_rest_time());
             for (uint8_t community_index = 0; community_index < board.get_num_of_communities(); community_index++)
@@ -474,7 +481,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     board.set_spec(std::get<2>(moves[community_index][move_index]));
                     uint8_t prev_index = community_index;
                     Timer move_execution_timer;
-                    m_move_exec.exec_move(player_num, board, community_index);
+                    move_exec.exec_move(player_num, board, community_index);
                     move_execution_time += move_execution_timer.get_elapsed_time();
                     int eval;
                     if (board.num_of_players_in_community[community_index] > 2)
@@ -502,6 +509,11 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             if (estimated_runtime > timer.return_rest_time())
             {
                 LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                break;
+            }
+            else if (estimated_runtime > _30SECONDS)
+            {
+                LOG_INFO("estimated time exceeds 30 seconds, stopping search");
                 break;
             }
         }
@@ -544,5 +556,30 @@ double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &ti
     else
     {
         return -1.0;
+    }
+}
+
+void Algorithms::adapt_depth_to_map_progress(uint8_t &max_search_depth, uint8_t occupied_percentage)
+{
+
+    if (occupied_percentage > 80)
+    {
+        max_search_depth = MAX_SEARCH_DEPTH;
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    }
+    else if (occupied_percentage > 60 && max_search_depth != 7)
+    {
+        max_search_depth = 7;
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    }
+    else if (occupied_percentage > 45 && max_search_depth != 5)
+    {
+        max_search_depth = 3;
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    }
+    else if (occupied_percentage > 30 && max_search_depth != 3)
+    {
+        max_search_depth = 1;
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
     }
 }

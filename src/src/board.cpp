@@ -9,6 +9,7 @@ Board::Board(Map &map)
       static_evaluation(map.get_num_of_fields(), 0),
       fixed_protected_fields(),
       protected_fields(map.get_player_count()),
+      before_protected_fields(map.get_player_count()),
       corners_and_walls(),
       overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
       bombs(map.get_player_count(), map.get_initial_bombs()),
@@ -42,8 +43,9 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       valid_moves(board.valid_moves),
       static_evaluation(board.static_evaluation),
       fixed_protected_fields(board.fixed_protected_fields),
-      corners_and_walls(board.corners_and_walls),
       protected_fields(board.protected_fields),
+      before_protected_fields(board.before_protected_fields),
+      corners_and_walls(board.corners_and_walls),
       overwrite_stones(board.overwrite_stones),
       bombs(board.bombs),
       communities(board.communities),
@@ -397,4 +399,9 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
         total_moves |= moves;
 
     return total_moves;
+}
+
+void Board::calc_occupied_percentage(uint16_t possible_fields)
+{
+    occupied_percentage = (occupied_fields * 100) / possible_fields;
 }

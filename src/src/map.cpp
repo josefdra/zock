@@ -196,6 +196,7 @@ void Map::read_map(std::stringstream mapfile)
         set_transition(pos2, r2, pos1r);
     }
     init_next_coords();
+    init_possible_fields();
 }
 
 void Map::one_dimension_2_second_dimension(uint16_t _1D_coord, uint8_t &x, uint8_t &y)
@@ -558,6 +559,22 @@ void Map::init_static_evaluation(Board &board)
     }
 }
 
+void Map::calculate_before_protected_fields(Board &board)
+{
+    for (uint8_t player = 0; player < get_player_count(); player++)
+    {
+        board.before_protected_fields[player].reset();
+        for (uint16_t c = 1; c < m_num_of_fields; c++)
+            if (board.protected_fields[player].test(c))
+                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+                {
+                    uint16_t next_coord = get_transition(c, d);
+                    if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
+                        board.before_protected_fields[player].set(next_coord);
+                }
+    }
+}
+
 Board Map::init_boards_and_players()
 {
     Board ret_board(*this);
@@ -576,6 +593,8 @@ Board Map::init_boards_and_players()
     get_walls(ret_board, checked);
     for (uint8_t p = 0; p < get_player_count(); p++)
         expand_protected_fields(ret_board, p);
+
+    calculate_before_protected_fields(ret_board);
 
     init_communities(ret_board);
     for (uint8_t p = 0; p < get_player_count(); p++)
@@ -631,4 +650,14 @@ void Map::generate_transitions()
     {
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
+}
+void Map::init_possible_fields()
+{
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if (get_symbol(c) != '-')
+            m_possible_fields++;
+}
+uint16_t Map::get_sum_possible_fields()
+{
+    return m_possible_fields;
 }

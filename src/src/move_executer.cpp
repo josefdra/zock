@@ -254,6 +254,19 @@ void MoveExecuter::recalculate_protected_fields(Board &board, std::bitset<MAX_NU
         }
 }
 
+void MoveExecuter::calculate_before_protected_fields(Board &board, uint8_t player)
+{
+    board.before_protected_fields[player].reset();
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if (board.protected_fields[player].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && board.board_sets[EMPTY].test(next_coord))
+                    board.before_protected_fields[player].set(next_coord);
+            }
+}
+
 void MoveExecuter::calculcate_choice_and_bonus_fields(uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &bitset)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
