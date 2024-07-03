@@ -16,6 +16,8 @@
 #define MOVE_VALUE 30
 #define STONE_VALUE 10
 #define PROTECTED_FIELD_VALUE 20
+#define WINNER_VALUE 1000
+#define NOT_WINNER_VALUE -200
 
 #include <bitset>
 #include <stdint.h>

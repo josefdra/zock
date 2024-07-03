@@ -65,6 +65,29 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
         score += before_bonus_value + before_choice_value;
 
+        uint16_t max = 0;
+        uint8_t winner = 0;
+
+        for (uint8_t i = 0; i < board.get_player_count(); i++)
+        {
+            if (board.disqualified[i])
+                continue;
+
+            else
+            {
+                if (board.player_sets[i].count() >= max)
+                {
+                    max = board.player_sets[i].count();
+                    winner = i;
+                }
+            }
+        }
+
+        if(winner == player_num)
+            score += WINNER_VALUE * end_game_multiplier;
+        else
+            score += NOT_WINNER_VALUE * end_game_multiplier;
+
         if (board.is_overwrite_move(player_num))
             overwrite_value += OVERWRITE_VALUE;
 
