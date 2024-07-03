@@ -11,6 +11,8 @@
 
 Map::Map() : wall_sets(),
              before_wall_sets(),
+             before_before_wall_sets(),
+             corners_and_walls(),
              next_coords()
 {
 
@@ -224,7 +226,10 @@ void Map::set_values(Board &board, uint16_t c)
         board.board_sets[EMPTY].set(c);
 
     else if (get_symbol(c) == '-')
+    {
         board.board_sets[MINUS].set(c);
+        board.decrement_not_minus_fields();
+    }
 
     else if (get_symbol(c) == 'i')
     {
@@ -272,34 +277,74 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
                 counter = 0;
                 d = prev_dir;
             }
-            if (most == 4)
+            if (most == 3)
+                wall_sets[THREE_WALLS].set(c);
+            else if (most == 4)
                 wall_sets[FOUR_WALLS].set(c);
-
-            if (most == 5)
+            else if (most == 5)
                 wall_sets[FIVE_WALLS].set(c);
 
             if (most > 3)
                 board.fixed_protected_fields.set(c);
         }
+
+    corners_and_walls = wall_sets[THREE_WALLS] | wall_sets[FOUR_WALLS] | wall_sets[FIVE_WALLS];
+    init_before_wall_values(board);
 }
 
 void Map::init_before_wall_values(Board &board)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        if (wall_sets[FOUR_WALLS].test(c))
+        if (wall_sets[THREE_WALLS].test(c))
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
-                if (next_coord != 0 && !wall_sets[FOUR_WALLS].test(next_coord) && !wall_sets[FIVE_WALLS].test(next_coord))
+                if (next_coord != 0)
+                    before_wall_sets[THREE_WALLS].set(next_coord);
+            }
+        else if (wall_sets[FOUR_WALLS].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0)
                     before_wall_sets[FOUR_WALLS].set(next_coord);
             }
         else if (wall_sets[FIVE_WALLS].test(c))
             for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
             {
                 uint16_t next_coord = get_transition(c, d);
-                if (next_coord != 0 && !wall_sets[FOUR_WALLS].test(next_coord) && !wall_sets[FIVE_WALLS].test(next_coord))
+                if (next_coord != 0)
                     before_wall_sets[FIVE_WALLS].set(next_coord);
             }
+    init_before_before_wall_values(board);
+}
+
+void Map::init_before_before_wall_values(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+    {
+        if (before_wall_sets[THREE_WALLS].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0)
+                    before_before_wall_sets[THREE_WALLS].set(next_coord);
+            }
+        if (before_wall_sets[FOUR_WALLS].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0)
+                    before_before_wall_sets[FOUR_WALLS].set(next_coord);
+            }
+        if (before_wall_sets[FIVE_WALLS].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0)
+                    before_before_wall_sets[FIVE_WALLS].set(next_coord);
+            }
+    }
 }
 
 bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
@@ -317,7 +362,6 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
     else
     {
         init_wall_values(board, checked);
-        init_before_wall_values(board);
         return true;
     }
 }
@@ -485,18 +529,32 @@ void Map::init_communities(Board &board)
 
 void Map::init_static_evaluation(Board &board)
 {
+    std::bitset<MAX_NUM_OF_FIELDS> all_stones;
+    for (auto &player : board.player_sets)
+        all_stones |= player;
+    all_stones |= board.board_sets[X];
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
     {
-        if (board.board_sets[MINUS].test(c))
+        if (board.board_sets[MINUS].test(c) || all_stones.test(c))
             continue;
-        else if (wall_sets[FOUR_WALLS].test(c))
+        if (wall_sets[THREE_WALLS].test(c))
+            board.static_evaluation[c] += THREE_WALLS_VALUE;
+        if (wall_sets[FOUR_WALLS].test(c))
             board.static_evaluation[c] += FOUR_WALLS_VALUE;
-        else if (wall_sets[FIVE_WALLS].test(c))
+        if (wall_sets[FIVE_WALLS].test(c))
             board.static_evaluation[c] += FIVE_WALLS_VALUE;
-        else if (before_wall_sets[FOUR_WALLS].test(c))
+        if (before_wall_sets[THREE_WALLS].test(c))
+            board.static_evaluation[c] += BEFORE_THREE_WALLS_VALUE;
+        if (before_wall_sets[FOUR_WALLS].test(c))
             board.static_evaluation[c] += BEFORE_FOUR_WALLS_VALUE;
-        else if (before_wall_sets[FIVE_WALLS].test(c))
+        if (before_wall_sets[FIVE_WALLS].test(c))
             board.static_evaluation[c] += BEFORE_FIVE_WALLS_VALUE;
+        if (before_before_wall_sets[THREE_WALLS].test(c))
+            board.static_evaluation[c] += BEFORE_BEFORE_THREE_WALLS_VALUE;
+        if (before_before_wall_sets[FOUR_WALLS].test(c))
+            board.static_evaluation[c] += BEFORE_BEFORE_FOUR_WALLS_VALUE;
+        if (before_before_wall_sets[FIVE_WALLS].test(c))
+            board.static_evaluation[c] += BEFORE_BEFORE_FIVE_WALLS_VALUE;
     }
 }
 

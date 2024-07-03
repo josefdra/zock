@@ -203,6 +203,9 @@ int Algorithms::minimax(Board &board, int alpha, int beta, uint8_t depth, uint8_
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer, m_move_gen, index);
 
+        if (!board.corners_and_walls.test(board.get_coord()))
+            board.static_evaluation[board.get_coord()] = 0;
+
         Timer set_up_moves_timer;
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
@@ -239,7 +242,10 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
         average_next_player_calculation_time += get_next_player_timer.get_elapsed_time();
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer, m_move_gen, index);
-    
+
+        if (!board.corners_and_walls.test(board.get_coord()))
+            board.static_evaluation[board.get_coord()] = 0;
+            
         nodes_calculated++;
         Timer set_up_moves_timer;
         moves moves;
@@ -507,7 +513,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         LOG_WARNING(e.what());
     }
     // print_evaluation_statistics();
-    // print_time_statistics();    
+    // print_time_statistics();
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
 }
