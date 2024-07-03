@@ -112,6 +112,11 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
         board = move_exec.exec_bomb(player, board, map.get_strength());
     }
 
+    if(!board.corners_and_walls.test(board.get_coord()))
+        board.static_evaluation[board.get_coord()] = 0;
+
+    move_exec.calculate_before_protected_fields(board, player);
+
 #ifdef DEBUG
     board.print(player, (board.get_our_player() == player));
 #endif // DEBUG
