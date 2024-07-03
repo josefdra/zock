@@ -233,14 +233,14 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
     {
         static int call_count = 0;
         call_count++;
-        nodes_calculated++;
 
         Timer get_next_player_timer;
         uint8_t next_player = get_next_player(player_num, board, timer, index);
         average_next_player_calculation_time += get_next_player_timer.get_elapsed_time();
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer, m_move_gen, index);
-
+    
+        nodes_calculated++;
         Timer set_up_moves_timer;
         moves moves;
         moves.reserve(MEMORY_SIZE_WITH_BUFFER);
@@ -506,7 +506,8 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }
-    print_statistics();
+    // print_evaluation_statistics();
+    // print_time_statistics();    
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
 }

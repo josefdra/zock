@@ -33,6 +33,7 @@ void Game::set_game_over()
 void Game::set_disqualified(Board &board, uint8_t player_number)
 {
     board.disqualified[player_number] = true;
+    LOG_INFO("Player " + std::to_string(player_number + 1) + " is disqualified");
 }
 
 void Game::set_bomb_phase()
@@ -72,8 +73,9 @@ void Game::end(Board &board, uint8_t player_number)
 
     else
         calculate_winner(board);
-    
-    print_total_statistics();
+
+    print_total_time_statistics();
+    print_total_evaluation_statistics();
 }
 
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
@@ -112,12 +114,31 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
 #endif // DEBUG
 }
 
+void Game::print_static_evaluation(Board &board)
+{
+    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
+    {
+        std::cout << std::setw(4) << board.static_evaluation[c] << " ";
+
+        if (c % board.get_width() == 0)
+            std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
+
 void Game::run(Network &net, bool sorting)
 {
     Map map;
     map.read_map(net.receive_map());
+    Timer board_setup_timer;
     Board board = map.init_boards_and_players();
+    LOG_INFO("Board setup time: " + std::to_string(board_setup_timer.get_elapsed_time()));
     board.print(0, false);
+    Timer move_gen_and_exec_setup_timer;
+    move_gen = MoveGenerator(map);
+    move_exec = MoveExecuter(map);
+    LOG_INFO("Move generator and executer setup time: " + std::to_string(move_gen_and_exec_setup_timer.get_elapsed_time()));
+    print_static_evaluation(board);
 
     while (!is_game_over() && !board.disqualified[board.get_our_player()])
     {
@@ -127,14 +148,13 @@ void Game::run(Network &net, bool sorting)
         case TYPE_RECEIVE_PLAYERNUM:
         {
             board.set_our_player(data & ONE_SET_BYTE);
-            move_gen = MoveGenerator(map);
-            move_exec = MoveExecuter(map);
+            Timer algorithms_setup_timer;
             algorithms = Algorithms(move_exec, move_gen);
+            LOG_INFO("Algorithms setup time: " + std::to_string(algorithms_setup_timer.get_elapsed_time()));
             break;
         }
         case TYPE_RECEIVE_TURN_REQUEST:
         {
-
             turn_request(net, data, map, board, sorting, m_bomb_phase);
             break;
         }

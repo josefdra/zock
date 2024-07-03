@@ -16,7 +16,53 @@ double sorting_time = 0;
 double total_move_execution_time = 0;
 double move_execution_time = 0;
 
-void print_total_statistics()
+int score = 0;
+int total_score = 0;
+int this_calculation_score = 0;
+int enemy_move_value = 0;
+int total_enemy_move_value = 0;
+int this_calculation_enemy_move_value = 0;
+int enemy_stone_value = 0;
+int total_enemy_stone_value = 0;
+int this_calculation_enemy_stone_value = 0;
+int enemy_protected_fields_value = 0;
+int total_enemy_protected_fields_value = 0;
+int this_calculation_enemy_protected_fields_value = 0;
+int enemy_static_eval = 0;
+int total_enemy_static_eval = 0;
+int this_calculation_enemy_static_eval = 0;
+int our_move_value = 0;
+int total_our_move_value = 0;
+int this_calculation_our_move_value = 0;
+int our_stone_value = 0;
+int total_our_stone_value = 0;
+int this_calculation_our_stone_value = 0;
+int our_protected_fields_value = 0;
+int total_our_protected_fields_value = 0;
+int this_calculation_our_protected_fields_value = 0;
+int our_static_eval = 0;
+int total_our_static_eval = 0;
+int this_calculation_our_static_eval = 0;
+int before_bonus_value = 0;
+int total_before_bonus_value = 0;
+int this_calculation_before_bonus_value = 0;
+int before_choice_value = 0;
+int total_before_choice_value = 0;
+int this_calculation_before_choice_value = 0;
+int overwrite_value = 0;
+int total_overwrite_value = 0;
+int this_calculation_overwrite_value = 0;
+int no_move_value = 0;
+int total_no_move_value = 0;
+int this_calculation_no_move_value = 0;
+int bonus_value = 0;
+int total_bonus_value = 0;
+int this_calculation_bonus_value = 0;
+int choice_value = 0;
+int total_choice_value = 0;
+int this_calculation_choice_value = 0;
+
+void print_total_time_statistics()
 {
     LOG_INFO("Total nodes calculated: " + std::to_string(total_nodes_calculated));
     LOG_INFO("Total leafs calculated: " + std::to_string(total_leafs_calculated));
@@ -27,7 +73,7 @@ void print_total_statistics()
     LOG_INFO("Average move execution time: " + std::to_string(total_move_execution_time / static_cast<double>(total_nodes_calculated)));
 }
 
-void print_statistics()
+void print_time_statistics()
 {
     LOG_INFO("Nodes calculated: " + std::to_string(nodes_calculated));
     LOG_INFO("Leafs calculated: " + std::to_string(leafs_calculated));
@@ -50,4 +96,137 @@ void print_statistics()
     sorting_time = 0;
     total_move_execution_time += move_execution_time;
     move_execution_time = 0;
+}
+void print_total_evaluation_statistics()
+{
+    double average_enemy_move_value = static_cast<double>(total_enemy_move_value) / static_cast<double>(total_leafs_calculated);
+    double average_enemy_stone_value = static_cast<double>(total_enemy_stone_value) / static_cast<double>(total_leafs_calculated);
+    double average_enemy_protected_fields_value = static_cast<double>(total_enemy_protected_fields_value) / static_cast<double>(total_leafs_calculated);
+    double average_enemy_static_eval = static_cast<double>(total_enemy_static_eval) / static_cast<double>(total_leafs_calculated);
+    double average_our_move_value = static_cast<double>(total_our_move_value) / static_cast<double>(total_leafs_calculated);
+    double average_our_stone_value = static_cast<double>(total_our_stone_value) / static_cast<double>(total_leafs_calculated);
+    double average_our_protected_fields_value = static_cast<double>(total_our_protected_fields_value) / static_cast<double>(total_leafs_calculated);
+    double average_our_static_eval = static_cast<double>(total_our_static_eval) / static_cast<double>(total_leafs_calculated);
+    double average_before_bonus_value = static_cast<double>(total_before_bonus_value) / static_cast<double>(total_leafs_calculated);
+    double average_before_choice_value = static_cast<double>(total_before_choice_value) / static_cast<double>(total_leafs_calculated);
+    double average_overwrite_value = static_cast<double>(total_overwrite_value) / static_cast<double>(total_leafs_calculated);
+    double average_no_move_value = static_cast<double>(total_no_move_value) / static_cast<double>(total_leafs_calculated);
+    double average_bonus_value = static_cast<double>(total_bonus_value) / static_cast<double>(total_leafs_calculated);
+    double average_choice_value = static_cast<double>(total_choice_value) / static_cast<double>(total_leafs_calculated);
+
+    LOG_INFO("Average enemy move value: " + std::to_string(average_enemy_move_value));
+    LOG_INFO("Average enemy stone value: " + std::to_string(average_enemy_stone_value));
+    LOG_INFO("Average enemy protected fields value: " + std::to_string(average_enemy_protected_fields_value));
+    LOG_INFO("Average enemy static eval: " + std::to_string(average_enemy_static_eval));
+    LOG_INFO("Average our move value: " + std::to_string(average_our_move_value));
+    LOG_INFO("Average our stone value: " + std::to_string(average_our_stone_value));
+    LOG_INFO("Average our protected fields value: " + std::to_string(average_our_protected_fields_value));
+    LOG_INFO("Average our static eval: " + std::to_string(average_our_static_eval));
+    LOG_INFO("Average before bonus value: " + std::to_string(average_before_bonus_value));
+    LOG_INFO("Average before choice value: " + std::to_string(average_before_choice_value));
+    LOG_INFO("Average overwrite value: " + std::to_string(average_overwrite_value));
+    LOG_INFO("Average no move value: " + std::to_string(average_no_move_value));
+    LOG_INFO("Average bonus value: " + std::to_string(average_bonus_value));
+    LOG_INFO("Average choice value: " + std::to_string(average_choice_value));
+}
+
+void print_evaluation_statistics()
+{
+    LOG_INFO("Score: " + std::to_string(this_calculation_score / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Enemy move value: " + std::to_string(this_calculation_enemy_move_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Enemy stone value: " + std::to_string(this_calculation_enemy_stone_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Enemy protected fields value: " + std::to_string(this_calculation_enemy_protected_fields_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Enemy static eval: " + std::to_string(this_calculation_enemy_static_eval / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Our move value: " + std::to_string(this_calculation_our_move_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Our stone value: " + std::to_string(this_calculation_our_stone_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Our protected fields value: " + std::to_string(this_calculation_our_protected_fields_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Our static eval: " + std::to_string(this_calculation_our_static_eval / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Before bonus value: " + std::to_string(this_calculation_before_bonus_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Before choice value: " + std::to_string(this_calculation_before_choice_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Overwrite value: " + std::to_string(this_calculation_overwrite_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("No move value: " + std::to_string(this_calculation_no_move_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Bonus value: " + std::to_string(this_calculation_bonus_value / static_cast<double>(leafs_calculated)));
+    LOG_INFO("Choice value: " + std::to_string(this_calculation_choice_value / static_cast<double>(leafs_calculated)));
+    total_score += this_calculation_score;
+    total_enemy_move_value += this_calculation_enemy_move_value;
+    total_enemy_stone_value += this_calculation_enemy_stone_value;
+    total_enemy_protected_fields_value += this_calculation_enemy_protected_fields_value;
+    total_enemy_static_eval += this_calculation_enemy_static_eval;
+    total_our_move_value += this_calculation_our_move_value;
+    total_our_stone_value += this_calculation_our_stone_value;
+    total_our_protected_fields_value += this_calculation_our_protected_fields_value;
+    total_our_static_eval += this_calculation_our_static_eval;
+    total_before_bonus_value += this_calculation_before_bonus_value;
+    total_before_choice_value += this_calculation_before_choice_value;
+    total_overwrite_value += this_calculation_overwrite_value;
+    total_no_move_value += this_calculation_no_move_value;
+    total_bonus_value += this_calculation_bonus_value;
+    total_choice_value += this_calculation_choice_value;
+    this_calculation_score = 0;
+    this_calculation_enemy_move_value = 0;
+    this_calculation_enemy_stone_value = 0;
+    this_calculation_enemy_protected_fields_value = 0;
+    this_calculation_enemy_static_eval = 0;
+    this_calculation_our_move_value = 0;
+    this_calculation_our_stone_value = 0;
+    this_calculation_our_protected_fields_value = 0;
+    this_calculation_our_static_eval = 0;
+    this_calculation_before_bonus_value = 0;
+    this_calculation_before_choice_value = 0;
+    this_calculation_overwrite_value = 0;
+    this_calculation_no_move_value = 0;
+    this_calculation_bonus_value = 0;
+    this_calculation_choice_value = 0;
+}
+
+void ajdust_time_values()
+{
+    total_nodes_calculated += nodes_calculated;
+    nodes_calculated = 0;
+    total_leafs_calculated += leafs_calculated;
+    leafs_calculated = 0;
+    total_average_next_player_calculation_time += average_next_player_calculation_time;
+    average_next_player_calculation_time = 0;
+    total_average_evaluation_time += average_evaluation_time;
+    average_evaluation_time = 0;
+    total_set_up_moves_time += set_up_moves_time;
+    set_up_moves_time = 0;
+    total_sorting_time += sorting_time;
+    sorting_time = 0;
+    total_move_execution_time += move_execution_time;
+    move_execution_time = 0;
+}
+
+void adjust_evaluation_values()
+{
+    this_calculation_score += score;
+    this_calculation_enemy_move_value += enemy_move_value;
+    this_calculation_enemy_stone_value += enemy_stone_value;
+    this_calculation_enemy_protected_fields_value += enemy_protected_fields_value;
+    this_calculation_enemy_static_eval += enemy_static_eval;
+    this_calculation_our_move_value += our_move_value;
+    this_calculation_our_stone_value += our_stone_value;
+    this_calculation_our_protected_fields_value += our_protected_fields_value;
+    this_calculation_our_static_eval += our_static_eval;
+    this_calculation_before_bonus_value += before_bonus_value;
+    this_calculation_before_choice_value += before_choice_value;
+    this_calculation_overwrite_value += overwrite_value;
+    this_calculation_no_move_value += no_move_value;
+    this_calculation_bonus_value += bonus_value;
+    this_calculation_choice_value += choice_value;
+    score = 0;
+    enemy_move_value = 0;
+    enemy_stone_value = 0;
+    enemy_protected_fields_value = 0;
+    enemy_static_eval = 0;
+    our_move_value = 0;
+    our_stone_value = 0;
+    our_protected_fields_value = 0;
+    our_static_eval = 0;
+    before_bonus_value = 0;
+    before_choice_value = 0;
+    overwrite_value = 0;
+    no_move_value = 0;
+    bonus_value = 0;
+    choice_value = 0;
 }

@@ -4,16 +4,6 @@
 #include "timer.hpp"
 #include "statistics.hpp"
 
-void print_static_evaluation(Board &board)
-{
-    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-    {
-        std::cout << std::setw(4) << board.static_evaluation[c] << " ";
-        if (c % board.get_width() == 0)
-            std::cout << std::endl;
-    }
-}
-
 int get_static_eval(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community_player_stones, uint8_t index)
 {
     int return_value = 0;
@@ -28,8 +18,6 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 {
     Timer evaluation_time;
     leafs_calculated++;
-    // print_static_evaluation(board);
-    // exit(0);
 
     uint8_t end_game_multiplier = 1;
 
@@ -38,18 +26,6 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
     try
     {
-        int score = 0;
-
-        int enemy_move_value = 0;
-        int enemy_stone_value = 0;
-        int enemy_protected_fields_value = 0;
-        int enemy_static_eval = 0;
-
-        int our_move_value = 0;
-        int our_stone_value = 0;
-        int our_protected_fields_value = 0;
-        int our_static_eval = 0;
-
         for (uint8_t i = 0; i < board.get_player_count(); i++)
         {
             if (timer.return_rest_time() < timer.exception_time)
@@ -69,7 +45,7 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
                 enemy_stone_value += player_stones_in_community.count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier;
                 enemy_protected_fields_value += board.protected_fields[i].count() * ENEMY_PROTECTED_FIELD_MULTIPLIER;
-                enemy_static_eval += get_static_eval(board, player_stones_in_community, index);                
+                enemy_static_eval -= get_static_eval(board, player_stones_in_community, index);                
             }
             else
             {
@@ -80,35 +56,31 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
             }
         }
 
-        score += enemy_move_value - enemy_stone_value - enemy_protected_fields_value - enemy_static_eval;
+        score += enemy_move_value + enemy_stone_value + enemy_protected_fields_value + enemy_static_eval;
         score += our_move_value + our_stone_value + our_protected_fields_value + our_static_eval;
 
-        // std::cout << "Our move value: " << our_move_value << std::endl;
-        // std::cout << "Our stone value: " << our_stone_value << std::endl;
-        // std::cout << "Our protected fields value: " << our_protected_fields_value << std::endl;
-        // std::cout << "Our static eval: " << our_static_eval << std::endl;
-        // std::cout << "Enemy move value: " << enemy_move_value << std::endl;
-        // std::cout << "Enemy stone value: " << enemy_stone_value << std::endl;
-        // std::cout << "Enemy protected fields value: " << enemy_protected_fields_value << std::endl;
-        // std::cout << "Enemy static eval: " << enemy_static_eval << std::endl;
+        before_bonus_value = (board.before_bonus_fields & board.player_sets[player_num]).count() * BEFORE_BONUS_VALUE;
+        before_choice_value = (board.before_choice_fields & board.player_sets[player_num]).count() * BEFORE_CHOICE_VALUE;
 
-        score -= (board.before_bonus_fields & board.player_sets[player_num]).count() * BONUS_VALUE;
-        score -= (board.before_choice_fields & board.player_sets[player_num]).count() * CHOICE_VALUE;
+        score += before_bonus_value + before_choice_value;
 
         if (board.is_overwrite_move(player_num))
-            score -= OVERWRITE_VALUE;
+            overwrite_value += OVERWRITE_VALUE;
 
         if (board.valid_moves[player_num][index].count() == 0)
-            score -= NO_MOVE_VALUE;
+            no_move_value += NO_MOVE_VALUE;
         else if (board.check_bonus_field())
-            score += BONUS_VALUE;
+            bonus_value += BONUS_VALUE;
         else if (board.check_choice_field())
-            score += CHOICE_VALUE;
+            choice_value += CHOICE_VALUE;
 
-        // std::cout << "Score: " << score << std::endl;
+        score += overwrite_value + no_move_value + bonus_value + choice_value;
 
         average_evaluation_time += evaluation_time.get_elapsed_time();
-        return score;
+        int return_value = score;
+        adjust_evaluation_values();
+        ajdust_time_values();
+        return return_value;
     }
     catch (const TimeLimitExceededException &)
     {

@@ -10,7 +10,6 @@ Network::Network(const char *ip, int port) : m_ip(ip), m_port(port)
 Network::~Network()
 {
     close_socket();
-    std::cout << "closed socket succesfully" << std::endl;
 }
 
 bool Network::init()

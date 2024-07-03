@@ -2,6 +2,7 @@
 #include "board.hpp"
 #include "move_generator.hpp"
 #include "logging.hpp"
+#include "timer.hpp"
 
 /**
  * @brief map.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships
@@ -10,10 +11,6 @@
 
 Map::Map() : wall_sets(),
              before_wall_sets(),
-             before_before_wall_sets(),
-             before_before_before_wall_sets(),
-             four_times_before_wall_sets(),
-             five_times_before_wall_sets(),
              next_coords()
 {
 
@@ -275,8 +272,11 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
                 counter = 0;
                 d = prev_dir;
             }
-            if (most > 0)
-                wall_sets[most - 1].set(c);
+            if (most == 4)
+                wall_sets[FOUR_WALLS].set(c);
+
+            if (most == 5)
+                wall_sets[FIVE_WALLS].set(c);
 
             if (most > 3)
                 board.fixed_protected_fields.set(c);
@@ -286,66 +286,20 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
 void Map::init_before_wall_values(Board &board)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
-            if (wall_sets[i].test(c))
-                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                {
-                    uint16_t next_coord = get_transition(c, d);
-                    if (next_coord != 0 && !wall_sets[i].test(next_coord))
-                        before_wall_sets[i].set(next_coord);
-                }
-}
-
-void Map::init_before_before_wall_values(Board &board)
-{
-    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
-            if (before_wall_sets[i].test(c))
-                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                {
-                    uint16_t next_coord = get_transition(c, d);
-                    if (next_coord != 0 && !wall_sets[i].test(next_coord) && !before_wall_sets[i].test(next_coord))
-                        before_before_wall_sets[i].set(next_coord);
-                }
-}
-
-void Map::init_before_before_before_wall_values(Board &board)
-{
-    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
-            if (before_before_wall_sets[i].test(c))
-                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                {
-                    uint16_t next_coord = get_transition(c, d);
-                    if (next_coord != 0 && !wall_sets[i].test(next_coord) && !before_wall_sets[i].test(next_coord) && !before_before_wall_sets[i].test(next_coord))
-                        before_before_before_wall_sets[i].set(next_coord);
-                }
-}
-
-void Map::init_four_times_before_wall_values(Board &board)
-{
-    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
-            if (before_before_before_wall_sets[i].test(c))
-                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                {
-                    uint16_t next_coord = get_transition(c, d);
-                    if (next_coord != 0 && !wall_sets[i].test(next_coord) && !before_wall_sets[i].test(next_coord) && !before_before_wall_sets[i].test(next_coord) && !before_before_before_wall_sets[i].test(next_coord))
-                        four_times_before_wall_sets[i].set(next_coord);
-                }
-}
-
-void Map::init_five_times_before_wall_values(Board &board)
-{
-    for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
-        for (uint8_t i = 0; i < NUM_OF_WALL_SETS; i++)
-            if (four_times_before_wall_sets[i].test(c))
-                for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-                {
-                    uint16_t next_coord = get_transition(c, d);
-                    if (next_coord != 0 && !wall_sets[i].test(next_coord) && !before_wall_sets[i].test(next_coord) && !before_before_wall_sets[i].test(next_coord) && !before_before_before_wall_sets[i].test(next_coord) && !four_times_before_wall_sets[i].test(next_coord))
-                        five_times_before_wall_sets[i].set(next_coord);
-                }
+        if (wall_sets[FOUR_WALLS].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && !wall_sets[FOUR_WALLS].test(next_coord) && !wall_sets[FIVE_WALLS].test(next_coord))
+                    before_wall_sets[FOUR_WALLS].set(next_coord);
+            }
+        else if (wall_sets[FIVE_WALLS].test(c))
+            for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
+            {
+                uint16_t next_coord = get_transition(c, d);
+                if (next_coord != 0 && !wall_sets[FOUR_WALLS].test(next_coord) && !wall_sets[FIVE_WALLS].test(next_coord))
+                    before_wall_sets[FIVE_WALLS].set(next_coord);
+            }
 }
 
 bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
@@ -364,10 +318,6 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
     {
         init_wall_values(board, checked);
         init_before_wall_values(board);
-        init_before_before_wall_values(board);
-        init_before_before_before_wall_values(board);
-        init_four_times_before_wall_values(board);
-        init_five_times_before_wall_values(board);
         return true;
     }
 }
@@ -468,6 +418,19 @@ void Map::remove_double_communities(Board &board)
 {
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_communities;
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+    {
+        bool not_empty = false;
+        if ((board.communities[i] & board.board_sets[X]).count() != 0)
+            not_empty = true;
+
+        for (auto &p : board.player_sets)
+            if ((board.communities[i] & p).count() != 0)
+                not_empty = true;
+
+        if (!not_empty)
+            board.communities[i].reset();
+    }
+    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
         for (uint8_t j = 0; j < board.get_num_of_communities(); j++)
             if (i != j && (board.communities[i] & board.communities[j]).count() != 0)
             {
@@ -526,102 +489,14 @@ void Map::init_static_evaluation(Board &board)
     {
         if (board.board_sets[MINUS].test(c))
             continue;
-        if (wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * WALL_MULTIPLIER;
         else if (wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * WALL_MULTIPLIER;
+            board.static_evaluation[c] += FOUR_WALLS_VALUE;
         else if (wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * WALL_MULTIPLIER;
-        else if (wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * WALL_MULTIPLIER;
-        if (before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * BEFORE_BEFORE_BEFORE_WALL_MULTIPLIER;
-        if (before_before_before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (four_times_before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * FOUR_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[ONE_WALL].test(c))
-            board.static_evaluation[c] += ONE_WALL_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[TWO_WALLS].test(c))
-            board.static_evaluation[c] += TWO_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[THREE_WALLS].test(c))
-            board.static_evaluation[c] += THREE_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[FOUR_WALLS].test(c))
-            board.static_evaluation[c] += FOUR_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[FIVE_WALLS].test(c))
-            board.static_evaluation[c] += FIVE_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[SIX_WALLS].test(c))
-            board.static_evaluation[c] += SIX_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[SEVEN_WALLS].test(c))
-            board.static_evaluation[c] += SEVEN_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
-        if (five_times_before_wall_sets[EIGHT_WALLS].test(c))
-            board.static_evaluation[c] += EIGHT_WALLS_VALUE * FIVE_TIMES_BEFORE_WALL_MULTIPLIER;
+            board.static_evaluation[c] += FIVE_WALLS_VALUE;
+        else if (before_wall_sets[FOUR_WALLS].test(c))
+            board.static_evaluation[c] += BEFORE_FOUR_WALLS_VALUE;
+        else if (before_wall_sets[FIVE_WALLS].test(c))
+            board.static_evaluation[c] += BEFORE_FIVE_WALLS_VALUE;
     }
 }
 

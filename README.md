@@ -10,6 +10,10 @@ http://172.20.0.41:8088/current
 
 https://matchpoint.moves.rwth-aachen.de/current
 
+# Really good state for big maps
+
+856d5221
+
 # RevXT-SS24-g01
 
 
