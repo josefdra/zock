@@ -21,8 +21,8 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
     uint8_t end_game_multiplier = 1;
 
-    if (board.get_num_of_not_minus_fields() / 4 > board.board_sets[EMPTY].count())
-        end_game_multiplier = 100;
+    if (sqrt(board.get_num_of_fields()) > board.board_sets[EMPTY].count())
+        end_game_multiplier = 10;
 
     try
     {
@@ -33,27 +33,26 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
             std::bitset<MAX_NUM_OF_FIELDS> player_stones_in_community = board.communities[index] & board.player_sets[i];
 
-            uint16_t count_of_player_stones = player_stones_in_community.count();
-            if (i == player_num && count_of_player_stones == 0)
+            if (player_stones_in_community.count() == 0 || board.disqualified[i])
                 continue;
 
             if (i != player_num)
             {
                 if (move_gen.check_if_player_has_no_overwrite_move(board, i, index))
                     enemy_move_value += ENEMY_HAS_MOVE_VALUE;
-                else
+                else 
                     enemy_move_value += ENEMY_HAS_NO_MOVE_VALUE;
 
-                enemy_stone_value += player_stones_in_community.count() * ENEMY_STONE_VALUE * end_game_multiplier;
-                enemy_protected_fields_value += board.protected_fields[i].count() * ENEMY_PROTECTED_FIELD_VALUE;
-                enemy_static_eval -= get_static_eval(board, player_stones_in_community, index);
+                enemy_stone_value += player_stones_in_community.count() * ENEMY_STONE_MULTIPLIER * end_game_multiplier;
+                enemy_protected_fields_value += board.protected_fields[i].count() * ENEMY_PROTECTED_FIELD_MULTIPLIER;
+                enemy_static_eval -= get_static_eval(board, player_stones_in_community, index);                
             }
             else
             {
-                our_move_value += board.valid_moves[i][index].count() * MOVE_VALUE;
-                our_stone_value += player_stones_in_community.count() * STONE_VALUE * end_game_multiplier;
-                our_protected_fields_value += board.protected_fields[i].count() * PROTECTED_FIELD_VALUE;
-                our_static_eval += get_static_eval(board, player_stones_in_community, index);
+                our_move_value += board.valid_moves[i][index].count() * MOVE_MULTIPLIER;
+                our_stone_value += player_stones_in_community.count() * STONE_MULTIPLIER * end_game_multiplier;
+                our_protected_fields_value += board.protected_fields[i].count() * PROTECTED_FIELD_MULTIPLIER;
+                our_static_eval += get_static_eval(board, player_stones_in_community, index);                
             }
         }
 
@@ -81,28 +80,6 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
         int return_value = score;
         adjust_evaluation_values();
         ajdust_time_values();
-        uint16_t coord = board.get_coord();
-        if (!board.corners.test(coord))
-            board.static_evaluation[coord] = 0;
-        else if(board.check_bonus_field())
-        {
-            for(uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-            {
-                uint16_t next_coord = move_gen.next_coords[(coord - 1) * NUM_OF_DIRECTIONS + d][0];
-                if(board.corners.test(next_coord))
-                    board.before_bonus_fields.reset(next_coord);
-            }
-        }
-        else if(board.check_choice_field())
-        {
-            for(uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
-            {
-                uint16_t next_coord = move_gen.next_coords[(coord - 1) * NUM_OF_DIRECTIONS + d][0];
-                if(board.corners.test(next_coord))
-                    board.before_choice_fields.reset(next_coord);
-            }
-        }
-            
         return return_value;
     }
     catch (const TimeLimitExceededException &)

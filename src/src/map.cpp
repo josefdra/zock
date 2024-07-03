@@ -164,6 +164,7 @@ void Map::read_map(std::stringstream mapfile)
 {
     char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
+    LOG_INFO("m_height: " + std::to_string(m_height) + " m_width: " + std::to_string(m_width));
     m_num_of_fields = m_height * m_width + 1;
     m_transitions.resize((m_num_of_fields - 1) * NUM_OF_DIRECTIONS + 1, 0);
     m_numbers.resize(m_num_of_fields, 0);
@@ -222,10 +223,8 @@ void Map::set_values(Board &board, uint16_t c)
     if (get_symbol(c) == '0')
         board.board_sets[EMPTY].set(c);
 
-    else if (get_symbol(c) == '-'){
+    else if (get_symbol(c) == '-')
         board.board_sets[MINUS].set(c);
-        board.decrement_not_minus_fields();
-    }
 
     else if (get_symbol(c) == 'i')
     {
@@ -282,8 +281,6 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
             if (most > 3)
                 board.fixed_protected_fields.set(c);
         }
-
-    board.corners = (wall_sets[FOUR_WALLS] | wall_sets[FIVE_WALLS]);
 }
 
 void Map::init_before_wall_values(Board &board)
@@ -488,10 +485,6 @@ void Map::init_communities(Board &board)
 
 void Map::init_static_evaluation(Board &board)
 {
-    std::bitset<MAX_NUM_OF_FIELDS> all_stones;
-    for (auto &player : board.player_sets)
-        all_stones |= player;
-    all_stones |= board.board_sets[X];
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
     {
         if (board.board_sets[MINUS].test(c))
@@ -500,9 +493,9 @@ void Map::init_static_evaluation(Board &board)
             board.static_evaluation[c] += FOUR_WALLS_VALUE;
         else if (wall_sets[FIVE_WALLS].test(c))
             board.static_evaluation[c] += FIVE_WALLS_VALUE;
-        else if (before_wall_sets[FOUR_WALLS].test(c) && !all_stones.test(c))
+        else if (before_wall_sets[FOUR_WALLS].test(c))
             board.static_evaluation[c] += BEFORE_FOUR_WALLS_VALUE;
-        else if (before_wall_sets[FIVE_WALLS].test(c) && !all_stones.test(c))
+        else if (before_wall_sets[FIVE_WALLS].test(c))
             board.static_evaluation[c] += BEFORE_FIVE_WALLS_VALUE;
     }
 }
@@ -511,6 +504,7 @@ Board Map::init_boards_and_players()
 {
     Board ret_board(*this);
 
+    LOG_INFO("number of fields: " + std::to_string(m_num_of_fields));
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         set_values(ret_board, c);
 
