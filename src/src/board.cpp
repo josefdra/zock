@@ -384,3 +384,8 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
 
     return total_moves;
 }
+
+void Board::calc_occupied_percentage(uint16_t possible_fields)
+{
+    occupied_percentage = (occupied_fields * 100) / possible_fields;
+}

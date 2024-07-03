@@ -6,9 +6,10 @@
 #include "logging.hpp"
 #include "statistics.hpp"
 
-#define MAX_SEARCH_DEPTH 15
+#define MAX_SEARCH_DEPTH 20
 #define ESTIMATED_TIME_DIVISOR 1.75
 #define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
+#define _30SECONDS 30000000
 
 Algorithms::Algorithms() {}
 
@@ -239,7 +240,7 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
         average_next_player_calculation_time += get_next_player_timer.get_elapsed_time();
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer, m_move_gen, index);
-    
+
         nodes_calculated++;
         Timer set_up_moves_timer;
         moves moves;
@@ -432,6 +433,10 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     std::vector<int> best_community_eval(board.get_num_of_communities(), INT32_MIN);
     std::vector<uint16_t> best_move_in_community_index(board.get_num_of_communities(), 0);
     uint8_t best_community_index = 0;
+    static uint8_t max_search_depth = 1;
+
+    if (max_search_depth != MAX_SEARCH_DEPTH)
+        adapt_depth_to_map_progress(max_search_depth, board.occupied_percentage);
 
     try
     {
@@ -447,7 +452,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                 sort_valid_moves(board, player_num, moves[community_index], timer, 0);
             sorting_time += sorting_timer.get_elapsed_time();
         }
-        for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
+        for (search_depth = 0; search_depth < max_search_depth; search_depth++)
         {
             Timer measure_depth_search(timer.return_rest_time());
             for (uint8_t community_index = 0; community_index < board.get_num_of_communities(); community_index++)
@@ -498,6 +503,11 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                 LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
                 break;
             }
+            else if (estimated_runtime > _30SECONDS)
+            {
+                LOG_INFO("estimated time exceeds 30 seconds, stopping search");
+                break;
+            }
         }
     }
     catch (TimeLimitExceededException &e)
@@ -507,7 +517,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
         LOG_WARNING(e.what());
     }
     // print_evaluation_statistics();
-    // print_time_statistics();    
+    // print_time_statistics();
     LOG_INFO("best eval: " + std::to_string(best_eval));
     return best_board;
 }
@@ -538,5 +548,30 @@ double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &ti
     else
     {
         return -1.0;
+    }
+}
+
+void Algorithms::adapt_depth_to_map_progress(uint8_t &max_search_depth, uint8_t occupied_percentage)
+{
+
+    if (occupied_percentage > 80)
+    {
+        max_search_depth = MAX_SEARCH_DEPTH;
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    }
+    else if (occupied_percentage > 60 && max_search_depth != 7)
+    {
+        max_search_depth = 7;
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    }
+    else if (occupied_percentage > 45 && max_search_depth != 5)
+    {
+        max_search_depth = 3;
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    }
+    else if (occupied_percentage > 30 && max_search_depth != 3)
+    {
+        max_search_depth = 1;
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
     }
 }

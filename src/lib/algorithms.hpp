@@ -46,6 +46,7 @@ public:
     Board get_best_coord(Board &, Timer &, bool);
     void calculate_average_branching_factor();
     double estimate_runtime_next_depth(uint8_t &, Timer &);
+    void adapt_depth_to_map_progress(uint8_t &, uint8_t);
 
     std::vector<std::vector<uint16_t>> killer_moves;
 

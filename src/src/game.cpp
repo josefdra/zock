@@ -95,12 +95,15 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     board.set_coord(map.two_dimension_2_one_dimension((data >> FOUR_BYTES) & ONE_SET_BYTE, (data >> TWO_BYTES) & ONE_SET_BYTE));
     board.set_spec((data >> BYTE) & ONE_SET_BYTE);
     uint8_t player = (data & ONE_SET_BYTE) - 1;
+    board.calc_occupied_percentage(map.get_sum_possible_fields());
+    LOG_INFO("current map progress: " + std::to_string(board.occupied_percentage) + "% " + "of fields occupied");
     if (!bomb_phase)
     {
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
         LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
         uint8_t temp_index = MAX_INDEX;
         move_exec.exec_move(player, board, temp_index);
+        board.occupied_fields++;
     }
     else
     {
