@@ -9,7 +9,7 @@
 
 void init_print(bool quietMode, const char *ip, int port, bool sorting)
 {
-    LOG_INFO("Gruppe01 | Dräxl, Koch, Kuhn");
+    LOG_INFO("Group01 | Dräxl, Koch, Kuhn");
     if (sorting)
         LOG_INFO("Move ordering active");
 
