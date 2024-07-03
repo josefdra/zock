@@ -50,7 +50,7 @@ public:
     std::vector<std::vector<uint16_t>> killer_moves;
 
 private:
-    MoveExecuter m_move_exec;
+    MoveExecuter move_exec;
     MoveGenerator m_move_gen;
 
     double average_branching_factor = 0;

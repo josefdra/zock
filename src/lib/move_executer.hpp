@@ -33,6 +33,7 @@ public:
     void merge_communities(Board &, uint8_t &);
     void check_if_protected_field_with_extending(Board &, uint8_t, uint16_t);
     void recalculate_protected_fields(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
+    void calculate_before_protected_fields(Board &board, uint8_t player);
     void calculcate_choice_and_bonus_fields(uint16_t, std::bitset<MAX_NUM_OF_FIELDS> &);
     void extend_protected_fields(Board &, uint8_t, std::bitset<MAX_NUM_OF_FIELDS> &);
     void update_boards(uint8_t, uint8_t, Board &, uint8_t &, bool);

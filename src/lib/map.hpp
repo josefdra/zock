@@ -77,6 +77,7 @@ public:
     void init_players_in_communities_count(Board &);
     void init_communities(Board &);
     void init_static_evaluation(Board &);
+    void calculate_before_protected_fields(Board &);
     Board init_boards_and_players();
     void generate_transitions();
 
