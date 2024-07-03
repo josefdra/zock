@@ -10,6 +10,10 @@ http://172.20.0.41:8088/current
 
 https://matchpoint.moves.rwth-aachen.de/current
 
+# Current best state
+
+d1da638a
+
 # Really good state for big maps
 
 856d5221
