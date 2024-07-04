@@ -5,9 +5,10 @@
 #include "evaluator.hpp"
 #include "logging.hpp"
 #include "statistics.hpp"
+#include <cmath>
 
 #define MAX_SEARCH_DEPTH 20
-#define ESTIMATED_TIME_DIVISOR 1.75
+#define ESTIMATED_TIME_DIVISOR 1.5
 #define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
 #define _30SECONDS 30000000
 
@@ -442,9 +443,10 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     std::vector<uint16_t> best_move_in_community_index(board.get_num_of_communities(), 0);
     uint8_t best_community_index = 0;
     static uint8_t max_search_depth = 1;
+    calculate_thresholds(board.scaling_factor);
 
     if (max_search_depth != MAX_SEARCH_DEPTH)
-        adapt_depth_to_map_progress(max_search_depth, board.occupied_percentage);
+        adapt_depth_to_map_progress(max_search_depth, board);
 
     try
     {
@@ -559,27 +561,33 @@ double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &ti
     }
 }
 
-void Algorithms::adapt_depth_to_map_progress(uint8_t &max_search_depth, uint8_t occupied_percentage)
+void Algorithms::adapt_depth_to_map_progress(uint8_t &max_search_depth, Board &b)
 {
+    uint8_t old = max_search_depth;
 
-    if (occupied_percentage > 80)
+    if (b.occupied_percentage > threshold_60_80)
     {
         max_search_depth = MAX_SEARCH_DEPTH;
-        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
     }
-    else if (occupied_percentage > 60 && max_search_depth != 7)
+    else if (b.occupied_percentage > threshold_40_60 && max_search_depth < 7)
     {
         max_search_depth = 7;
-        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
     }
-    else if (occupied_percentage > 45 && max_search_depth != 3)
+    else if (b.occupied_percentage > threshold_25_45 && max_search_depth < 4)
     {
-        max_search_depth = 3;
-        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+        max_search_depth = 4;
     }
-    else if (occupied_percentage > 30 && max_search_depth != 1)
+    else if (b.occupied_percentage > threshold_15_30 && max_search_depth < 2)
     {
-        max_search_depth = 1;
-        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+        max_search_depth = 2;
     }
+    if (old != max_search_depth)
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+}
+void Algorithms::calculate_thresholds(double scaling_factor)
+{
+    threshold_60_80 = small_map_threshold_60 + (large_map_threshold_80 - small_map_threshold_60) * scaling_factor;
+    threshold_40_60 = small_map_threshold_40 + (large_map_threshold_60 - small_map_threshold_40) * scaling_factor;
+    threshold_25_45 = small_map_threshold_25 + (large_map_threshold_45 - small_map_threshold_25) * scaling_factor;
+    threshold_15_30 = small_map_threshold_15 + (large_map_threshold_30 - small_map_threshold_15) * scaling_factor;
 }

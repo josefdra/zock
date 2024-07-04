@@ -83,6 +83,7 @@ void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bo
     if (((data >> BYTE) & FOUR_SET_BYTES) != 0)
         m_initial_time_limit = ((data >> BYTE) & FOUR_SET_BYTES);
     Timer timer(m_initial_time_limit);
+
     if (!bomb_phase)
         net.send_move(move_gen.generate_move(board, algorithms, timer, sorting));
     else
@@ -112,7 +113,7 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
         board = move_exec.exec_bomb(player, board, map.get_strength());
     }
 
-    if(!board.corners_and_walls.test(board.get_coord()))
+    if (!board.corners_and_walls.test(board.get_coord()))
         board.static_evaluation[board.get_coord()] = 0;
 
     move_exec.calculate_before_protected_fields(board, player);
@@ -146,6 +147,8 @@ void Game::run(Network &net, bool sorting)
     move_gen = MoveGenerator(map);
     move_exec = MoveExecuter(map);
     LOG_INFO("Move generator and executer setup time: " + std::to_string(move_gen_and_exec_setup_timer.get_elapsed_time()));
+    board.calculate_scaling_factor(map.get_sum_possible_fields());
+    LOG_INFO("current scaling factor: " + std::to_string(board.scaling_factor) + "\n");
     print_static_evaluation(board);
 
     while (!is_game_over() && !board.disqualified[board.get_our_player()])
