@@ -353,9 +353,7 @@ void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
         board.decrement_overwrite_stones(player);
         overwrite_move = true;
     }
-    else
-	board.decrement_not_minus_fields();
-
+    
     if (spec == BOMB_SPEC)
     {
         board.board_sets[EMPTY].reset(coord);
