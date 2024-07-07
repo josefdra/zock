@@ -371,7 +371,7 @@ void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, ui
 void Algorithms::init_best_board(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> total_moves = board.get_total_moves(board.get_our_player());
-    LOG_INFO("total moves: " + std::to_string(total_moves.count()));
+    LOG_INFO("Total moves: " + std::to_string(total_moves.count()));
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (total_moves.test(c))
         {
@@ -510,12 +510,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
             if (estimated_runtime > timer.return_rest_time())
             {
-                LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                LOG_INFO("Skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
                 break;
             }
             else if (estimated_runtime > _30SECONDS)
             {
-                LOG_INFO("estimated time exceeds 30 seconds, stopping search");
+                LOG_INFO("Estimated time exceeds 30 seconds, stopping search");
                 break;
             }
         }
@@ -523,12 +523,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     catch (TimeLimitExceededException &e)
     {
         board = prev_board;
-        LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
+        LOG_INFO("Time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }
     // print_evaluation_statistics();
     // print_time_statistics();
-    LOG_INFO("best eval: " + std::to_string(best_eval));
+    LOG_INFO("Best eval: " + std::to_string(best_eval));
     return best_board;
 }
 
@@ -546,10 +546,10 @@ double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &ti
         double estimated_nodes_next_depth = pow(static_cast<double>(average_branching_factor), static_cast<double>((current_depth + 1)));
 #ifdef DEBUG
 
-        LOG_INFO("elapsed time: " + std::to_string(elapsed_time) + " no_nodes: " + std::to_string(total_nodes) + " time per node: " + std::to_string(time_per_node));
-        LOG_INFO("branching average: " + std::to_string(average_branching_factor / 1.5));
-        LOG_INFO("estimated nodes next depth: " + std::to_string(estimated_nodes_next_depth));
-        LOG_INFO("caculating: " + std::to_string(estimated_nodes_next_depth) + " * " + std::to_string(time_per_node));
+        LOG_INFO("Elapsed time: " + std::to_string(elapsed_time) + " no_nodes: " + std::to_string(total_nodes) + " time per node: " + std::to_string(time_per_node));
+        LOG_INFO("Branching average: " + std::to_string(average_branching_factor / 1.5));
+        LOG_INFO("Estimated nodes next depth: " + std::to_string(estimated_nodes_next_depth));
+        LOG_INFO("Caculating: " + std::to_string(estimated_nodes_next_depth) + " * " + std::to_string(time_per_node));
 #endif // DEBUG
         calculate_average_branching_factor();
         average_branching_factor = 1;
