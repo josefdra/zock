@@ -405,3 +405,10 @@ void Board::calc_occupied_percentage(uint16_t possible_fields)
 {
     occupied_percentage = (occupied_fields * 100) / possible_fields;
 }
+void Board::calculate_scaling_factor(uint16_t playable_fields)
+{
+    LOG_INFO("playable fields: " + std::to_string(playable_fields));
+    scaling_factor = double((playable_fields - MIN_NUM_OF_FIELDS)) / double((MAX_NUM_OF_FIELDS - MIN_NUM_OF_FIELDS));
+    // Apply a square root scaling for a more gradual change
+    std::sqrt(scaling_factor);
+}

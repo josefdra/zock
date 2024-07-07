@@ -1,6 +1,7 @@
 #ifndef BOARD_HPP
 #define BOARD_HPP
 
+#define MIN_NUM_OF_FIELDS 64
 #define MAX_NUM_OF_FIELDS 2501
 #define NUM_OF_BOARD_SETS 6
 #define MINUS 0
@@ -81,6 +82,7 @@ public:
     void reset_valid_moves(uint8_t);
     std::bitset<MAX_NUM_OF_FIELDS> get_total_moves(uint8_t);
     void calc_occupied_percentage(uint16_t);
+    void calculate_scaling_factor(uint16_t);
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -117,6 +119,7 @@ public:
 
     uint16_t occupied_fields = 0;
     uint8_t occupied_percentage = 0;
+    double scaling_factor = 0;
 
 private:
     uint8_t m_our_player;
