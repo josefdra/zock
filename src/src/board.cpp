@@ -2,6 +2,11 @@
 #include "map.hpp"
 #include "logging.hpp"
 
+/**
+ * @brief this cpp contains all needed information about the current board state
+ *
+ */
+
 Board::Board(Map &map)
     : board_sets(),
       player_sets(map.get_player_count()),
@@ -74,6 +79,11 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
 
 Board::~Board() {}
 
+/**
+ *
+ * HERE ARE JUST SETTER AND GETTER
+ *
+ */
 void Board::set_our_player(uint8_t player)
 {
     m_our_player = player - 1;
@@ -245,17 +255,28 @@ void Board::reset_choice_field()
     m_choice_field = false;
 }
 
+/// @brief calcualtes our dimension layout to the dimension used by the server
+/// @param _1D_coord 1D coordinate
+/// @param x x value to set
+/// @param y y value to set
 void Board::one_dimension_2_second_dimension(uint16_t _1D_coord, uint8_t &x, uint8_t &y)
 {
     _1D_coord % m_width == 0 ? x = m_width - 1 : x = _1D_coord % m_width - 1;
     y = (_1D_coord - (x + 1)) / m_width;
 }
 
+/// @brief calculates server dimension to our dimension
+/// @param x x coordinate
+/// @param y y coordinate
+/// @return 1D coordinate used by our program
 uint16_t Board::two_dimension_2_one_dimension(uint8_t x, uint8_t y)
 {
     return (x + 1 + y * m_width);
 }
 
+/// @brief is used to get coloured prints for players in local terminal
+/// @param color enum of the used color
+/// @return escape encoding of needed color
 std::string Board::get_color_string(Colors color)
 {
 #ifdef COLOR
@@ -284,7 +305,11 @@ std::string Board::get_color_string(Colors color)
     return "";
 #endif
 }
-
+/**
+ *
+ * HERE ARE JUST FUNCTIONS THAT ARE NEEDED TO PRINT THE CURRENT BOARD IN TERMINAL
+ *
+ */
 void Board::print_upper_outlines()
 {
     std::cout << "     ";
@@ -392,6 +417,9 @@ void Board::reset_valid_moves(uint8_t player)
         moves.reset();
 }
 
+/// @brief adds valid moves of set with - or without overwrite stones to a total_moves set
+/// @param player current player
+/// @return total_moves with and without overwrite stones
 std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
 {
     std::bitset<MAX_NUM_OF_FIELDS> total_moves;
@@ -401,14 +429,19 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
     return total_moves;
 }
 
+/// @brief calculates the percentage of the map that is already occupied and can't be played anymore (doesn't include overwrite stones - is not necessary)
+/// @param possible_fields actual fields than can initially be put player stones on
 void Board::calc_occupied_percentage(uint16_t possible_fields)
 {
     occupied_percentage = (occupied_fields * 100) / possible_fields;
 }
+
+/// @brief calculates the scaling factor according to total size of map and actual playable fields
+/// @param playable_fields
 void Board::calculate_scaling_factor(uint16_t playable_fields)
 {
     LOG_INFO("playable fields: " + std::to_string(playable_fields));
-    scaling_factor = double((playable_fields - MIN_NUM_OF_FIELDS)) / double((MAX_NUM_OF_FIELDS - MIN_NUM_OF_FIELDS));
+    scaling_factor = double(playable_fields) / double(MAX_NUM_OF_FIELDS);
     // Apply a square root scaling for a more gradual change
     std::sqrt(scaling_factor);
 }

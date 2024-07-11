@@ -4,6 +4,11 @@
 #include "timer.hpp"
 #include "statistics.hpp"
 
+/// @brief calculates a static evaluation not dependant on any move by any player
+/// @param board current board layout
+/// @param community_player_stones stones in a community by a player
+/// @param index community index
+/// @return calculated static evaluation
 int get_static_eval(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community_player_stones, uint8_t index)
 {
     int return_value = 0;
@@ -14,6 +19,13 @@ int get_static_eval(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community_play
     return return_value;
 }
 
+/// @brief calculates current situation of board for us + our move
+/// @param board current board layout
+/// @param player_num current player that gets evaluated
+/// @param timer timer object to check if time is up
+/// @param move_gen movegenerator object
+/// @param index community index
+/// @return evaluation of current situation for the board
 int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator &move_gen, uint8_t index)
 {
     Timer evaluation_time;

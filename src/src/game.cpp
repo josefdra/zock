@@ -6,6 +6,17 @@
 #include "logging.hpp"
 #include "statistics.hpp"
 
+/**
+ *
+ * @brief this cpp handles the whole logic around the game and is needed to receive and send all types of information between server and client
+ *
+ */
+
+/**
+ *
+ * HERE ARE JUST INITIALIZATIONS AND SETTER AND GETTER
+ *
+ */
 Game::Game()
 {
     m_game_over = false;
@@ -42,6 +53,8 @@ void Game::set_bomb_phase()
     m_bomb_phase = true;
 }
 
+/// @brief prints each players status at the end of the game either if they're disqualified or their points
+/// @param board current board layout - end state board
 void Game::calculate_winner(Board &board)
 {
     uint16_t max = 0;
@@ -66,6 +79,9 @@ void Game::calculate_winner(Board &board)
     LOG_INFO("The winner is player " + std::to_string(winner) + " with " + std::to_string(max) + " points");
 }
 
+/// @brief handles prints at the end of the game
+/// @param board current board layout
+/// @param player_number our player number
 void Game::end(Board &board, uint8_t player_number)
 {
     if (board.disqualified[player_number])
@@ -78,6 +94,13 @@ void Game::end(Board &board, uint8_t player_number)
     print_total_evaluation_statistics();
 }
 
+/// @brief handles information exchange if we've got a turn request
+/// @param net network object to send move to
+/// @param data includes message of data sent by the server
+/// @param map current map we're playing
+/// @param board current board layout
+/// @param sorting bool if sorting is enabled or disabled
+/// @param bomb_phase bool if we're at bomb phase or not
 void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bool sorting, bool bomb_phase)
 {
     if (((data >> BYTE) & FOUR_SET_BYTES) != 0)
@@ -90,6 +113,11 @@ void Game::turn_request(Network &net, uint64_t &data, Map &map, Board &board, bo
         net.send_move(move_gen.generate_bomb(board, map, timer));
 }
 
+/// @brief handles a executed move sent by the server and sends the information deeper to execute the move locally
+/// @param map current map we're playing on
+/// @param data contains message sent by the server (which player did which move)
+/// @param board current board layout
+/// @param bomb_phase bool if we're in bomb_phase
 void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
 {
     Timer timer(m_initial_time_limit);
@@ -135,6 +163,9 @@ void Game::print_static_evaluation(Board &board)
     std::cout << std::endl;
 }
 
+/// @brief handles whole information exchange and is a while loop which only ends if the game is over or we're disqualified
+/// @param net network object
+/// @param sorting bool if sorting is enabled/disabled
 void Game::run(Network &net, bool sorting)
 {
     Map map;
