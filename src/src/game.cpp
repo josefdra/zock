@@ -38,7 +38,7 @@ void Game::set_disqualified(Board &board, uint8_t player_number)
 
 void Game::set_bomb_phase()
 {
-    LOG_INFO("\nbomb phase starting\n");
+    LOG_INFO("Bomb phase starting\n");
     m_bomb_phase = true;
 }
 
@@ -97,7 +97,7 @@ void Game::receive_turn(Map &map, uint64_t &data, Board &board, bool bomb_phase)
     board.set_spec((data >> BYTE) & ONE_SET_BYTE);
     uint8_t player = (data & ONE_SET_BYTE) - 1;
     board.calc_occupied_percentage(map.get_sum_possible_fields());
-    LOG_INFO("current map progress: " + std::to_string(board.occupied_percentage) + "% " + "of fields occupied");
+    LOG_INFO("Current map progress: " + std::to_string(board.occupied_percentage) + "% " + "of fields occupied");
     if (!bomb_phase)
     {
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));

@@ -166,7 +166,6 @@ void Map::read_map(std::stringstream mapfile)
 {
     char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
-    LOG_INFO("m_height: " + std::to_string(m_height) + " m_width: " + std::to_string(m_width));
     m_num_of_fields = m_height * m_width + 1;
     m_transitions.resize((m_num_of_fields - 1) * NUM_OF_DIRECTIONS + 1, 0);
     m_numbers.resize(m_num_of_fields, 0);
@@ -579,7 +578,6 @@ Board Map::init_boards_and_players()
 {
     Board ret_board(*this);
 
-    LOG_INFO("number of fields: " + std::to_string(m_num_of_fields));
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         set_values(ret_board, c);
 
