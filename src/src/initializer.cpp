@@ -650,7 +650,9 @@ void Initializer::check_if_special_map(Board &board)
                         board.special_moves.push_back((uint32_t)x << TWO_BYTES | (uint32_t)y << BYTE | 20);
                         one_dimension_2_second_dimension(c, x, y);
                         board.special_moves.push_back((uint32_t)x << TWO_BYTES | (uint32_t)y << BYTE | 0);
-                        board.special_coord = c;
+                        board.special_coords[0] = c;
+                        board.special_coords[1] = next_coord;
+                        board.special_coords[2] = next_next_coord;
                         return;
                     }
                 }

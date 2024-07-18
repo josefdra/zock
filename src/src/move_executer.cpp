@@ -486,6 +486,9 @@ Board MoveExecuter::exec_bomb(uint8_t player, Board board, uint8_t strength)
         if (!board.board_sets[MINUS].test(c))
             mask.set(c);
 
+    for(auto &c : board.special_coords)
+        mask.reset(c);
+
     std::bitset<MAX_NUM_OF_FIELDS> fields_to_remove(get_fields_to_remove(board, coord, strength, mask));
     board.decrement_bombs(player);
     for (uint8_t i = 0; i < board.board_sets.size(); i++)

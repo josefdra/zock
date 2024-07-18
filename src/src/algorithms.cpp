@@ -694,8 +694,8 @@ void Algorithms::adapt_depth_to_map_progress(uint8_t &max_search_depth, Board &b
     {
         max_search_depth = 2;
     }
-    // if (old != max_search_depth)
-    LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    if (old != max_search_depth)
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
 }
 
 /// @brief calculates the threshold according to the current map size to be able to set the next depth sooner or later

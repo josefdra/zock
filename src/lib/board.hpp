@@ -121,7 +121,7 @@ public:
     uint8_t occupied_percentage = 0;
     double scaling_factor = 0;
     std::vector<uint32_t> special_moves;
-    uint16_t special_coord;
+    std::array<uint16_t, 3> special_coords;
 
 private:
     uint8_t m_our_player;

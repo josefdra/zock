@@ -91,8 +91,8 @@ void Game::end(Board &board, uint8_t player_number)
     else
         calculate_winner(board);
 
-    // print_total_time_statistics();
-    // print_total_evaluation_statistics();
+    print_total_time_statistics();
+    print_total_evaluation_statistics();
 }
 
 /// @brief handles information exchange if we've got a turn request
@@ -110,7 +110,7 @@ void Game::turn_request(Network &net, uint64_t &data, Initializer &init, Board &
 
     if (!bomb_phase)
     {
-        if ((board.special_moves.size() > 2 && board.board_sets[X].test(board.special_coord)) || (board.special_moves.size() > 1 && board.player_sets[board.get_our_player()].test(board.special_coord)))
+        if ((board.special_moves.size() > 2 && board.board_sets[X].test(board.special_coords[0])) || (board.special_moves.size() > 1 && board.player_sets[board.get_our_player()].test(board.special_coords[0])))
         {
             net.send_move(board.special_moves.back());
             board.special_moves.pop_back();
