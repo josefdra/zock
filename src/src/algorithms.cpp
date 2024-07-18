@@ -1,16 +1,10 @@
 #include "algorithms.hpp"
-#include "map.hpp"
+#include "initializer.hpp"
 #include "timer.hpp"
 #include "board.hpp"
 #include "evaluator.hpp"
 #include "logging.hpp"
 #include "statistics.hpp"
-#include <cmath>
-
-#define MAX_SEARCH_DEPTH 20
-#define ESTIMATED_TIME_DIVISOR 1.5
-#define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
-#define _30SECONDS 30000000
 
 /**
  * @brief This part contains all relevant information about used algorithms through this project and it's helper functions
@@ -81,6 +75,7 @@ int Algorithms::set_up_best_eval_minimax(Board &board, uint8_t player_num)
         best_eval = INT32_MAX;
     return best_eval;
 }
+
 /// @brief initializes evaluation value for brs
 /// @param board current board layout
 /// @param brs_m init value of m
@@ -254,7 +249,7 @@ void Algorithms::get_eval_brs(Board &board, moves &moves, int alpha, int beta, u
     }
 }
 
-/// @brief
+/// @brief gets first valid move of a player
 /// @param moves contains all valid moves
 /// @return first valid move
 move Algorithms::get_first_move(moves &moves)
@@ -264,6 +259,7 @@ move Algorithms::get_first_move(moves &moves)
 
     return move();
 }
+
 /// @brief sets everything up to be able to do a evaluation of minimax by checking next player, getting valid moves and sorting them if necessary
 /// @param board current board layout
 /// @param alpha alpha value for alpha beta pruning
@@ -472,7 +468,7 @@ void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, ui
 void Algorithms::init_best_board(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> total_moves = board.get_total_moves(board.get_our_player());
-    LOG_INFO("Total moves: " + std::to_string(total_moves.count()));
+    // LOG_INFO("Total moves: " + std::to_string(total_moves.count()));
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (total_moves.test(c))
         {
@@ -619,12 +615,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
             if (estimated_runtime > timer.return_rest_time())
             {
-                LOG_INFO("Skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                // LOG_INFO("Skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
                 break;
             }
             else if (estimated_runtime > _30SECONDS)
             {
-                LOG_INFO("Estimated time exceeds 30 seconds, stopping search");
+                // LOG_INFO("Estimated time exceeds 30 seconds, stopping search");
                 break;
             }
         }
@@ -632,12 +628,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     catch (TimeLimitExceededException &e)
     {
         board = prev_board;
-        LOG_INFO("Time left: " + std::to_string(timer.return_rest_time()));
-        LOG_WARNING(e.what());
+        // LOG_INFO("Time left: " + std::to_string(timer.return_rest_time()));
+        // LOG_WARNING(e.what());
     }
     // print_evaluation_statistics();
     // print_time_statistics();
-    LOG_INFO("Best eval: " + std::to_string(best_eval));
+    // LOG_INFO("Best eval: " + std::to_string(best_eval));
     return best_board;
 }
 
@@ -698,8 +694,8 @@ void Algorithms::adapt_depth_to_map_progress(uint8_t &max_search_depth, Board &b
     {
         max_search_depth = 2;
     }
-    if (old != max_search_depth)
-        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    // if (old != max_search_depth)
+    // LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
 }
 
 /// @brief calculates the threshold according to the current map size to be able to set the next depth sooner or later

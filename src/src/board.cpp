@@ -1,5 +1,5 @@
 #include "board.hpp"
-#include "map.hpp"
+#include "initializer.hpp"
 #include "logging.hpp"
 
 /**
@@ -7,34 +7,36 @@
  *
  */
 
-Board::Board(Map &map)
+Board::Board(Initializer &init)
     : board_sets(),
-      player_sets(map.get_player_count()),
-      valid_moves(map.get_player_count()),
-      static_evaluation(map.get_num_of_fields(), 0),
+      player_sets(init.get_player_count()),
+      valid_moves(init.get_player_count()),
+      static_evaluation(init.get_num_of_fields(), 0),
       fixed_protected_fields(),
-      protected_fields(map.get_player_count()),
-      before_protected_fields(map.get_player_count()),
+      protected_fields(init.get_player_count()),
+      before_protected_fields(init.get_player_count()),
       corners_and_walls(),
-      overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
-      bombs(map.get_player_count(), map.get_initial_bombs()),
+      overwrite_stones(init.get_player_count(), init.get_initial_overwrite_stones()),
+      bombs(init.get_player_count(), init.get_initial_bombs()),
       communities(0),
       frames(0),
       num_of_players_in_community(0),
       start_end_communities(0),
       start_end_frames(0),
-      disqualified(map.get_player_count(), false),
+      disqualified(init.get_player_count(), false),
       before_bonus_fields(),
       before_choice_fields(),
+      special_moves(),
+      special_coord(0),
       m_our_player(0),
-      m_player_count(map.get_player_count()),
-      m_num_of_fields(map.get_num_of_fields()),
-      m_num_of_not_minus_fields(map.get_num_of_fields() - 1),
-      m_width(map.get_width()),
-      m_height(map.get_height()),
+      m_player_count(init.get_player_count()),
+      m_num_of_fields(init.get_num_of_fields()),
+      m_num_of_not_minus_fields(init.get_num_of_fields() - 1),
+      m_width(init.get_width()),
+      m_height(init.get_height()),
       m_coord(0),
       m_spec(0),
-      m_overwrite_move(map.get_player_count(), false),
+      m_overwrite_move(init.get_player_count(), false),
       evaluation(0),
       final_state(false),
       m_bonus_field(false),
@@ -61,6 +63,8 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       disqualified(board.disqualified),
       before_bonus_fields(board.before_bonus_fields),
       before_choice_fields(board.before_choice_fields),
+      special_moves(board.special_moves),
+      special_coord(board.special_coord),
       m_our_player(board.m_our_player),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
@@ -84,10 +88,11 @@ Board::~Board() {}
  * HERE ARE JUST SETTER AND GETTER
  *
  */
+
 void Board::set_our_player(uint8_t player)
 {
     m_our_player = player - 1;
-    LOG_INFO("Our player: " + std::to_string(m_our_player + 1));
+    // LOG_INFO("Our player: " + std::to_string(m_our_player + 1));
 }
 
 void Board::set_coord(uint16_t coord)
@@ -305,6 +310,7 @@ std::string Board::get_color_string(Colors color)
     return "";
 #endif
 }
+
 /**
  *
  * HERE ARE JUST FUNCTIONS THAT ARE NEEDED TO PRINT THE CURRENT BOARD IN TERMINAL
@@ -387,7 +393,7 @@ void Board::print(uint8_t player, bool our_player)
         }
         std::cout << std::endl;
     }
-    LOG_INFO("Calculated valid moves: " + std::to_string(get_total_moves(player).count()));
+    // LOG_INFO("Calculated valid moves: " + std::to_string(get_total_moves(player).count()));
     std::cout << std::endl;
 }
 
@@ -440,7 +446,7 @@ void Board::calc_occupied_percentage(uint16_t possible_fields)
 /// @param playable_fields
 void Board::calculate_scaling_factor(uint16_t playable_fields)
 {
-    LOG_INFO("playable fields: " + std::to_string(playable_fields));
+    // LOG_INFO("playable fields: " + std::to_string(playable_fields));
     scaling_factor = double(playable_fields) / double(MAX_NUM_OF_FIELDS);
     // Apply a square root scaling for a more gradual change
     std::sqrt(scaling_factor);

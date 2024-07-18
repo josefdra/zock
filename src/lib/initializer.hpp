@@ -1,5 +1,5 @@
-#ifndef MAP_HPP
-#define MAP_HPP
+#ifndef INITIALIZER_HPP
+#define INITIALIZER_HPP
 
 #define NUM_OF_DIRECTIONS 8
 #define MAX_NUM_OF_FIELDS 2501
@@ -38,11 +38,11 @@
 
 class Board;
 
-class Map
+class Initializer
 {
 public:
-    Map();
-    ~Map();
+    Initializer();
+    ~Initializer();
     void check_neighbours(uint16_t);
     void set_symbol(uint16_t, unsigned char);
     void set_transition(uint16_t, uint8_t, uint16_t);
@@ -78,6 +78,7 @@ public:
     void init_communities(Board &);
     void init_static_evaluation(Board &);
     void calculate_before_protected_fields(Board &);
+    void check_if_special_map(Board &);
     Board init_boards_and_players();
     void generate_transitions();
     void init_possible_fields();
@@ -106,4 +107,4 @@ private:
     uint16_t m_possible_fields = 0;
 };
 
-#endif // MAP_HPP
+#endif // INITIALIZER_HPP

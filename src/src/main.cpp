@@ -7,6 +7,7 @@
 #include "game.hpp"
 #include "network.hpp"
 
+/// @brief prints initial information
 void init_print(bool quietMode, const char *ip, int port, bool sorting)
 {
     LOG_INFO("Group01 | Dräxl, Koch, Kuhn");
@@ -88,6 +89,7 @@ bool read_args(int argc, char *argv[], const char *&ip, int &port, bool &sorting
     return false;
 }
 
+/// @brief main function
 int main(int argc, char *argv[])
 {
     const char *ip = "127.0.0.1\0";

@@ -17,7 +17,7 @@
 #include <array>
 #include <string>
 
-class Map;
+class Initializer;
 
 enum Colors
 {
@@ -34,7 +34,7 @@ enum Colors
 class Board
 {
 public:
-    Board(Map &);
+    Board(Initializer &);
     Board(Board &, uint16_t, uint8_t);
     ~Board();
 
@@ -120,6 +120,8 @@ public:
     uint16_t occupied_fields = 0;
     uint8_t occupied_percentage = 0;
     double scaling_factor = 0;
+    std::vector<uint32_t> special_moves;
+    uint16_t special_coord;
 
 private:
     uint8_t m_our_player;

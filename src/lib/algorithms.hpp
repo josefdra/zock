@@ -4,11 +4,16 @@
 #define MEMORY_SIZE_WITH_BUFFER 3000
 #define ZERO_EVALUATION 0
 #define ZERO_SPEC 0
+#define MAX_SEARCH_DEPTH 20
+#define ESTIMATED_TIME_DIVISOR 1.5
+#define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
+#define _30SECONDS 30000000
 
 #include <stdint.h>
 #include <array>
 #include <bitset>
 #include <vector>
+#include <cmath>
 
 #include "move_generator.hpp"
 #include "move_executer.hpp"

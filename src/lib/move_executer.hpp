@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <bitset>
 
-class Map;
+class Initializer;
 class Board;
 class Evaluator;
 class Timer;
@@ -19,7 +19,7 @@ class MoveExecuter
 {
 public:
     MoveExecuter();
-    MoveExecuter(Map &);
+    MoveExecuter(Initializer &);
     ~MoveExecuter();
 
     uint16_t get_transition(uint16_t, uint8_t);
