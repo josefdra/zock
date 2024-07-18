@@ -148,8 +148,9 @@ void Game::receive_turn(Initializer &init, uint64_t &data, Board &board, bool bo
         LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
         LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
         uint8_t temp_index = MAX_INDEX;
+        if (board.board_sets[EMPTY].test(board.get_coord()))
+            board.occupied_fields++;
         move_exec.exec_move(player, board, temp_index);
-        board.occupied_fields++;
     }
     else
     {

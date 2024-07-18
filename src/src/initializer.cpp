@@ -687,6 +687,10 @@ Board Initializer::init_boards_and_players()
 
     init_static_evaluation(ret_board);
     check_if_special_map(ret_board);
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if(!ret_board.board_sets[EMPTY].test(c) && !ret_board.board_sets[MINUS].test(c))
+            ret_board.occupied_fields++;
+
     return ret_board;
 }
 
