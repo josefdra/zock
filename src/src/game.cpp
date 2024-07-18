@@ -142,19 +142,19 @@ void Game::receive_turn(Initializer &init, uint64_t &data, Board &board, bool bo
     board.set_spec((data >> BYTE) & ONE_SET_BYTE);
     uint8_t player = (data & ONE_SET_BYTE) - 1;
     board.calc_occupied_percentage(init.get_sum_possible_fields());
-    // LOG_INFO("Current map progress: " + std::to_string(board.occupied_percentage) + "% " + "of fields occupied");
+    LOG_INFO("Current map progress: " + std::to_string(board.occupied_percentage) + "% " + "of fields occupied");
     if (!bomb_phase)
     {
-        // LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
-        // LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
+        LOG_INFO("Overwrites: " + std::to_string(board.get_overwrite_stones(player)) + " | Bombs: " + std::to_string(board.get_bombs(player)));
+        LOG_INFO("Player " + std::to_string((int)player + 1) + " moved to " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
         uint8_t temp_index = MAX_INDEX;
         move_exec.exec_move(player, board, temp_index);
         board.occupied_fields++;
     }
     else
     {
-        // LOG_INFO("Bombs: " + std::to_string(board.get_bombs(player)));
-        // LOG_INFO("Player " + std::to_string((int)player + 1) + " threw bomb at " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
+        LOG_INFO("Bombs: " + std::to_string(board.get_bombs(player)));
+        LOG_INFO("Player " + std::to_string((int)player + 1) + " threw bomb at " + std::to_string((int)((data >> FOUR_BYTES) & ONE_SET_BYTE)) + ", " + std::to_string((int)((data >> TWO_BYTES) & ONE_SET_BYTE)));
         board = move_exec.exec_bomb(player, board, init.get_strength());
     }
 
@@ -189,14 +189,14 @@ void Game::run(Network &net, bool sorting)
     init.read_map(net.receive_map());
     Timer board_setup_timer;
     Board board = init.init_boards_and_players();
-    // LOG_INFO("Board setup time: " + std::to_string(board_setup_timer.get_elapsed_time()));
+    LOG_INFO("Board setup time: " + std::to_string(board_setup_timer.get_elapsed_time()));
     board.print(0, false);
     Timer move_gen_and_exec_setup_timer;
     move_gen = MoveGenerator(init);
     move_exec = MoveExecuter(init);
-    // LOG_INFO("Move generator and executer setup time: " + std::to_string(move_gen_and_exec_setup_timer.get_elapsed_time()));
+    LOG_INFO("Move generator and executer setup time: " + std::to_string(move_gen_and_exec_setup_timer.get_elapsed_time()));
     board.calculate_scaling_factor(init.get_sum_possible_fields());
-    // LOG_INFO("current scaling factor: " + std::to_string(board.scaling_factor) + "\n");
+    LOG_INFO("current scaling factor: " + std::to_string(board.scaling_factor) + "\n");
     print_static_evaluation(board);
 
     while (!is_game_over() && !board.disqualified[board.get_our_player()])
@@ -209,7 +209,7 @@ void Game::run(Network &net, bool sorting)
             board.set_our_player(data & ONE_SET_BYTE);
             Timer algorithms_setup_timer;
             algorithms = Algorithms(move_exec, move_gen);
-            // LOG_INFO("Algorithms setup time: " + std::to_string(algorithms_setup_timer.get_elapsed_time()));
+            LOG_INFO("Algorithms setup time: " + std::to_string(algorithms_setup_timer.get_elapsed_time()));
             break;
         }
         case TYPE_RECEIVE_TURN_REQUEST:
@@ -241,8 +241,8 @@ void Game::run(Network &net, bool sorting)
         }
         default:
         {
-            // LOG_ERROR("Unknown message type");
-            // LOG_ERROR("Data: " + std::to_string(data));
+            LOG_ERROR("Unknown message type");
+            LOG_ERROR("Data: " + std::to_string(data));
             exit(1);
         }
         }

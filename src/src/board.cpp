@@ -92,7 +92,7 @@ Board::~Board() {}
 void Board::set_our_player(uint8_t player)
 {
     m_our_player = player - 1;
-    // LOG_INFO("Our player: " + std::to_string(m_our_player + 1));
+    LOG_INFO("Our player: " + std::to_string(m_our_player + 1));
 }
 
 void Board::set_coord(uint16_t coord)
@@ -393,7 +393,7 @@ void Board::print(uint8_t player, bool our_player)
         }
         std::cout << std::endl;
     }
-    // LOG_INFO("Calculated valid moves: " + std::to_string(get_total_moves(player).count()));
+    LOG_INFO("Calculated valid moves: " + std::to_string(get_total_moves(player).count()));
     std::cout << std::endl;
 }
 
@@ -446,7 +446,7 @@ void Board::calc_occupied_percentage(uint16_t possible_fields)
 /// @param playable_fields
 void Board::calculate_scaling_factor(uint16_t playable_fields)
 {
-    // LOG_INFO("playable fields: " + std::to_string(playable_fields));
+    LOG_INFO("playable fields: " + std::to_string(playable_fields));
     scaling_factor = double(playable_fields) / double(MAX_NUM_OF_FIELDS);
     // Apply a square root scaling for a more gradual change
     std::sqrt(scaling_factor);

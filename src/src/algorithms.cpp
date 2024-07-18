@@ -468,7 +468,7 @@ void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, ui
 void Algorithms::init_best_board(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> total_moves = board.get_total_moves(board.get_our_player());
-    // LOG_INFO("Total moves: " + std::to_string(total_moves.count()));
+    LOG_INFO("Total moves: " + std::to_string(total_moves.count()));
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (total_moves.test(c))
         {
@@ -615,12 +615,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
             if (estimated_runtime > timer.return_rest_time())
             {
-                // LOG_INFO("Skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                LOG_INFO("Skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
                 break;
             }
             else if (estimated_runtime > _30SECONDS)
             {
-                // LOG_INFO("Estimated time exceeds 30 seconds, stopping search");
+                LOG_INFO("Estimated time exceeds 30 seconds, stopping search");
                 break;
             }
         }
@@ -628,12 +628,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     catch (TimeLimitExceededException &e)
     {
         board = prev_board;
-        // LOG_INFO("Time left: " + std::to_string(timer.return_rest_time()));
-        // LOG_WARNING(e.what());
+        LOG_INFO("Time left: " + std::to_string(timer.return_rest_time()));
+        LOG_WARNING(e.what());
     }
     // print_evaluation_statistics();
     // print_time_statistics();
-    // LOG_INFO("Best eval: " + std::to_string(best_eval));
+    LOG_INFO("Best eval: " + std::to_string(best_eval));
     return best_board;
 }
 
@@ -695,7 +695,7 @@ void Algorithms::adapt_depth_to_map_progress(uint8_t &max_search_depth, Board &b
         max_search_depth = 2;
     }
     // if (old != max_search_depth)
-    // LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+    LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
 }
 
 /// @brief calculates the threshold according to the current map size to be able to set the next depth sooner or later
