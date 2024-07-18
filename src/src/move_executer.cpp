@@ -1,5 +1,5 @@
 #include "move_executer.hpp"
-#include "map.hpp"
+#include "initializer.hpp"
 #include "board.hpp"
 #include "move_generator.hpp"
 #include "timer.hpp"
@@ -7,15 +7,21 @@
 
 MoveExecuter::MoveExecuter() {}
 
-MoveExecuter::MoveExecuter(Map &map)
+MoveExecuter::MoveExecuter(Initializer &init)
 {
-    next_coords = map.next_coords;
-    m_transitions = map.get_transitions();
-    m_num_of_fields = map.get_num_of_fields();
-    m_num_of_players = map.get_player_count();
+    next_coords = init.next_coords;
+    m_transitions = init.get_transitions();
+    m_num_of_fields = init.get_num_of_fields();
+    m_num_of_players = init.get_player_count();
 }
 
 MoveExecuter::~MoveExecuter() {}
+
+/**
+ *
+ * HERE ARE JUST INITIALIZATIONS AND SETTER AND GETTER
+ *
+ */
 
 uint16_t MoveExecuter::get_transition(uint16_t c, uint8_t d)
 {
@@ -37,6 +43,10 @@ uint8_t MoveExecuter::get_num_of_players()
     return m_num_of_players;
 }
 
+/// @brief updates the bits of the board
+/// @param to_color bits to color
+/// @param player moving player
+/// @param board current board
 void MoveExecuter::update_bits(std::bitset<MAX_NUM_OF_FIELDS> &to_color, uint8_t player, Board &board)
 {
     for (auto &bitset : board.board_sets)
@@ -48,6 +58,10 @@ void MoveExecuter::update_bits(std::bitset<MAX_NUM_OF_FIELDS> &to_color, uint8_t
     board.player_sets[player] |= to_color;
 }
 
+/// @brief gets the bits to update
+/// @param player moving player
+/// @param board current board
+/// @return bits to update
 std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_bits_to_update(uint8_t player, Board &board)
 {
     uint16_t coord = board.get_coord();
@@ -75,6 +89,9 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_bits_to_update(uint8_t player, 
     return to_color;
 }
 
+/// @brief updates communities and frames
+/// @param to_color bits to color
+/// @param board current board
 void MoveExecuter::update_communities_and_frames(std::bitset<MAX_NUM_OF_FIELDS> &to_color, Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> temp;
@@ -120,6 +137,8 @@ void MoveExecuter::update_communities_and_frames(std::bitset<MAX_NUM_OF_FIELDS> 
         }
 }
 
+/// @brief updates the number of players in communities
+/// @param board current board
 void MoveExecuter::update_players_in_communities_count(Board &board)
 {
     board.num_of_players_in_community.clear();
@@ -134,6 +153,9 @@ void MoveExecuter::update_players_in_communities_count(Board &board)
     }
 }
 
+/// @brief merges communities
+/// @param board current board
+/// @param index community index
 void MoveExecuter::merge_communities(Board &board, uint8_t &index)
 {
     bool merge = true;
@@ -195,6 +217,10 @@ void MoveExecuter::merge_communities(Board &board, uint8_t &index)
     update_players_in_communities_count(board);
 }
 
+/// @brief checks if a field is protected
+/// @param board current board
+/// @param player moving player
+/// @param coord current field
 void MoveExecuter::check_if_protected_field_with_extending(Board &board, uint8_t player, uint16_t coord)
 {
     uint8_t counter = 0;
@@ -228,6 +254,9 @@ void MoveExecuter::check_if_protected_field_with_extending(Board &board, uint8_t
     }
 }
 
+/// @brief recalculates protected fields
+/// @param board current board
+/// @param to_color bits to color
 void MoveExecuter::recalculate_protected_fields(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &to_color)
 {
     board.before_bonus_fields.reset();
@@ -254,6 +283,9 @@ void MoveExecuter::recalculate_protected_fields(Board &board, std::bitset<MAX_NU
         }
 }
 
+/// @brief calculates before protected fields
+/// @param board current board
+/// @param player moving player
 void MoveExecuter::calculate_before_protected_fields(Board &board, uint8_t player)
 {
     board.before_protected_fields[player].reset();
@@ -267,6 +299,9 @@ void MoveExecuter::calculate_before_protected_fields(Board &board, uint8_t playe
             }
 }
 
+/// @brief calculates choice and bonus fields
+/// @param c current field
+/// @param bitset bitset to set
 void MoveExecuter::calculcate_choice_and_bonus_fields(uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &bitset)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
@@ -277,6 +312,10 @@ void MoveExecuter::calculcate_choice_and_bonus_fields(uint16_t c, std::bitset<MA
     }
 }
 
+/// @brief extends protected fields
+/// @param board current board
+/// @param player moving player
+/// @param to_color bits to color
 void MoveExecuter::extend_protected_fields(Board &board, uint8_t player, std::bitset<MAX_NUM_OF_FIELDS> &to_color)
 {
     board.before_bonus_fields.reset();
@@ -295,6 +334,12 @@ void MoveExecuter::extend_protected_fields(Board &board, uint8_t player, std::bi
         }
 }
 
+/// @brief updates boards
+/// @param player moving player
+/// @param change_stones change stones
+/// @param board current board
+/// @param index community index
+/// @param overwrite_move overwrite move
 void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &board, uint8_t &index, bool overwrite_move)
 {
     uint16_t coord = board.get_coord();
@@ -340,6 +385,10 @@ void MoveExecuter::update_boards(uint8_t player, uint8_t change_stones, Board &b
     }
 }
 
+/// @brief executes a move
+/// @param player moving player
+/// @param board current board
+/// @param index community index
 void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
 {
     uint16_t coord = board.get_coord();
@@ -353,7 +402,7 @@ void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
         board.decrement_overwrite_stones(player);
         overwrite_move = true;
     }
-    
+
     if (spec == BOMB_SPEC)
     {
         board.board_sets[EMPTY].reset(coord);
@@ -378,6 +427,13 @@ void MoveExecuter::exec_move(uint8_t player, Board &board, uint8_t &index)
     update_boards(player, change_stones, board, index, overwrite_move);
 }
 
+/// @brief gets the bomb coordinates
+/// @param start_coord start coordinate
+/// @param c current coordinate
+/// @param strength bomb strength
+/// @param mask mask
+/// @param board current board
+/// @param fields_to_remove fields to remove
 void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t strength, std::bitset<MAX_NUM_OF_FIELDS> &mask, Board &board, std::bitset<MAX_NUM_OF_FIELDS> &fields_to_remove)
 {
     if (strength == 0 || fields_to_remove == mask)
@@ -394,6 +450,12 @@ void MoveExecuter::get_bomb_coords(uint16_t start_coord, uint16_t c, uint8_t str
     }
 }
 
+/// @brief gets the fields to remove
+/// @param board current board
+/// @param coord current coordinate
+/// @param strength bomb strength
+/// @param mask mask
+/// @return fields to remove
 std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_fields_to_remove(Board &board, uint16_t coord, uint8_t strength, std::bitset<MAX_NUM_OF_FIELDS> &mask)
 {
     std::bitset<MAX_NUM_OF_FIELDS> fields_to_remove;
@@ -411,6 +473,11 @@ std::bitset<MAX_NUM_OF_FIELDS> MoveExecuter::get_fields_to_remove(Board &board, 
     return fields_to_remove;
 }
 
+/// @brief executes a bomb
+/// @param player moving player
+/// @param board current board
+/// @param strength bomb strength
+/// @return new board
 Board MoveExecuter::exec_bomb(uint8_t player, Board board, uint8_t strength)
 {
     uint16_t coord = board.get_coord();
@@ -418,6 +485,9 @@ Board MoveExecuter::exec_bomb(uint8_t player, Board board, uint8_t strength)
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         if (!board.board_sets[MINUS].test(c))
             mask.set(c);
+
+    for(auto &c : board.special_coords)
+        mask.reset(c);
 
     std::bitset<MAX_NUM_OF_FIELDS> fields_to_remove(get_fields_to_remove(board, coord, strength, mask));
     board.decrement_bombs(player);

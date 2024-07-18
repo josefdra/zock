@@ -1,16 +1,10 @@
 #include "algorithms.hpp"
-#include "map.hpp"
+#include "initializer.hpp"
 #include "timer.hpp"
 #include "board.hpp"
 #include "evaluator.hpp"
 #include "logging.hpp"
 #include "statistics.hpp"
-#include <cmath>
-
-#define MAX_SEARCH_DEPTH 20
-#define ESTIMATED_TIME_DIVISOR 1.5
-#define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
-#define _30SECONDS 30000000
 
 /**
  * @brief This part contains all relevant information about used algorithms through this project and it's helper functions
@@ -81,6 +75,7 @@ int Algorithms::set_up_best_eval_minimax(Board &board, uint8_t player_num)
         best_eval = INT32_MAX;
     return best_eval;
 }
+
 /// @brief initializes evaluation value for brs
 /// @param board current board layout
 /// @param brs_m init value of m
@@ -254,7 +249,7 @@ void Algorithms::get_eval_brs(Board &board, moves &moves, int alpha, int beta, u
     }
 }
 
-/// @brief
+/// @brief gets first valid move of a player
 /// @param moves contains all valid moves
 /// @return first valid move
 move Algorithms::get_first_move(moves &moves)
@@ -264,6 +259,7 @@ move Algorithms::get_first_move(moves &moves)
 
     return move();
 }
+
 /// @brief sets everything up to be able to do a evaluation of minimax by checking next player, getting valid moves and sorting them if necessary
 /// @param board current board layout
 /// @param alpha alpha value for alpha beta pruning

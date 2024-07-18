@@ -1,19 +1,19 @@
-#include "map.hpp"
+#include "initializer.hpp"
 #include "board.hpp"
 #include "move_generator.hpp"
 #include "logging.hpp"
 #include "timer.hpp"
 
 /**
- * @brief map.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships
+ * @brief initializer.cpp is responsible for reading in the map information and the correct output as well as calculating the correct neighbourhood relationships
  *
  */
 
-Map::Map() : wall_sets(),
-             before_wall_sets(),
-             before_before_wall_sets(),
-             corners_and_walls(),
-             next_coords()
+Initializer::Initializer() : wall_sets(),
+                             before_wall_sets(),
+                             before_before_wall_sets(),
+                             corners_and_walls(),
+                             next_coords()
 {
 
     m_numbers = std::vector<char>();
@@ -27,14 +27,14 @@ Map::Map() : wall_sets(),
     m_num_of_fields = 0;
 }
 
-Map::~Map() {}
+Initializer::~Initializer() {}
 
 /**
  * @brief Calculation of all possible transitions and their coordinates depending on their direction
  *
- * @param n current coordinate
+ * @param c current coordinate
  */
-void Map::check_neighbours(uint16_t c)
+void Initializer::check_neighbours(uint16_t c)
 {
     if (c > m_width && get_symbol(c - m_width) != '-') // checks if there is a field above
         set_transition(c, UP, (c - m_width) * COORD_TO_DIR_OFFSET);
@@ -61,77 +61,86 @@ void Map::check_neighbours(uint16_t c)
         set_transition(c, UPPER_LEFT, (c - m_width - 1) * COORD_TO_DIR_OFFSET + UPPER_LEFT);
 }
 
-void Map::set_symbol(uint16_t c, unsigned char s)
+/**
+ *
+ * HERE ARE JUST INITIALIZATIONS AND SETTER AND GETTER
+ *
+ */
+
+void Initializer::set_symbol(uint16_t c, unsigned char s)
 {
     m_numbers[c] = s;
 }
 
-void Map::set_transition(uint16_t c, uint8_t d, uint16_t t)
+void Initializer::set_transition(uint16_t c, uint8_t d, uint16_t t)
 {
     m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] = t;
 }
 
-char Map::get_symbol(uint16_t c)
+char Initializer::get_symbol(uint16_t c)
 {
     return m_numbers[c];
 }
 
-uint16_t Map::get_transition(uint16_t c, uint8_t d)
+uint16_t Initializer::get_transition(uint16_t c, uint8_t d)
 {
     return m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] / COORD_TO_DIR_OFFSET;
 }
 
-uint8_t Map::get_direction(uint16_t c, uint8_t d)
+uint8_t Initializer::get_direction(uint16_t c, uint8_t d)
 {
     return m_transitions[(c - 1) * NUM_OF_DIRECTIONS + d] % COORD_TO_DIR_OFFSET;
 }
 
-uint16_t Map::get_height()
+uint16_t Initializer::get_height()
 {
     return m_height;
 }
 
-uint16_t Map::get_width()
+uint16_t Initializer::get_width()
 {
     return m_width;
 }
 
-uint16_t Map::get_player_count()
+uint16_t Initializer::get_player_count()
 {
     return m_player_count;
 }
 
-uint16_t Map::get_strength()
+uint16_t Initializer::get_strength()
 {
     return m_strength;
 }
 
-uint16_t Map::get_num_of_fields()
+uint16_t Initializer::get_num_of_fields()
 {
     return m_num_of_fields;
 }
 
-uint16_t Map::get_initial_overwrite_stones()
+uint16_t Initializer::get_initial_overwrite_stones()
 {
     return m_initial_overwrite_stones;
 }
 
-uint16_t Map::get_initial_bombs()
+uint16_t Initializer::get_initial_bombs()
 {
     return m_initial_bombs;
 }
 
-std::vector<uint16_t> Map::get_transitions()
+std::vector<uint16_t> Initializer::get_transitions()
 {
     return m_transitions;
 }
 
-uint8_t Map::get_reverse_direction(uint8_t d)
+uint8_t Initializer::get_reverse_direction(uint8_t d)
 {
     return (d + 4) % NUM_OF_DIRECTIONS;
 }
 
-void Map::expand_coord(uint16_t c, uint8_t d, uint16_t next_coords_pos)
+/// @brief expands transitions into direction and saves next coordinates to vector
+/// @param c current coordinate
+/// @param next_coords_pos position in next_coords vector
+void Initializer::expand_coord(uint16_t c, uint8_t d, uint16_t next_coords_pos)
 {
     uint16_t next_coord = get_transition(c, d);
     uint8_t next_direction = get_direction(c, d);
@@ -149,7 +158,8 @@ void Map::expand_coord(uint16_t c, uint8_t d, uint16_t next_coords_pos)
     }
 }
 
-void Map::init_next_coords()
+/// @brief initializes all possible fields
+void Initializer::init_next_coords()
 {
     next_coords.resize((m_num_of_fields - 1) * 8);
     for (uint16_t c = 1; c < m_num_of_fields; c++)
@@ -162,7 +172,7 @@ void Map::init_next_coords()
  *
  * @param inputfile mapfile to read
  */
-void Map::read_map(std::stringstream mapfile)
+void Initializer::read_map(std::stringstream mapfile)
 {
     char temp;
     mapfile >> m_player_count >> m_initial_overwrite_stones >> m_initial_bombs >> m_strength >> m_height >> m_width;
@@ -198,18 +208,29 @@ void Map::read_map(std::stringstream mapfile)
     init_possible_fields();
 }
 
-void Map::one_dimension_2_second_dimension(uint16_t _1D_coord, uint8_t &x, uint8_t &y)
+/// @brief converts 1D coordinate to 2D coordinates
+/// @param _1D_coord 1D coordinate
+/// @param x x coordinate
+/// @param y y coordinate
+void Initializer::one_dimension_2_second_dimension(uint16_t _1D_coord, uint8_t &x, uint8_t &y)
 {
     _1D_coord % m_width == 0 ? x = m_width - 1 : x = _1D_coord % m_width - 1;
     y = (_1D_coord - (x + 1)) / m_width;
 }
 
-uint16_t Map::two_dimension_2_one_dimension(uint8_t x, uint8_t y)
+/// @brief converts 2D coordinates to 1D coordinate
+/// @param x x coordinate
+/// @param y y coordinate
+/// @return 1D coordinate
+uint16_t Initializer::two_dimension_2_one_dimension(uint8_t x, uint8_t y)
 {
     return (x + 1 + y * m_width);
 }
 
-bool Map::check_players(char c)
+/// @brief checks if the character is a player
+/// @param c character to check
+/// @return true if it is a player
+bool Initializer::check_players(char c)
 {
     std::array<unsigned char, 8> player_symbols{'1', '2', '3', '4', '5', '6', '7', '8'};
     bool var = false;
@@ -220,7 +241,10 @@ bool Map::check_players(char c)
     return var;
 }
 
-void Map::set_values(Board &board, uint16_t c)
+/// @brief sets values from vector to bitsets
+/// @param board board to set values
+/// @param c coordinate
+void Initializer::set_values(Board &board, uint16_t c)
 {
     if (get_symbol(c) == '0')
         board.board_sets[EMPTY].set(c);
@@ -253,7 +277,10 @@ void Map::set_values(Board &board, uint16_t c)
         board.player_sets[get_symbol(c) - '0' - 1].set(c);
 }
 
-void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
+/// @brief initializes wall values of the board
+/// @param board board to set values
+/// @param checked checked fields
+void Initializer::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (checked.test(c))
@@ -292,7 +319,9 @@ void Map::init_wall_values(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked
     init_before_wall_values(board);
 }
 
-void Map::init_before_wall_values(Board &board)
+/// @brief initializes values before wall values
+/// @param board board to set values
+void Initializer::init_before_wall_values(Board &board)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (wall_sets[THREE_WALLS].test(c))
@@ -319,7 +348,9 @@ void Map::init_before_wall_values(Board &board)
     init_before_before_wall_values(board);
 }
 
-void Map::init_before_before_wall_values(Board &board)
+/// @brief initializes values before before wall values
+/// @param board board to set values
+void Initializer::init_before_before_wall_values(Board &board)
 {
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
     {
@@ -347,7 +378,10 @@ void Map::init_before_before_wall_values(Board &board)
     }
 }
 
-bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
+/// @brief initializes wall values of the board
+/// @param board board to set values
+/// @param checked checked fields
+bool Initializer::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
@@ -366,7 +400,11 @@ bool Map::get_walls(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &checked)
     }
 }
 
-void Map::check_if_protected_field(Board &board, uint8_t player, uint16_t coord)
+/// @brief checkes if field is protected and expands it
+/// @param board board to set values
+/// @param player player to check
+/// @param coord coordinate to check
+void Initializer::check_if_protected_field(Board &board, uint8_t player, uint16_t coord)
 {
     uint8_t counter = 0;
     uint8_t most = 0;
@@ -399,7 +437,10 @@ void Map::check_if_protected_field(Board &board, uint8_t player, uint16_t coord)
     }
 }
 
-void Map::expand_protected_fields(Board &board, uint8_t player)
+/// @brief expands protected fields if possible
+/// @param board board to set values
+/// @param player player to check
+void Initializer::expand_protected_fields(Board &board, uint8_t player)
 {
     board.protected_fields[player] = board.fixed_protected_fields & board.player_sets[player];
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
@@ -412,7 +453,12 @@ void Map::expand_protected_fields(Board &board, uint8_t player)
             }
 }
 
-void Map::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community, uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &checked_fields)
+/// @brief expands community if possible
+/// @param board board to set values
+/// @param community community to expand
+/// @param c coordinate to check
+/// @param checked_fields checked fields
+void Initializer::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community, uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &checked_fields)
 {
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
@@ -435,7 +481,9 @@ void Map::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &communi
     }
 }
 
-void Map::init_frames(Board &board)
+/// @brief initializes frames of the board
+/// @param board board to set values
+void Initializer::init_frames(Board &board)
 {
     for (uint16_t c = 1; c < get_num_of_fields(); c++)
         for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
@@ -458,7 +506,9 @@ void Map::init_frames(Board &board)
             board.communities[i].reset();
 }
 
-void Map::remove_double_communities(Board &board)
+/// @brief removes double communities
+/// @param board board to set values
+void Initializer::remove_double_communities(Board &board)
 {
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> temp_communities;
     for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
@@ -489,7 +539,9 @@ void Map::remove_double_communities(Board &board)
     board.communities = temp_communities;
 }
 
-void Map::init_players_in_communities_count(Board &board)
+/// @brief initializes number of players in communities
+/// @param board board to set values
+void Initializer::init_players_in_communities_count(Board &board)
 {
     for (auto &community : board.communities)
     {
@@ -502,7 +554,9 @@ void Map::init_players_in_communities_count(Board &board)
     }
 }
 
-void Map::init_communities(Board &board)
+/// @brief initializes communities of the board
+/// @param board board to set values
+void Initializer::init_communities(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> all_players;
     std::bitset<MAX_NUM_OF_FIELDS> checked_fields;
@@ -527,7 +581,9 @@ void Map::init_communities(Board &board)
     init_players_in_communities_count(board);
 }
 
-void Map::init_static_evaluation(Board &board)
+/// @brief initializes static evaluation of the board
+/// @param board board to set values
+void Initializer::init_static_evaluation(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> all_stones;
     for (auto &player : board.player_sets)
@@ -558,7 +614,9 @@ void Map::init_static_evaluation(Board &board)
     }
 }
 
-void Map::calculate_before_protected_fields(Board &board)
+/// @brief calculates which fields are before protected fields
+/// @param board board to set values
+void Initializer::calculate_before_protected_fields(Board &board)
 {
     for (uint8_t player = 0; player < get_player_count(); player++)
     {
@@ -574,7 +632,36 @@ void Map::calculate_before_protected_fields(Board &board)
     }
 }
 
-Board Map::init_boards_and_players()
+void Initializer::check_if_special_map(Board &board)
+{
+    if (m_strength == 255)
+        for (uint16_t c = 1; c < m_num_of_fields; c++)
+            if (board.board_sets[X].test(c))
+            {
+                uint16_t next_coord = get_transition(c, RIGHT);
+                if (next_coord != 0 && board.board_sets[X].test(next_coord))
+                {
+                    uint16_t next_next_coord = get_transition(next_coord, RIGHT);
+                    if (next_next_coord != 0 && board.board_sets[B].test(next_next_coord))
+                    {
+                        uint8_t x, y;
+                        board.special_moves.push_back((uint32_t)16 << TWO_BYTES | (uint32_t)14 << BYTE | 0);
+                        one_dimension_2_second_dimension(next_next_coord, x, y);
+                        board.special_moves.push_back((uint32_t)x << TWO_BYTES | (uint32_t)y << BYTE | 20);
+                        one_dimension_2_second_dimension(c, x, y);
+                        board.special_moves.push_back((uint32_t)x << TWO_BYTES | (uint32_t)y << BYTE | 0);
+                        board.special_coords[0] = c;
+                        board.special_coords[1] = next_coord;
+                        board.special_coords[2] = next_next_coord;
+                        return;
+                    }
+                }
+            }
+}
+
+/// @brief initializes boards and players
+/// @return board
+Board Initializer::init_boards_and_players()
 {
     Board ret_board(*this);
 
@@ -599,11 +686,16 @@ Board Map::init_boards_and_players()
         ret_board.valid_moves[p].resize(ret_board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>(0));
 
     init_static_evaluation(ret_board);
+    check_if_special_map(ret_board);
+    for (uint16_t c = 1; c < m_num_of_fields; c++)
+        if(!ret_board.board_sets[EMPTY].test(c) && !ret_board.board_sets[MINUS].test(c))
+            ret_board.occupied_fields++;
 
     return ret_board;
 }
 
-void Map::generate_transitions()
+/// @brief generates transitions
+void Initializer::generate_transitions()
 {
     std::vector<std::array<uint16_t, 2>> tr;
     std::vector<std::array<uint16_t, 6>> output;
@@ -649,13 +741,17 @@ void Map::generate_transitions()
         std::cout << elem[0] - 1 << " " << elem[1] - 1 << " " << elem[2] << " <-> " << elem[3] - 1 << " " << elem[4] - 1 << " " << elem[5] << " " << std::endl;
     }
 }
-void Map::init_possible_fields()
+
+/// @brief initializes possible fields
+void Initializer::init_possible_fields()
 {
     for (uint16_t c = 1; c < m_num_of_fields; c++)
         if (get_symbol(c) != '-')
             m_possible_fields++;
 }
-uint16_t Map::get_sum_possible_fields()
+
+/// @brief returns possible fields
+uint16_t Initializer::get_sum_possible_fields()
 {
     return m_possible_fields;
 }

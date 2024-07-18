@@ -33,8 +33,8 @@ int get_evaluation(Board &board, uint8_t player_num, Timer &timer, MoveGenerator
 
     uint8_t end_game_multiplier = 1;
 
-    if (board.get_num_of_not_minus_fields() / 4 > board.board_sets[EMPTY].count())
-        end_game_multiplier = 100;
+    if (sqrt(board.get_num_of_fields()) > board.board_sets[EMPTY].count())
+        end_game_multiplier = 10;
 
     try
     {
