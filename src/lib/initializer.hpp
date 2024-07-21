@@ -12,12 +12,18 @@
 #define LOWER_LEFT 5
 #define LEFT 6
 #define UPPER_LEFT 7
-#define FOUR_WALLS_VALUE 350
-#define FIVE_WALLS_VALUE 250
-#define BEFORE_FOUR_WALLS_VALUE -35
-#define BEFORE_FIVE_WALLS_VALUE -25
-#define FOUR_WALLS 0
-#define FIVE_WALLS 1
+#define THREE_WALLS_VALUE 500
+#define FOUR_WALLS_VALUE 3500
+#define FIVE_WALLS_VALUE 2500
+#define BEFORE_THREE_WALLS_VALUE -200
+#define BEFORE_FOUR_WALLS_VALUE -1400
+#define BEFORE_FIVE_WALLS_VALUE -1000
+#define BEFORE_BEFORE_THREE_WALLS_VALUE 10
+#define BEFORE_BEFORE_FOUR_WALLS_VALUE 70
+#define BEFORE_BEFORE_FIVE_WALLS_VALUE 50
+#define THREE_WALLS 0
+#define FOUR_WALLS 1
+#define FIVE_WALLS 2
 
 #include <stdint.h>
 #include <sstream>
@@ -32,11 +38,11 @@
 
 class Board;
 
-class Map
+class Initializer
 {
 public:
-    Map();
-    ~Map();
+    Initializer();
+    ~Initializer();
     void check_neighbours(uint16_t);
     void set_symbol(uint16_t, unsigned char);
     void set_transition(uint16_t, uint8_t, uint16_t);
@@ -61,6 +67,7 @@ public:
     void set_values(Board &, uint16_t);
     void init_wall_values(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
     void init_before_wall_values(Board &);
+    void init_before_before_wall_values(Board &);
     bool get_walls(Board &, std::bitset<MAX_NUM_OF_FIELDS> &);
     void check_if_protected_field(Board &, uint8_t, uint16_t);
     void expand_protected_fields(Board &, uint8_t);
@@ -70,11 +77,18 @@ public:
     void init_players_in_communities_count(Board &);
     void init_communities(Board &);
     void init_static_evaluation(Board &);
+    void calculate_before_protected_fields(Board &);
+    void check_if_special_map(Board &);
     Board init_boards_and_players();
     void generate_transitions();
+    void init_possible_fields();
+    uint16_t get_sum_possible_fields();
 
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, 2> wall_sets;
-    std::array<std::bitset<MAX_NUM_OF_FIELDS>, 2> before_wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, 3> wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, 3> before_wall_sets;
+    std::array<std::bitset<MAX_NUM_OF_FIELDS>, 3> before_before_wall_sets;
+
+    std::bitset<MAX_NUM_OF_FIELDS> corners_and_walls;
 
     std::vector<std::vector<uint16_t>> next_coords;
 
@@ -90,6 +104,7 @@ private:
     uint16_t m_initial_overwrite_stones;
     uint16_t m_initial_bombs;
     uint16_t m_num_of_fields;
+    uint16_t m_possible_fields = 0;
 };
 
 #endif // INITIALIZER_HPP

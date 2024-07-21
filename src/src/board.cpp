@@ -2,31 +2,41 @@
 #include "initializer.hpp"
 #include "logging.hpp"
 
-Board::Board(Map &map)
+/**
+ * @brief this cpp contains all needed information about the current board state
+ *
+ */
+
+Board::Board(Initializer &init)
     : board_sets(),
-      player_sets(map.get_player_count()),
-      valid_moves(map.get_player_count()),
-      static_evaluation(map.get_num_of_fields(), 0),
+      player_sets(init.get_player_count()),
+      valid_moves(init.get_player_count()),
+      static_evaluation(init.get_num_of_fields(), 0),
       fixed_protected_fields(),
-      protected_fields(map.get_player_count()),
-      overwrite_stones(map.get_player_count(), map.get_initial_overwrite_stones()),
-      bombs(map.get_player_count(), map.get_initial_bombs()),
+      protected_fields(init.get_player_count()),
+      before_protected_fields(init.get_player_count()),
+      corners_and_walls(),
+      overwrite_stones(init.get_player_count(), init.get_initial_overwrite_stones()),
+      bombs(init.get_player_count(), init.get_initial_bombs()),
       communities(0),
       frames(0),
       num_of_players_in_community(0),
       start_end_communities(0),
       start_end_frames(0),
-      disqualified(map.get_player_count(), false),
+      disqualified(init.get_player_count(), false),
       before_bonus_fields(),
       before_choice_fields(),
+      special_moves(),
+      special_coords{0, 0, 0},
       m_our_player(0),
-      m_player_count(map.get_player_count()),
-      m_num_of_fields(map.get_num_of_fields()),
-      m_width(map.get_width()),
-      m_height(map.get_height()),
+      m_player_count(init.get_player_count()),
+      m_num_of_fields(init.get_num_of_fields()),
+      m_num_of_not_minus_fields(init.get_num_of_fields() - 1),
+      m_width(init.get_width()),
+      m_height(init.get_height()),
       m_coord(0),
       m_spec(0),
-      m_overwrite_move(map.get_player_count(), false),
+      m_overwrite_move(init.get_player_count(), false),
       evaluation(0),
       final_state(false),
       m_bonus_field(false),
@@ -41,6 +51,8 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       static_evaluation(board.static_evaluation),
       fixed_protected_fields(board.fixed_protected_fields),
       protected_fields(board.protected_fields),
+      before_protected_fields(board.before_protected_fields),
+      corners_and_walls(board.corners_and_walls),
       overwrite_stones(board.overwrite_stones),
       bombs(board.bombs),
       communities(board.communities),
@@ -51,9 +63,12 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
       disqualified(board.disqualified),
       before_bonus_fields(board.before_bonus_fields),
       before_choice_fields(board.before_choice_fields),
+      special_moves(board.special_moves),
+      special_coords(board.special_coords),
       m_our_player(board.m_our_player),
       m_player_count(board.m_player_count),
       m_num_of_fields(board.m_num_of_fields),
+      m_num_of_not_minus_fields(board.m_num_of_not_minus_fields),
       m_width(board.m_width),
       m_height(board.m_height),
       m_coord(coord),
@@ -67,6 +82,12 @@ Board::Board(Board &board, uint16_t coord, uint8_t spec)
 }
 
 Board::~Board() {}
+
+/**
+ *
+ * HERE ARE JUST SETTER AND GETTER
+ *
+ */
 
 void Board::set_our_player(uint8_t player)
 {
@@ -129,6 +150,11 @@ uint16_t Board::get_num_of_fields()
     return m_num_of_fields;
 }
 
+uint16_t Board::get_num_of_not_minus_fields()
+{
+    return m_num_of_not_minus_fields;
+}
+
 uint8_t Board::get_width()
 {
     return m_width;
@@ -189,6 +215,11 @@ void Board::decrement_bombs(uint8_t player)
     bombs[player]--;
 }
 
+void Board::decrement_not_minus_fields()
+{
+    m_num_of_not_minus_fields--;
+}
+
 bool Board::has_overwrite_stones(uint8_t player)
 {
     return overwrite_stones[player] > 0;
@@ -229,17 +260,28 @@ void Board::reset_choice_field()
     m_choice_field = false;
 }
 
+/// @brief calcualtes our dimension layout to the dimension used by the server
+/// @param _1D_coord 1D coordinate
+/// @param x x value to set
+/// @param y y value to set
 void Board::one_dimension_2_second_dimension(uint16_t _1D_coord, uint8_t &x, uint8_t &y)
 {
     _1D_coord % m_width == 0 ? x = m_width - 1 : x = _1D_coord % m_width - 1;
     y = (_1D_coord - (x + 1)) / m_width;
 }
 
+/// @brief calculates server dimension to our dimension
+/// @param x x coordinate
+/// @param y y coordinate
+/// @return 1D coordinate used by our program
 uint16_t Board::two_dimension_2_one_dimension(uint8_t x, uint8_t y)
 {
     return (x + 1 + y * m_width);
 }
 
+/// @brief is used to get coloured prints for players in local terminal
+/// @param color enum of the used color
+/// @return escape encoding of needed color
 std::string Board::get_color_string(Colors color)
 {
 #ifdef COLOR
@@ -269,6 +311,11 @@ std::string Board::get_color_string(Colors color)
 #endif
 }
 
+/**
+ *
+ * HERE ARE JUST FUNCTIONS THAT ARE NEEDED TO PRINT THE CURRENT BOARD IN TERMINAL
+ *
+ */
 void Board::print_upper_outlines()
 {
     std::cout << "     ";
@@ -376,6 +423,9 @@ void Board::reset_valid_moves(uint8_t player)
         moves.reset();
 }
 
+/// @brief adds valid moves of set with - or without overwrite stones to a total_moves set
+/// @param player current player
+/// @return total_moves with and without overwrite stones
 std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
 {
     std::bitset<MAX_NUM_OF_FIELDS> total_moves;
@@ -383,4 +433,21 @@ std::bitset<MAX_NUM_OF_FIELDS> Board::get_total_moves(uint8_t player)
         total_moves |= moves;
 
     return total_moves;
+}
+
+/// @brief calculates the percentage of the map that is already occupied and can't be played anymore (doesn't include overwrite stones - is not necessary)
+/// @param possible_fields actual fields than can initially be put player stones on
+void Board::calc_occupied_percentage(uint16_t possible_fields)
+{
+    occupied_percentage = (occupied_fields * 100) / possible_fields;
+}
+
+/// @brief calculates the scaling factor according to total size of map and actual playable fields
+/// @param playable_fields
+void Board::calculate_scaling_factor(uint16_t playable_fields)
+{
+    LOG_INFO("playable fields: " + std::to_string(playable_fields));
+    scaling_factor = double(playable_fields) / double(MAX_NUM_OF_FIELDS);
+    // Apply a square root scaling for a more gradual change
+    std::sqrt(scaling_factor);
 }

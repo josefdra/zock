@@ -12,7 +12,7 @@
 #include <tuple>
 #include <algorithm>
 
-class Map;
+class Initializer;
 class Board;
 class Timer;
 class Algorithms;
@@ -21,7 +21,7 @@ class MoveGenerator
 {
 public:
     MoveGenerator();
-    MoveGenerator(Map &);
+    MoveGenerator(Initializer &);
     ~MoveGenerator();
 
     uint16_t get_num_of_fields();
@@ -42,7 +42,7 @@ public:
     void get_affected_by_bomb(uint8_t, uint16_t &);
     void sort_players_by_stones(std::vector<std::pair<uint8_t, uint16_t>> &, Board &);
     void select_target_player(uint8_t &, uint8_t &, Board &, std::vector<std::pair<uint8_t, uint16_t>> &);
-    uint32_t generate_bomb(Board &, Map &, Timer &);
+    uint32_t generate_bomb(Board &, Initializer &, Timer &);
 
     std::vector<std::vector<uint16_t>> next_coords;
 

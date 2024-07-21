@@ -7,20 +7,21 @@
 #include "game.hpp"
 #include "network.hpp"
 
+/// @brief prints initial information
 void init_print(bool quietMode, const char *ip, int port, bool sorting)
 {
-    LOG_INFO("Gruppe01 | Dräxl, Koch, Kuhn");
+    LOG_INFO("Group01 | Dräxl, Koch, Kuhn");
     if (sorting)
-        LOG_INFO("Zugsortierung aktiviert");
+        LOG_INFO("Move ordering active");
 
     else
-        LOG_INFO("Zugsortierung deaktiviert");
+        LOG_INFO("Move ordering disabled");
 
     if (quietMode)
-        LOG_INFO("Quiet mode aktiviert");
+        LOG_INFO("Quiet mode active");
 
     if (ip != nullptr)
-        LOG_INFO(std::string("IP-Adresse: ") + ip);
+        LOG_INFO(std::string("IP-Adress: ") + ip);
 
     if (port != -1)
         LOG_INFO("Port: " + std::to_string(port));
@@ -33,6 +34,14 @@ void init_print(bool quietMode, const char *ip, int port, bool sorting)
     }
 }
 
+/// @brief argparser which reacts to set parameters
+/// @param argc
+/// @param argv
+/// @param ip ip we're connected to
+/// @param port port we're connected to
+/// @param sorting disables sorting if it's parameter is set - default is enabled
+/// @param quietMode enables quietmode if it's parameter is set - default is disabled
+/// @return
 bool read_args(int argc, char *argv[], const char *&ip, int &port, bool &sorting, bool &quietMode)
 {
     for (int i = 1; i < argc; i++)
@@ -80,6 +89,7 @@ bool read_args(int argc, char *argv[], const char *&ip, int &port, bool &sorting
     return false;
 }
 
+/// @brief main function
 int main(int argc, char *argv[])
 {
     const char *ip = "127.0.0.1\0";
@@ -99,6 +109,6 @@ int main(int argc, char *argv[])
     Game game;
     game.run(net, sorting);
 
-    LOG_INFO("terminated without errors");
+    LOG_INFO("Terminated without errors");
     return 0;
 }

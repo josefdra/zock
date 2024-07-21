@@ -6,24 +6,34 @@
 #include "logging.hpp"
 #include "statistics.hpp"
 
-#define MAX_SEARCH_DEPTH 15
-#define ESTIMATED_TIME_DIVISOR 1.75
-#define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
+/**
+ * @brief This part contains all relevant information about used algorithms through this project and it's helper functions
+ *
+ *
+ *
+ *
+ */
 
 Algorithms::Algorithms() {}
 
-Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields()))), m_move_exec(move_exec), m_move_gen(move_gen)
+Algorithms::Algorithms(MoveExecuter &move_exec, MoveGenerator &move_gen) : killer_moves(std::vector<std::vector<uint16_t>>(MAX_SEARCH_DEPTH, std::vector<uint16_t>(move_exec.get_num_of_fields()))), move_exec(move_exec), m_move_gen(move_gen)
 {
 }
 
 Algorithms::~Algorithms() {}
 
+/// @brief calculates next player which can do moves
+/// @param player_num current player
+/// @param board current board layout
+/// @param timer current timer object
+/// @param index index of community
+/// @return player after current player
 uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &timer, uint8_t &index)
 {
     uint8_t next_player = player_num;
     do
     {
-        next_player = (next_player + 1) % m_move_exec.get_num_of_players();
+        next_player = (next_player + 1) % move_exec.get_num_of_players();
         board.valid_moves[next_player].clear();
         board.valid_moves[next_player].resize(board.get_num_of_communities(), std::bitset<MAX_NUM_OF_FIELDS>(0));
 
@@ -50,6 +60,10 @@ uint8_t Algorithms::get_next_player(uint8_t player_num, Board &board, Timer &tim
     return next_player;
 }
 
+/// @brief initializes evaluation value for minimax
+/// @param board current board layout
+/// @param player_num current player
+/// @return init value according to player
 int Algorithms::set_up_best_eval_minimax(Board &board, uint8_t player_num)
 {
     int best_eval;
@@ -62,6 +76,11 @@ int Algorithms::set_up_best_eval_minimax(Board &board, uint8_t player_num)
     return best_eval;
 }
 
+/// @brief initializes evaluation value for brs
+/// @param board current board layout
+/// @param brs_m init value of m
+/// @param player_num current player
+/// @return init value according to player
 int Algorithms::set_up_best_eval_brs(Board &board, uint8_t &brs_m, uint8_t player_num)
 {
     int best_eval;
@@ -75,13 +94,25 @@ int Algorithms::set_up_best_eval_brs(Board &board, uint8_t &brs_m, uint8_t playe
     return best_eval;
 }
 
+/// @brief calls minimax function to determine value of current move and executes it to actually calculate the value of the board if move was done
+/// @param board current board layout
+/// @param m current move to evaluate
+/// @param alpha alpha value for alpha beta pruning
+/// @param beta beta value for alpha beta pruning
+/// @param depth current depth
+/// @param timer timer object to prevent a timeout
+/// @param prev_board previous board layout to save the actual board layout to prevent interference with actual move execution sent by server
+/// @param next_player player after current player
+/// @param sorting tells if move sorting is enabled | true - enabled; false - disabled
+/// @param index index of community
+/// @return evaluation of move through minimax
 int Algorithms::do_move_minimax(Board &board, move &m, int alpha, int beta, uint8_t depth, Timer &timer, Board &prev_board, uint8_t next_player, bool sorting, uint8_t &index)
 {
     board.set_coord(std::get<1>(m));
     board.set_spec(std::get<2>(m));
     uint8_t prev_index = index;
     Timer move_execution_timer;
-    m_move_exec.exec_move(next_player, board, index);
+    move_exec.exec_move(next_player, board, index);
     move_execution_time += move_execution_timer.get_elapsed_time();
     int eval = minimax(board, alpha, beta, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
@@ -89,13 +120,26 @@ int Algorithms::do_move_minimax(Board &board, move &m, int alpha, int beta, uint
     return eval;
 }
 
+/// @brief calls brs function to determine value of current move and executes it to actually calculate the value of the board if move was done
+/// @param board current board layout
+/// @param m current move to evaluate
+/// @param alpha alpha value for alpha beta pruning
+/// @param beta beta value for alpha beta pruning
+/// @param brs_m current m value for brs
+/// @param depth current depth
+/// @param timer current timer object
+/// @param prev_board previous board layout to save the actual board layout to prevent interference with actual move execution sent by server
+/// @param next_player player after current player
+/// @param sorting tells if move sorting is enabled | true - enabled; false - disabled
+/// @param index index of community
+/// @return evaluation of move through brs
 int Algorithms::do_move_brs(Board &board, move &m, int alpha, int beta, uint8_t brs_m, uint8_t depth, Timer &timer, Board &prev_board, uint8_t next_player, bool sorting, uint8_t &index)
 {
     board.set_coord(std::get<1>(m));
     board.set_spec(std::get<2>(m));
     uint8_t prev_index = index;
     Timer move_execution_timer;
-    m_move_exec.exec_move(next_player, board, index);
+    move_exec.exec_move(next_player, board, index);
     move_execution_time += move_execution_timer.get_elapsed_time();
     int eval = brs(board, alpha, beta, brs_m, depth - 1, next_player, timer, sorting, index);
     board = prev_board;
@@ -103,6 +147,18 @@ int Algorithms::do_move_brs(Board &board, move &m, int alpha, int beta, uint8_t 
     return eval;
 }
 
+/// @brief evaluates moves and switches to brs evaluation if there are more than 2 players in a community and sets values for alpha beta pruning
+/// @param board current board
+/// @param moves contains all valid moves
+/// @param alpha alpha value for alpha beta pruning
+/// @param beta beta value for alpha beta pruning
+/// @param depth current depth
+/// @param timer timer object to check if time is up
+/// @param prev_board previous board state
+/// @param next_player player after current player
+/// @param best_eval best eval to set
+/// @param sorting sorting bool to give to other functions which have to check because of move sorting
+/// @param index index of community
 void Algorithms::get_eval_minimax(Board &board, moves &moves, int alpha, int beta, uint8_t depth, Timer &timer, Board &prev_board, uint8_t next_player, int &best_eval, bool sorting, uint8_t &index)
 {
     for (auto &m : moves)
@@ -145,6 +201,19 @@ void Algorithms::get_eval_minimax(Board &board, moves &moves, int alpha, int bet
     }
 }
 
+/// @brief evaluates moves and switches to brs evaluation if there are more than 2 players in a community and sets values for alpha beta pruning
+/// @param board current board
+/// @param moves contains all valid moves
+/// @param alpha alpha value for alpha beta pruning
+/// @param beta beta value for alpha beta pruning
+/// @param brs_m current brs_m state
+/// @param depth current depth
+/// @param timer timer object to check if time is up
+/// @param prev_board previous board state
+/// @param next_player player after current player
+/// @param best_eval best eval to set
+/// @param sorting bool to give to function which uses it to determine if moves must be sorted
+/// @param index index of community
 void Algorithms::get_eval_brs(Board &board, moves &moves, int alpha, int beta, uint8_t brs_m, uint8_t depth, Timer &timer, Board &prev_board, uint8_t next_player, int &best_eval, bool sorting, uint8_t &index)
 {
     for (auto &m : moves)
@@ -180,6 +249,9 @@ void Algorithms::get_eval_brs(Board &board, moves &moves, int alpha, int beta, u
     }
 }
 
+/// @brief gets first valid move of a player
+/// @param moves contains all valid moves
+/// @return first valid move
 move Algorithms::get_first_move(moves &moves)
 {
     for (auto &m : moves)
@@ -188,6 +260,16 @@ move Algorithms::get_first_move(moves &moves)
     return move();
 }
 
+/// @brief sets everything up to be able to do a evaluation of minimax by checking next player, getting valid moves and sorting them if necessary
+/// @param board current board layout
+/// @param alpha alpha value for alpha beta pruning
+/// @param beta beta value for alpha beta pruning
+/// @param depth current depth
+/// @param player_num current player
+/// @param timer current timer object
+/// @param sorting bool if sorting is enabled or not | true - enabled; false - disabled
+/// @param index index of community
+/// @return returns best value of board layout
 int Algorithms::minimax(Board &board, int alpha, int beta, uint8_t depth, uint8_t player_num, Timer &timer, bool sorting, uint8_t &index)
 {
     Board prev_board = board;
@@ -202,6 +284,9 @@ int Algorithms::minimax(Board &board, int alpha, int beta, uint8_t depth, uint8_
         average_next_player_calculation_time += get_next_player_timer.get_elapsed_time();
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer, m_move_gen, index);
+
+        if (!board.corners_and_walls.test(board.get_coord()))
+            board.static_evaluation[board.get_coord()] = 0;
 
         Timer set_up_moves_timer;
         moves moves;
@@ -225,7 +310,17 @@ int Algorithms::minimax(Board &board, int alpha, int beta, uint8_t depth, uint8_
         throw;
     }
 }
-
+/// @brief setup function for brs by getting next player, valid moves and sorting if necessary. Also calls needed function in dependency of brs_m
+/// @param board current board layout
+/// @param alpha alpha value for alpha beta pruning
+/// @param beta beta value for alpha beta pruning
+/// @param brs_m current brs_m value
+/// @param depth current depth
+/// @param player_num current player
+/// @param timer timer object
+/// @param sorting bool if sorting is enabled or not | true - enabled; false - disabled
+/// @param index index of community
+/// @return returns best value of board layout
 int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t depth, uint8_t player_num, Timer &timer, bool sorting, uint8_t &index)
 {
     Board prev_board = board;
@@ -239,7 +334,12 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
         average_next_player_calculation_time += get_next_player_timer.get_elapsed_time();
         if (depth == 0 || board.is_final_state())
             return get_evaluation(board, player_num, timer, m_move_gen, index);
-    
+
+        if (!board.corners_and_walls.test(board.get_coord()))
+            board.static_evaluation[board.get_coord()] = 0;
+
+        move_exec.calculate_before_protected_fields(board, player_num);
+
         nodes_calculated++;
         Timer set_up_moves_timer;
         moves moves;
@@ -271,11 +371,13 @@ int Algorithms::brs(Board &board, int alpha, int beta, uint8_t brs_m, uint8_t de
         throw;
     }
 }
-
+/// @brief checks for possible bad moves and puts them first into order to be able to prune it's paths early on
+/// @param moves field of valid moves
+/// @param depth current depth
 void Algorithms::set_up_killer(moves &moves, uint8_t depth)
 {
     std::vector<std::tuple<uint16_t, uint8_t>> temp_killer;
-    for (uint16_t c = 1; c < m_move_exec.get_num_of_fields(); c++)
+    for (uint16_t c = 1; c < move_exec.get_num_of_fields(); c++)
         if (killer_moves[depth][c] > 0)
             temp_killer.push_back(std::make_tuple(c, killer_moves[depth][c]));
 
@@ -298,11 +400,11 @@ void Algorithms::set_up_killer(moves &moves, uint8_t depth)
     }
 }
 
-/// @brief sorts the valid moves of a player and needs already the calculated valid moves in the board
-/// @param board
-/// @param player_num
-/// @param timer
-/// @param maximizer
+/// @brief sorts the valid moves of a player and needs the calculated valid moves in the board
+/// @param board current board with calculated valid moves
+/// @param player_num current player
+/// @param timer timer object
+/// @param maximizer determines whether it gets sorted from small to high values or vice versa | if it's our player - high2small; else small2high
 /// @return sorted valid moves as vector
 void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves, Timer &timer, uint8_t depth)
 {
@@ -322,7 +424,7 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves
 
             board.set_coord(std::get<1>(m));
             board.set_spec(std::get<2>(m));
-            std::get<0>(m) += m_move_exec.get_bits_to_update(player_num, board).count();
+            std::get<0>(m) += move_exec.get_bits_to_update(player_num, board).count();
         }
         if (player_num == board.get_our_player())
             std::sort(moves.begin(), moves.end(), [](const move_tuple &a, const move_tuple &b)
@@ -340,14 +442,18 @@ void Algorithms::sort_valid_moves(Board &board, uint8_t player_num, moves &moves
         throw;
     }
 }
-
+/// @brief checks if a valid move is a special stone and sets our specifications for it, else it just gets added as normal move to moves
+/// @param board current board state
+/// @param player_num current player number
+/// @param moves contains all valid moves
+/// @param index index of community
 void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, uint8_t index)
 {
-    for (uint16_t c = 1; c < m_move_exec.get_num_of_fields(); c++)
+    for (uint16_t c = 1; c < move_exec.get_num_of_fields(); c++)
         if (board.valid_moves[player_num][index].test(c))
         {
             if (board.board_sets[C].test(c))
-                for (uint8_t j = 0; j < m_move_exec.get_num_of_players(); j++)
+                for (uint8_t j = 0; j < move_exec.get_num_of_players(); j++)
                     moves.push_back(std::make_tuple(ZERO_EVALUATION, c, j));
 
             else if (board.board_sets[B].test(c))
@@ -357,11 +463,12 @@ void Algorithms::set_up_moves(Board &board, uint8_t player_num, moves &moves, ui
                 moves.push_back(std::make_tuple(ZERO_EVALUATION, c, 0));
         }
 }
-
+/// @brief prints all valid moves we've got and sets current coords
+/// @param board
 void Algorithms::init_best_board(Board &board)
 {
     std::bitset<MAX_NUM_OF_FIELDS> total_moves = board.get_total_moves(board.get_our_player());
-    LOG_INFO("total moves: " + std::to_string(total_moves.count()));
+    LOG_INFO("Total moves: " + std::to_string(total_moves.count()));
     for (uint16_t c = 1; c < board.get_num_of_fields(); c++)
         if (total_moves.test(c))
         {
@@ -377,7 +484,11 @@ void Algorithms::init_best_board(Board &board)
             break;
         }
 }
-
+/// @brief sorts good moves and it's communities to front that it's paths get calculated early on to check if they remain good in other situations
+/// @param board current board layout
+/// @param best_move_in_community_index
+/// @param best_community_index
+/// @param valid_moves contains all valid moves
 void Algorithms::sort_best_moves_and_communities_to_front(Board &board, std::vector<uint16_t> &best_move_in_community_index, uint8_t &best_community_index, moves_vector &valid_moves)
 {
     if (board.get_num_of_communities() > 1)
@@ -416,7 +527,11 @@ void Algorithms::sort_best_moves_and_communities_to_front(Board &board, std::vec
         valid_moves[i][0] = temp_move;
     }
 }
-
+/// @brief main function of algorithms.cpp which controls all of the communication between all algorithms
+/// @param board current board layout
+/// @param timer timer object to check if time is up
+/// @param sorting bool which tells to sort moves or not
+/// @return best board that got calculated
 Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
 {
     int best_eval = INT32_MIN;
@@ -432,6 +547,11 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     std::vector<int> best_community_eval(board.get_num_of_communities(), INT32_MIN);
     std::vector<uint16_t> best_move_in_community_index(board.get_num_of_communities(), 0);
     uint8_t best_community_index = 0;
+    static uint8_t max_search_depth = 1;
+    calculate_thresholds(board.scaling_factor);
+
+    if (max_search_depth != MAX_SEARCH_DEPTH)
+        adapt_depth_to_map_progress(max_search_depth, board);
 
     try
     {
@@ -447,7 +567,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                 sort_valid_moves(board, player_num, moves[community_index], timer, 0);
             sorting_time += sorting_timer.get_elapsed_time();
         }
-        for (search_depth = 0; search_depth < MAX_SEARCH_DEPTH; search_depth++)
+        for (search_depth = 0; search_depth < max_search_depth; search_depth++)
         {
             Timer measure_depth_search(timer.return_rest_time());
             for (uint8_t community_index = 0; community_index < board.get_num_of_communities(); community_index++)
@@ -468,7 +588,7 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
                     board.set_spec(std::get<2>(moves[community_index][move_index]));
                     uint8_t prev_index = community_index;
                     Timer move_execution_timer;
-                    m_move_exec.exec_move(player_num, board, community_index);
+                    move_exec.exec_move(player_num, board, community_index);
                     move_execution_time += move_execution_timer.get_elapsed_time();
                     int eval;
                     if (board.num_of_players_in_community[community_index] > 2)
@@ -495,7 +615,12 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
             double estimated_runtime = estimate_runtime_next_depth(search_depth, measure_depth_search);
             if (estimated_runtime > timer.return_rest_time())
             {
-                LOG_INFO("skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                LOG_INFO("Skipping next depth " + std::to_string(search_depth + 1) + " because estimated time exceeds time left.");
+                break;
+            }
+            else if (estimated_runtime > _30SECONDS)
+            {
+                LOG_INFO("Estimated time exceeds 30 seconds, stopping search");
                 break;
             }
         }
@@ -503,20 +628,25 @@ Board Algorithms::get_best_coord(Board &board, Timer &timer, bool sorting)
     catch (TimeLimitExceededException &e)
     {
         board = prev_board;
-        LOG_INFO("time left: " + std::to_string(timer.return_rest_time()));
+        LOG_INFO("Time left: " + std::to_string(timer.return_rest_time()));
         LOG_WARNING(e.what());
     }
     // print_evaluation_statistics();
-    // print_time_statistics();    
-    LOG_INFO("best eval: " + std::to_string(best_eval));
+    // print_time_statistics();
+    LOG_INFO("Best eval: " + std::to_string(best_eval));
     return best_board;
 }
 
+/// @brief calculates average branching factor by divide total_nodes by all valid moves to be able to estimate the number of nodes for next depth
 void Algorithms::calculate_average_branching_factor()
 {
     average_branching_factor = static_cast<double>(total_nodes) / static_cast<double>(total_valid_moves);
 }
 
+/// @brief estimates needed time by calculating the time per node and the estimated nodes for the next depth with the branching factor
+/// @param current_depth
+/// @param timer timer object to determine the time it took to get to this point, which results in a elapsed time that can be devided by total_nodes, because it gets called right after the last node was calculated
+/// @return estimated time next depth search will take
 double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &timer)
 {
     if (average_branching_factor != -1.0)
@@ -526,17 +656,54 @@ double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &ti
         double estimated_nodes_next_depth = pow(static_cast<double>(average_branching_factor), static_cast<double>((current_depth + 1)));
 #ifdef DEBUG
 
-        LOG_INFO("elapsed time: " + std::to_string(elapsed_time) + " no_nodes: " + std::to_string(total_nodes) + " time per node: " + std::to_string(time_per_node));
-        LOG_INFO("branching average: " + std::to_string(average_branching_factor / 1.5));
-        LOG_INFO("estimated nodes next depth: " + std::to_string(estimated_nodes_next_depth));
-        LOG_INFO("caculating: " + std::to_string(estimated_nodes_next_depth) + " * " + std::to_string(time_per_node));
+        LOG_INFO("Elapsed time: " + std::to_string(elapsed_time) + " no_nodes: " + std::to_string(total_nodes) + " time per node: " + std::to_string(time_per_node));
+        LOG_INFO("Branching average: " + std::to_string(average_branching_factor / 1.5));
+        LOG_INFO("Estimated nodes next depth: " + std::to_string(estimated_nodes_next_depth));
+        LOG_INFO("Caculating: " + std::to_string(estimated_nodes_next_depth) + " * " + std::to_string(time_per_node));
 #endif // DEBUG
         calculate_average_branching_factor();
         average_branching_factor = 1;
-        return ((estimated_nodes_next_depth * time_per_node) / ESTIMATED_TIME_DIVISOR);
+        return ((estimated_nodes_next_depth * time_per_node) /*/ ESTIMATED_TIME_DIVISOR*/); // commented for testing
     }
     else
     {
         return -1.0;
     }
+}
+
+/// @brief checks how many percent of the current map is occupied and sets a fitting max depth
+/// @param max_search_depth current depth to set
+/// @param b current board layout
+void Algorithms::adapt_depth_to_map_progress(uint8_t &max_search_depth, Board &b)
+{
+    uint8_t old = max_search_depth;
+
+    if (b.occupied_percentage > threshold_60_80)
+    {
+        max_search_depth = MAX_SEARCH_DEPTH;
+    }
+    else if (b.occupied_percentage > threshold_40_60 && max_search_depth < 7)
+    {
+        max_search_depth = 7;
+    }
+    else if (b.occupied_percentage > threshold_25_45 && max_search_depth < 4)
+    {
+        max_search_depth = 4;
+    }
+    else if (b.occupied_percentage > threshold_15_30 && max_search_depth < 2)
+    {
+        max_search_depth = 2;
+    }
+    if (old != max_search_depth)
+        LOG_INFO("switched to max search depth: " + std::to_string(max_search_depth));
+}
+
+/// @brief calculates the threshold according to the current map size to be able to set the next depth sooner or later
+/// @param scaling_factor scaling factor according to map size and actual playable fields
+void Algorithms::calculate_thresholds(double scaling_factor)
+{
+    threshold_60_80 = small_map_threshold_60 + (large_map_threshold_80 - small_map_threshold_60) * scaling_factor;
+    threshold_40_60 = small_map_threshold_40 + (large_map_threshold_60 - small_map_threshold_40) * scaling_factor;
+    threshold_25_45 = small_map_threshold_25 + (large_map_threshold_45 - small_map_threshold_25) * scaling_factor;
+    threshold_15_30 = small_map_threshold_15 + (large_map_threshold_30 - small_map_threshold_15) * scaling_factor;
 }
