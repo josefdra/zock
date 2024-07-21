@@ -460,6 +460,7 @@ void Initializer::expand_protected_fields(Board &board, uint8_t player)
 /// @param checked_fields checked fields
 void Initializer::expand_community(Board &board, std::bitset<MAX_NUM_OF_FIELDS> &community, uint16_t c, std::bitset<MAX_NUM_OF_FIELDS> &checked_fields)
 {
+    community.set(c);
     for (uint8_t d = 0; d < NUM_OF_DIRECTIONS; d++)
     {
         uint16_t next_coord = get_transition(c, d);
@@ -501,9 +502,9 @@ void Initializer::init_frames(Board &board)
                     }
                 }
 
-    for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
-        if (board.frames[i].count() == 0)
-            board.communities[i].reset();
+    // for (uint8_t i = 0; i < board.get_num_of_communities(); i++)
+    //     if (board.frames[i].count() == 0)
+    //         board.communities[i].reset();
 }
 
 /// @brief removes double communities
