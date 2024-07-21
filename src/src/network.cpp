@@ -10,10 +10,9 @@ Network::Network(const char *ip, int port) : m_ip(ip), m_port(port)
 Network::~Network()
 {
     close_socket();
+    LOG_INFO("Closed socket successfully");
 }
 
-/// @brief initializes network object
-/// @return true if successful
 bool Network::init()
 {
     init_socket();
@@ -27,7 +26,6 @@ bool Network::init()
     return true;
 }
 
-/// @brief initializes the socket
 void Network::init_socket()
 {
     /**
@@ -42,11 +40,9 @@ void Network::init_socket()
     }
 }
 
-/// @brief initializes the server
-/// @return true if successful
 bool Network::init_server()
 {
-    memset(&m_server_addr, 0, sizeof(m_server_addr)); // save initialization
+    memset(&m_server_addr, 0, sizeof(m_server_addr)); // Sichere Initialisierung
     m_server_addr.sin_family = AF_INET;
     m_server_addr.sin_port = htons(m_port);
     if (inet_pton(AF_INET, m_ip, &m_server_addr.sin_addr) <= 0)
@@ -57,8 +53,6 @@ bool Network::init_server()
     return true;
 }
 
-/// @brief connects to the server
-/// @return true if successful
 bool Network::connect_to_server()
 {
     if ((connect(m_csocket, (struct sockaddr *)&m_server_addr,
@@ -70,7 +64,6 @@ bool Network::connect_to_server()
     return true;
 }
 
-/// @brief closes the socket
 void Network::close_socket()
 {
     if (close(m_csocket) < 0)
@@ -80,8 +73,6 @@ void Network::close_socket()
     }
 }
 
-/// @brief checks if the socket is active
-/// @return true if active
 bool Network::check_socket_acitivity()
 {
     fd_set read_fds;
@@ -95,7 +86,6 @@ bool Network::check_socket_acitivity()
         return false;
 }
 
-/// @brief sends the group number
 void Network::send_group_number()
 {
     uint8_t g_n = 1;
@@ -109,7 +99,6 @@ void Network::send_group_number()
     send(m_csocket, m_send_buffer, 6, 0);
 }
 
-/// @brief sends the move
 void Network::send_move(uint32_t move)
 {
     char m_send_buffer[10];
@@ -126,9 +115,6 @@ void Network::send_move(uint32_t move)
     send(m_csocket, m_send_buffer, 10, 0);
 }
 
-/// @brief gets the actual message length
-/// @param type type of message
-/// @return actual message length
 uint32_t Network::get_actual_message_length(uint8_t &type)
 {
     while (!check_socket_acitivity())
@@ -140,17 +126,15 @@ uint32_t Network::get_actual_message_length(uint8_t &type)
     return ntohl(message_length);
 }
 
-/// @brief receives the map
-/// @return map data
 std::stringstream Network::receive_map()
 {
     std::stringstream ss;
-    uint32_t total_received_data = 0;
-    uint32_t received_data = 0;
+    uint32_t total_received_data = 0;    
+    uint32_t received_data = 0;    
     uint8_t type = 0;
     uint32_t actual_message_length = get_actual_message_length(type);
     uint32_t left_to_receive = actual_message_length;
-    while (total_received_data < actual_message_length)
+    while(total_received_data < actual_message_length)
     {
         std::vector<char> message(left_to_receive);
         received_data = recv(m_csocket, message.data(), left_to_receive, 0);
@@ -158,13 +142,11 @@ std::stringstream Network::receive_map()
         total_received_data += received_data;
         left_to_receive = actual_message_length - total_received_data;
     }
-
+    
     LOG_INFO("Received map");
     return ss;
 }
 
-/// @brief receives the data
-/// @return game data
 uint64_t Network::receive_data()
 {
     uint8_t type = 0;
@@ -182,3 +164,4 @@ uint64_t Network::receive_data()
     }
     return (game_data | (big_type << 56));
 }
+

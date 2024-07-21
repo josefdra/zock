@@ -4,16 +4,11 @@
 #define MEMORY_SIZE_WITH_BUFFER 3000
 #define ZERO_EVALUATION 0
 #define ZERO_SPEC 0
-#define MAX_SEARCH_DEPTH 20
-#define ESTIMATED_TIME_DIVISOR 1.5
-#define AVERAGE_BRANCHING_FACTOR_DIVISOR 1.5
-#define _30SECONDS 30000000
 
 #include <stdint.h>
 #include <array>
 #include <bitset>
 #include <vector>
-#include <cmath>
 
 #include "move_generator.hpp"
 #include "move_executer.hpp"
@@ -51,35 +46,16 @@ public:
     Board get_best_coord(Board &, Timer &, bool);
     void calculate_average_branching_factor();
     double estimate_runtime_next_depth(uint8_t &, Timer &);
-    void adapt_depth_to_map_progress(uint8_t &, Board &);
-    void calculate_thresholds(double);
 
     std::vector<std::vector<uint16_t>> killer_moves;
 
 private:
-    MoveExecuter move_exec;
+    MoveExecuter m_move_exec;
     MoveGenerator m_move_gen;
 
     double average_branching_factor = 0;
     uint32_t total_nodes = 0;
     uint32_t total_valid_moves = 0;
-
-    // thresholds for small maps
-    uint8_t small_map_threshold_60 = 60;
-    uint8_t small_map_threshold_40 = 40;
-    uint8_t small_map_threshold_25 = 25;
-    uint8_t small_map_threshold_15 = 15;
-
-    // thresholds for large maps
-    uint8_t large_map_threshold_80 = 80;
-    uint8_t large_map_threshold_60 = 60;
-    uint8_t large_map_threshold_45 = 45;
-    uint8_t large_map_threshold_30 = 30;
-
-    uint8_t threshold_60_80 = 0;
-    uint8_t threshold_40_60 = 0;
-    uint8_t threshold_25_45 = 0;
-    uint8_t threshold_15_30 = 0;
 };
 
 #endif // ALGORITHMS_HPP

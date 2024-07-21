@@ -12,7 +12,7 @@ https://matchpoint.moves.rwth-aachen.de/current
 
 # Current best state
 
-d1da638a
+46333257
 
 # Really good state for big maps
 

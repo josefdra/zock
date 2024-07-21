@@ -1,7 +1,6 @@
 #ifndef BOARD_HPP
 #define BOARD_HPP
 
-#define MIN_NUM_OF_FIELDS 64
 #define MAX_NUM_OF_FIELDS 2501
 #define NUM_OF_BOARD_SETS 6
 #define MINUS 0
@@ -17,7 +16,7 @@
 #include <array>
 #include <string>
 
-class Initializer;
+class Map;
 
 enum Colors
 {
@@ -34,7 +33,7 @@ enum Colors
 class Board
 {
 public:
-    Board(Initializer &);
+    Board(Map &);
     Board(Board &, uint16_t, uint8_t);
     ~Board();
 
@@ -50,7 +49,6 @@ public:
     uint8_t get_our_player();
     uint8_t get_player_count();
     uint16_t get_num_of_fields();
-    uint16_t get_num_of_not_minus_fields();
     uint8_t get_width();
     uint8_t get_height();
     uint16_t get_overwrite_stones(uint8_t);
@@ -63,7 +61,6 @@ public:
     void increment_bombs(uint8_t);
     void decrement_overwrite_stones(uint8_t);
     void decrement_bombs(uint8_t);
-    void decrement_not_minus_fields();
     bool has_overwrite_stones(uint8_t);
     bool is_overwrite_move(uint8_t);
     bool is_final_state();
@@ -81,8 +78,6 @@ public:
     void print_bitset(std::bitset<MAX_NUM_OF_FIELDS> &);
     void reset_valid_moves(uint8_t);
     std::bitset<MAX_NUM_OF_FIELDS> get_total_moves(uint8_t);
-    void calc_occupied_percentage(uint16_t);
-    void calculate_scaling_factor(uint16_t);
 
     // boards[0] = - board
     // boards[1] = empty board (0, i, c, b)
@@ -94,12 +89,10 @@ public:
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> player_sets;
     std::vector<std::vector<std::bitset<MAX_NUM_OF_FIELDS>>> valid_moves;
     // first 8 sets for 1 to 8 walls next to field
-
+    
     std::vector<int> static_evaluation;
     std::bitset<MAX_NUM_OF_FIELDS> fixed_protected_fields;
     std::vector<std::bitset<MAX_NUM_OF_FIELDS>> protected_fields;
-    std::vector<std::bitset<MAX_NUM_OF_FIELDS>> before_protected_fields;
-    std::bitset<MAX_NUM_OF_FIELDS> corners_and_walls;
 
     std::vector<uint16_t> overwrite_stones;
     std::vector<uint16_t> bombs;
@@ -117,17 +110,10 @@ public:
     std::bitset<MAX_NUM_OF_FIELDS> before_bonus_fields;
     std::bitset<MAX_NUM_OF_FIELDS> before_choice_fields;
 
-    uint16_t occupied_fields = 0;
-    uint8_t occupied_percentage = 0;
-    double scaling_factor = 0;
-    std::vector<uint32_t> special_moves;
-    std::array<uint16_t, 3> special_coords;
-
 private:
     uint8_t m_our_player;
     uint8_t m_player_count;
     uint16_t m_num_of_fields;
-    uint16_t m_num_of_not_minus_fields;
     uint8_t m_width;
     uint8_t m_height;
     uint16_t m_coord;
