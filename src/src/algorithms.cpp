@@ -663,7 +663,7 @@ double Algorithms::estimate_runtime_next_depth(uint8_t &current_depth, Timer &ti
 #endif // DEBUG
         calculate_average_branching_factor();
         average_branching_factor = 1;
-        return ((estimated_nodes_next_depth * time_per_node) / ESTIMATED_TIME_DIVISOR);
+        return ((estimated_nodes_next_depth * time_per_node) /*/ ESTIMATED_TIME_DIVISOR*/); // commented for testing
     }
     else
     {
