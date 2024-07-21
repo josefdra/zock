@@ -199,8 +199,6 @@ void Game::run(Network &net, bool sorting)
     board.calculate_scaling_factor(init.get_sum_possible_fields());
     LOG_INFO("current scaling factor: " + std::to_string(board.scaling_factor) + "\n");
     print_static_evaluation(board);
-    for (auto &community : board.communities)
-        board.print_bitset(community);
 
     while (!is_game_over() && !board.disqualified[board.get_our_player()])
     {
