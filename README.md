@@ -1,113 +1,136 @@
-# FightClub:
+# RevXT Client Implementation
 
-https://172.20.0.41:8091
+## Overview
 
-# MatchPoint
+This repository contains a game client implementation for the `RevXT` board game competition. The client connects to a game server, receives game state information, and makes strategic moves using advanced AI algorithms such as minimax with alpha-beta pruning and Best Reply Search (BRS).
 
-http://172.20.0.41:8088/current
+## Game Description
 
-# MatchPoint - Aachen
+RevXT is a strategic board game where players compete to control territory on a map. The game features:
 
-https://matchpoint.moves.rwth-aachen.de/current
+- Multiple players (2-8 players supported)
+- Various map layouts with special fields
+- Two phases: placement phase and bomb phase
+- Special stones and abilities:
+  - **Overwrite stones**: Allow placing stones on occupied fields
+  - **Bombs**: Remove stones from the board
+  - **Special fields**: 'I' (inversion), 'C' (choice), 'B' (bonus)
 
-# Current best state
+## Getting Started
 
-46333257
+### Prerequisites
 
-# Really good state for big maps
+- C++ compiler (g++ recommended)
+- Linux/Unix environment
+- Make build system
 
-463e182f
+### Compiling
 
-# RevXT-SS24-g01
+The project uses a Makefile for compilation. To build the client:
 
+```bash
+# Regular build
+make release
 
+# Debug build with additional information
+make debug
 
-## Getting started
-
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
+# Build with color output
+make color
 ```
-cd existing_repo
-git remote add origin https://gitlab.oth-regensburg.de/kec39902/revxt-ss24-g01.git
-git branch -M main
-git push -uf origin main
+
+The compiled binary will be available in the `bin` directory.
+
+### Running the Client
+
+```bash
+# Basic execution
+./bin/client01
+
+# Connect to a specific server
+./bin/client01 -i <IP_ADDRESS> -p <PORT>
+
+# Additional options
+./bin/client01 -n  # Disable move sorting
+./bin/client01 -q  # Enable quiet mode (minimal console output)
+./bin/client01 -h  # Display help information
 ```
 
-## Integrate with your tools
+## Command Line Arguments
 
-- [ ] [Set up project integrations](https://gitlab.oth-regensburg.de/kec39902/revxt-ss24-g01/-/settings/integrations)
+| Argument | Description |
+|----------|-------------|
+| `-i <ip>` | Specify server IP address (default: 127.0.0.1) |
+| `-p <port>` | Specify server port (default: 7777) |
+| `-n` | Disable move sorting (improves performance but may reduce strategic play) |
+| `-q` | Enable quiet mode (reduces console output) |
+| `-h` | Display help information |
 
-## Collaborate with your team
+## Project Structure
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### Key Directories
 
-## Test and Deploy
+- `/src/src`: Implementation files
+- `/src/lib`: Header files
+- `/compMaps`: Competition map files
 
-Use the built-in continuous integration in GitLab.
+### Key Components
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+#### Core Game Logic
 
-***
+- `Board`: Represents the game state including player positions, stones, and field types
+- `Game`: Manages game flow and communication with the server
+- `Initializer`: Reads and processes map data and prepares the board
 
-# Editing this README
+#### AI Algorithm Components
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+- `Algorithms`: Implements minimax and Best Reply Search (BRS) strategies
+- `MoveGenerator`: Generates valid moves for a given game state
+- `MoveExecuter`: Executes moves and updates the game state
+- `Evaluator`: Evaluates board positions and determines the best moves
 
-## Suggestions for a good README
+#### Networking
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- `Network`: Handles communication with the game server
+- Supports protocol-specific message formatting and parsing
 
-## Name
-Choose a self-explaining name for your project.
+## Algorithm Overview
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+The client uses several advanced search algorithms:
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+1. **Minimax with Alpha-Beta Pruning**: A depth-first search algorithm that evaluates game states by looking ahead multiple moves and selecting the optimal path.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+2. **Best Reply Search (BRS)**: A variation of minimax that is particularly effective in multiplayer games where more than two players are competing.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The search depth adapts dynamically based on:
+- Current map occupation percentage
+- Available time for decision-making
+- Map size and complexity
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Configuration Settings
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Key algorithm parameters can be adjusted in the header files:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+- `MAX_SEARCH_DEPTH`: Maximum depth for search algorithms (default: 20)
+- `MEMORY_SIZE_WITH_BUFFER`: Memory allocation for move calculation
+- Various evaluation parameters in `evaluator.hpp`
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## Evaluation Metrics
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+The position evaluation considers multiple factors:
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+- Stone count and distribution
+- Protected fields
+- Special field control
+- Move mobility
+- Strategic positions (corners, walls)
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Current Development Status
 
-## License
-For open source projects, say how it is licensed.
+This client has been successfully tested in competition environments and performs well against other implementations. The core algorithms are stable and effective, but there's always room for fine-tuning the evaluation parameters for specific map types.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Competition Resources
+
+- FightClub: https://172.20.0.41:8091
+- MatchPoint: http://172.20.0.41:8088/current
+- MatchPoint - Aachen: https://matchpoint.moves.rwth-aachen.de/current
